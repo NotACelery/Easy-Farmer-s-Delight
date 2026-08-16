@@ -7,13 +7,14 @@ issueTrackerURL="https://github.com/NotACelery/Easy-Farmer-s-Delight-Compat/issu
 modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
+displayURL="https://github.com/NotACelery/Easy-Farmer-s-Delight-Compat"
 authors="Celerbi"
 credits="Independent compatibility addon for Easy Villagers by henkelmax and Farmer's Delight by vectorwing. Optional integrations: Jade, Argentum and Ars Nouveau."
 logoFile="easy-farmers-delight-compat-icon.png"
 logoBlur=false
 description='''
 An independent, unofficial compatibility addon for Easy Villagers and Farmer's Delight.
-Adds Paddy, Rich and Rich Paddy Farmers, Farmer's Delight crop automation, Rich Soil behavior and optional compatibility integrations without redistributing either dependency.
+Adds Paddy, Rich and Rich Paddy Farmers with Farmer's Delight crop automation, Rich Soil behavior and optional compatibility integrations without redistributing either dependency.
 '''
 
 [[dependencies.${mod_id}]]

@@ -1,7 +1,7 @@
-package dev.maicra.easyfarmersdelightcompat.block;
+package dev.celerbi.easyfarmersdelightcompat.block;
 
-import dev.maicra.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
-import dev.maicra.easyfarmersdelightcompat.registry.ModBlockEntities;
+import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

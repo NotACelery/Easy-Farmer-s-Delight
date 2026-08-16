@@ -1,7 +1,7 @@
-package dev.maicra.easyfarmersdelightcompat.recipe;
+package dev.celerbi.easyfarmersdelightcompat.recipe;
 
-import dev.maicra.easyfarmersdelightcompat.registry.ModBlocks;
-import dev.maicra.easyfarmersdelightcompat.registry.ModRecipeSerializers;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModRecipeSerializers;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;

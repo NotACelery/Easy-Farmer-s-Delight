@@ -1,8 +1,8 @@
-package dev.maicra.easyfarmersdelightcompat;
+package dev.celerbi.easyfarmersdelightcompat;
 
-import dev.maicra.easyfarmersdelightcompat.registry.ModBlockEntities;
-import dev.maicra.easyfarmersdelightcompat.registry.ModBlocks;
-import dev.maicra.easyfarmersdelightcompat.registry.ModRecipeSerializers;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModRecipeSerializers;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;

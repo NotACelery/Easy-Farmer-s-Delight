@@ -1,6 +1,6 @@
-package dev.maicra.easyfarmersdelightcompat.integration;
+package dev.celerbi.easyfarmersdelightcompat.integration;
 
-import dev.maicra.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

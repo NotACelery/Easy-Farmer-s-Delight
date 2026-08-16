@@ -8,9 +8,9 @@ Independent, unofficial compatibility addon for **Easy Villagers** and **Farmer'
 
 > This project is not affiliated with, endorsed by, sponsored by, or maintained by the authors of Easy Villagers, Farmer's Delight, Jade, Argentum or Ars Nouveau. It does not redistribute their code or assets.
 
-## Current status — 0.1.0-dev
+## Release — 1.0.0
 
-The main gameplay feature set is implemented and has passed live singleplayer validation. The remaining release gate is primarily **multiplayer/dedicated-server validation**, plus final JEI/EMI recipe-visibility checks and any issues found during that pass.
+The initial feature set is complete and has passed the final gameplay and multiplayer test pass.
 
 ### Farmer family
 
@@ -47,7 +47,7 @@ Paddy Farmer:
 - models lower Rice ages `0..3` and panicle ages `0..3` as one virtual `0..7` lifecycle;
 - harvests mature panicles using Farmer's Delight's real loot table;
 - keeps the mature lower Rice after harvest so only the upper portion regrows;
-- harvests a fully mature Rice plant on the next Farmer cadence instead of waiting for another `farmSpeed` RNG success;
+- harvests fully mature Rice on the next Farmer cadence instead of waiting for another `farmSpeed` RNG success;
 - exposes the four Easy Villagers output slots through the normal output menu and NeoForge item-handler capability.
 
 Rice is intentionally **not** added globally to `minecraft:villager_plantable_seeds`, because the normal Easy Villagers Farmer does not implement Rice's two-block lifecycle.
@@ -76,7 +76,7 @@ Rich Farmer:
 - reads Farmer's Delight's live `richSoilBoostChance`;
 - gives Rich Soil its own `farmSpeed`-scaled opportunity and applies the crop's real Bone Meal age increment when supported;
 - respects `farmersdelight:unaffected_by_rich_soil`;
-- does not use the old physical `1/4096` chunk-section selection roll, because the Rich Soil is virtual and permanently belongs to the Farmer.
+- keeps mature crops waiting when the four output slots cannot accept the complete harvest, preventing silent item loss.
 
 ### Tomato + Rope
 
@@ -87,16 +87,12 @@ Tomato is a dedicated persistent Rich Farmer crop:
 - mature harvest produces 1-2 Tomatoes and preserves Farmer's Delight's Rotten Tomato chance;
 - up to **2 Rope** sections may be installed;
 - Base, Rope 1 and Rope 2 keep independent progress and independent work rolls;
+- each mature section waits for sufficient output capacity before harvesting;
 - sneak-right-click removes the topmost Rope first, then the Tomato crop selection once no Rope remains.
 
 ### Mushroom Colonies
 
-Rich Farmer accepts:
-
-- Red Mushroom;
-- Brown Mushroom.
-
-Each is converted into the corresponding Farmer's Delight Mushroom Colony. The colony grows through its normal age states, produces mushrooms when mature, resets to its initial colony state and continues growing without consuming another mushroom.
+Rich Farmer accepts Red and Brown Mushrooms and converts them into the corresponding Farmer's Delight Mushroom Colony. Colonies grow through their normal age states, harvest repeatedly without consuming another mushroom, benefit from Rich Soil, and wait at maturity when the output inventory is full.
 
 ### Rich Paddy Farmer
 
@@ -108,7 +104,7 @@ G P G
 B R B
 ```
 
-It preserves Paddy state and applies Rich Soil acceleration across the **entire Rice lifecycle**, including the upper panicle stages.
+It preserves Paddy state and applies Rich Soil acceleration across the **entire Rice lifecycle**, including upper panicle stages. Mature Rice also waits instead of deleting drops when the output inventory cannot hold the complete harvest.
 
 ### Optional crop compatibility
 
@@ -125,18 +121,16 @@ The addon adds optional `minecraft:villager_plantable_seeds` entries without req
 
 - `ars_nouveau:magebloom_crop`
 
-Magebloom is therefore usable by the normal Easy Villagers Farmer and by Rich Farmer; Rich Farmer also applies its Rich Soil acceleration.
+Magebloom can be farmed by the normal Easy Villagers Farmer and by Rich Farmer; Rich Farmer also applies Rich Soil acceleration.
 
 ### Jade
 
-Jade support is optional. When Jade is installed, looking at a compat Farmer can show:
+Jade support is optional. When Jade is installed, compat Farmers can display:
 
 - selected crop;
 - growth percentage;
 - Rich Soil status;
 - Tomato Base / Rope 1 / Rope 2 progress on a single line.
-
-The gameplay addon does not require Jade to run.
 
 ## Rendering
 
@@ -149,7 +143,7 @@ The three compat Farmers use original models/rendering owned by this addon while
 - Rich Soil floor on Rich variants;
 - inset second glass shell only on Rich variants;
 - visual Tomato-on-Rope sections;
-- block-breaking particle textures.
+- valid block-breaking particle textures.
 
 No Easy Villagers models or textures are copied into this project. Farmer's Delight resources such as Rich Soil are referenced from the installed dependency at runtime.
 
@@ -157,10 +151,10 @@ No Easy Villagers models or textures are copied into this project. Farmer's Deli
 
 Required:
 
-- Minecraft 1.21.1
-- NeoForge 21.1.235+
-- Easy Villagers 1.1.42+
-- Farmer's Delight 1.2.9+
+- Minecraft **1.21.1**
+- NeoForge **21.1.235+**
+- Easy Villagers **1.1.42+**
+- Farmer's Delight **1.2.9+**
 
 Optional integrations:
 
@@ -168,36 +162,28 @@ Optional integrations:
 - Argentum
 - Ars Nouveau
 
-JEI and EMI are not required by the addon; they are useful during the final recipe-visibility validation pass.
+## Installation
+
+Install the mod on **both client and server** together with Easy Villagers and Farmer's Delight. Optional integrations are detected when their corresponding mods are present.
 
 ## Building
 
 The project uses Java 21 and NeoForge ModDevGradle.
 
-On Windows:
+Windows:
 
 ```text
 build-dev.bat
 ```
 
-On Linux/WSL:
+Linux/WSL:
 
 ```text
 ./build-dev.sh
 ```
 
-The resulting JAR is written to `build/libs/`.
+The resulting JAR is written to `build/libs/`. Runtime dependency mods are not embedded or shaded into this JAR. Jade is a compile-only optional API dependency.
 
-Runtime dependency mods are not embedded or shaded into this JAR. Jade is a compile-only optional API dependency.
+## License
 
-## Release gate
-
-Before promoting `0.1.0-dev` to a public release candidate, complete the tests in [`MULTIPLAYER-TEST-CHECKLIST.md`](MULTIPLAYER-TEST-CHECKLIST.md), especially:
-
-- dedicated-server startup;
-- client/server synchronization;
-- data persistence after chunk unload and server restart;
-- simultaneous multiplayer interactions;
-- hopper/item capability behavior;
-- optional Jade / Argentum / Ars Nouveau matrices;
-- JEI and EMI recipe visibility.
+Copyright © 2026 Celerbi. All rights reserved.

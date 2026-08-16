@@ -1,9 +1,9 @@
-package dev.maicra.easyfarmersdelightcompat.client;
+package dev.celerbi.easyfarmersdelightcompat.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import dev.maicra.easyfarmersdelightcompat.block.CompatFarmerBlock;
-import dev.maicra.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
+import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;

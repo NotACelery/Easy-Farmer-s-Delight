@@ -1,6 +1,6 @@
-package dev.maicra.easyfarmersdelightcompat.registry;
+package dev.celerbi.easyfarmersdelightcompat.registry;
 
-import dev.maicra.easyfarmersdelightcompat.EasyFarmersDelightCompat;
+import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;

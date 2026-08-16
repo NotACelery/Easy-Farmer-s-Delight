@@ -1,8 +1,8 @@
-package dev.maicra.easyfarmersdelightcompat.client;
+package dev.celerbi.easyfarmersdelightcompat.client;
 
-import dev.maicra.easyfarmersdelightcompat.EasyFarmersDelightCompat;
-import dev.maicra.easyfarmersdelightcompat.registry.ModBlockEntities;
-import dev.maicra.easyfarmersdelightcompat.registry.ModBlocks;
+import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;

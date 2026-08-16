@@ -1,6 +1,6 @@
-package dev.maicra.easyfarmersdelightcompat.recipe;
+package dev.celerbi.easyfarmersdelightcompat.recipe;
 
-import dev.maicra.easyfarmersdelightcompat.registry.ModBlockEntities;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;

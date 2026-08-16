@@ -1,4 +1,4 @@
-package dev.maicra.easyfarmersdelightcompat.integration;
+package dev.celerbi.easyfarmersdelightcompat.integration;
 
 import java.lang.reflect.Field;
 

@@ -1,8 +1,8 @@
-package dev.maicra.easyfarmersdelightcompat.compat.jade;
+package dev.celerbi.easyfarmersdelightcompat.compat.jade;
 
-import dev.maicra.easyfarmersdelightcompat.EasyFarmersDelightCompat;
-import dev.maicra.easyfarmersdelightcompat.block.CompatFarmerBlock;
-import dev.maicra.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
+import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
+import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;

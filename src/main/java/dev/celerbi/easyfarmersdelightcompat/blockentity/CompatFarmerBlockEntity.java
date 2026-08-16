@@ -1,10 +1,10 @@
-package dev.maicra.easyfarmersdelightcompat.blockentity;
+package dev.celerbi.easyfarmersdelightcompat.blockentity;
 
-import dev.maicra.easyfarmersdelightcompat.block.CompatFarmerBlock;
-import dev.maicra.easyfarmersdelightcompat.block.FarmerVariant;
-import dev.maicra.easyfarmersdelightcompat.integration.EasyVillagersFarmerAdapter;
-import dev.maicra.easyfarmersdelightcompat.integration.FarmersDelightAdapter;
-import dev.maicra.easyfarmersdelightcompat.registry.ModBlockEntities;
+import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
+import dev.celerbi.easyfarmersdelightcompat.block.FarmerVariant;
+import dev.celerbi.easyfarmersdelightcompat.integration.EasyVillagersFarmerAdapter;
+import dev.celerbi.easyfarmersdelightcompat.integration.FarmersDelightAdapter;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;

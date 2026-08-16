@@ -1,8 +1,8 @@
-package dev.maicra.easyfarmersdelightcompat.registry;
+package dev.celerbi.easyfarmersdelightcompat.registry;
 
-import dev.maicra.easyfarmersdelightcompat.EasyFarmersDelightCompat;
-import dev.maicra.easyfarmersdelightcompat.recipe.PaddyFarmerRecipe;
-import dev.maicra.easyfarmersdelightcompat.recipe.RichFarmerRecipe;
+import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
+import dev.celerbi.easyfarmersdelightcompat.recipe.PaddyFarmerRecipe;
+import dev.celerbi.easyfarmersdelightcompat.recipe.RichFarmerRecipe;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;

@@ -1,8 +1,8 @@
-package dev.maicra.easyfarmersdelightcompat.registry;
+package dev.celerbi.easyfarmersdelightcompat.registry;
 
-import dev.maicra.easyfarmersdelightcompat.EasyFarmersDelightCompat;
-import dev.maicra.easyfarmersdelightcompat.block.CompatFarmerBlock;
-import dev.maicra.easyfarmersdelightcompat.block.FarmerVariant;
+import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
+import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
+import dev.celerbi.easyfarmersdelightcompat.block.FarmerVariant;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;

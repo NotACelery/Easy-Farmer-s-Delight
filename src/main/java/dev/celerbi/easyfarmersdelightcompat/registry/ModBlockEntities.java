@@ -1,7 +1,7 @@
-package dev.maicra.easyfarmersdelightcompat.registry;
+package dev.celerbi.easyfarmersdelightcompat.registry;
 
-import dev.maicra.easyfarmersdelightcompat.EasyFarmersDelightCompat;
-import dev.maicra.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
+import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;

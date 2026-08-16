@@ -1,4 +1,4 @@
-package dev.maicra.easyfarmersdelightcompat.block;
+package dev.celerbi.easyfarmersdelightcompat.block;
 
 public enum FarmerVariant {
     PADDY(false, true),

@@ -1,10 +1,10 @@
 # Multiplayer / Dedicated Server Release Checklist
 
-Target: **Easy Farmer's Delight Compat 0.1.0-dev**  
+Target: **Easy Farmer's Delight Compat 1.0.0+ regression testing**  
 Minecraft: **1.21.1**  
 NeoForge baseline: **21.1.235**
 
-The goal of this pass is to find synchronization, persistence, duplication, automation and optional-dependency issues. Do not change balance simply because RNG differs between short runs.
+The 1.0.0 release pass has been completed. Keep this document as the regression checklist for future updates, dependency upgrades and bug-fix releases. Do not change balance simply because RNG differs between short runs.
 
 ## 1. Server boot matrix
 
@@ -263,7 +263,7 @@ After testing, inspect `logs/latest.log` and server log for:
 
 ## Release pass criteria
 
-The build is ready to move from `0.1.0-dev` toward a release candidate when:
+A future build is ready for release when:
 
 - [ ] Dedicated server boots reliably.
 - [ ] No reproducible crash exists.
