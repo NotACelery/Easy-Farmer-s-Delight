@@ -48,7 +48,7 @@ Rice is intentionally **not** added globally to `minecraft:villager_plantable_se
 - Keeps the Easy Villagers delegate unplaced and avoids invoking its own block-entity sync packets.
 - References `farmersdelight:block/rich_soil` directly in the current model rather than copying Farmer's Delight's texture.
 - Reads Farmer's Delight's live `richSoilBoostChance` value.
-- Respects `randomTickSpeed` and Farmer's Delight's `farmersdelight:unaffected_by_rich_soil` block tag.
+- Uses an independent Easy Villagers `farmSpeed`-scaled Rich Soil opportunity and then applies Farmer's Delight's live `richSoilBoostChance`; this avoids the previous effectively-invisible extra `1/4096` chunk-selection roll while preserving the configured boost chance and `farmersdelight:unaffected_by_rich_soil`.
 - For normal `CropBlock`-style crops, applies the crop's own bone-meal age increment instead of an arbitrary speed multiplier.
 
 ### Tomato + Rope test layer
@@ -57,14 +57,14 @@ Rice is intentionally **not** added globally to `minecraft:villager_plantable_se
 - Models the real Farmer's Delight budding stage before switching to the reusable tomato vine.
 - Mature tomato harvest keeps the plant, resets its fruit age and produces 1-2 Tomatoes with the same 5% Rotten Tomato chance.
 - Right-clicking a Tomato Rich Farmer with `farmersdelight:rope` installs up to **2 Rope** sections.
-- Base, Rope 1 and Rope 2 store independent `0..3` progress values and harvest independently.
+- Base, Rope 1 and Rope 2 store independent `0..3` progress values, use independent `farmSpeed` work rolls, and harvest independently.
 - Sneak-right-click removes the uppermost Rope first and returns it. Once no Ropes remain, the next sneak interaction removes the Tomato Seeds selection.
 
 The **Mushroom Colony** engine is the next Rich Farmer crop layer.
 
 ## Rich Paddy status
 
-The Rich Paddy block and upgrade recipe already exist and preserve Paddy data, but its Rich Soil acceleration is reserved for the dedicated Rich Paddy phase. At this milestone it behaves like the current Paddy Farmer engine.
+The Rich Paddy block and upgrade recipe preserve Paddy data and now apply the same virtual Rich Soil opportunity model as Rich Farmer. Rice uses Farmer's Delight's own bone-meal age increment across the full lower-rice + panicle lifecycle.
 
 ## Why the block models currently look simple
 

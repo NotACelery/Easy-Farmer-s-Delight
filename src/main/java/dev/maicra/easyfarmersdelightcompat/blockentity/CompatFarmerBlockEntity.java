@@ -27,10 +27,8 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -231,79 +229,96 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     public static void serverTick(ServerLevel level, BlockPos pos, BlockState state, CompatFarmerBlockEntity farmer) {
         HolderLookup.Provider registries = level.registryAccess();
 
-        if (!farmer.variant().isAquatic()) {
-            // The Rich Farmer drives the same normal crop operation as Easy Villagers,
-            // but without letting the unplaced delegate send its own block-entity sync
-            // packets. Seed validation, blacklist, farmSpeed, loot and output remain EV's.
-            if (farmer.easyVillagers.hasVillager(registries)) {
-                farmer.easyVillagers.advanceVillagerAge(registries);
-                farmer.setChanged();
-            }
-
-            if (level.getGameTime() % 20L == 0L
-                    && level.random.nextInt(farmer.easyVillagers.farmSpeed()) == 0) {
-                BlockState crop = farmer.easyVillagers.getCrop(registries);
-                boolean changed;
-                if (isTomatoState(crop)) {
-                    changed = farmer.ageTomato(level, registries);
-                    // Once the persistent base vine exists, each installed rope section
-                    // has its own growth/harvest cycle. Ropes installed later naturally
-                    // remain offset from the base and from each other.
-                    BlockState afterBase = farmer.easyVillagers.getCrop(registries);
-                    if (TOMATO_CROP_ID.equals(BuiltInRegistries.BLOCK.getKey(afterBase.getBlock()))) {
-                        changed |= farmer.ageTomatoRopes(level, registries);
-                    }
-                } else {
-                    changed = farmer.easyVillagers.ageCrop(registries);
-                }
-                if (changed) {
-                    farmer.setChanged();
-                }
-            }
-
-            if (farmer.variant().isRich()) {
-                farmer.tryRichSoilBoost(level, registries);
-            }
-            return;
-        }
-
-        // Easy Villagers advances a stored baby villager while it lives in the block.
+        // Keep Easy Villagers' stored-villager aging behaviour for every variant.
         if (farmer.easyVillagers.hasVillager(registries)) {
             farmer.easyVillagers.advanceVillagerAge(registries);
-            // The reflected villager entity lives inside the delegate, so the owner
-            // must be marked dirty or baby-age progress could be lost on chunk reload.
             farmer.setChanged();
         }
 
-        if (level.getGameTime() % 20L != 0L || !farmer.easyVillagers.hasRiceCrop(registries)) {
-            return;
-        }
-
-        Villager villager = farmer.easyVillagers.getVillagerEntity(registries);
-        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
+        // Every farmer family uses Easy Villagers' one-second work cadence. The
+        // configured farmSpeed remains the common speed control for base growth,
+        // rope sections and virtual Rich Soil opportunities.
+        if (level.getGameTime() % 20L != 0L) {
             return;
         }
 
         int farmSpeed = farmer.easyVillagers.farmSpeed();
-        if (level.random.nextInt(farmSpeed) != 0) {
+
+        if (farmer.variant().isAquatic()) {
+            if (!farmer.easyVillagers.hasRiceCrop(registries)) {
+                return;
+            }
+
+            Villager villager = farmer.easyVillagers.getVillagerEntity(registries);
+            boolean canHarvest = villager != null
+                    && !villager.isBaby()
+                    && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
+
+            // Normal Paddy work roll.
+            if (level.random.nextInt(farmSpeed) == 0) {
+                if (farmer.paddyGrowth < MAX_PADDY_GROWTH) {
+                    farmer.paddyGrowth++;
+                    farmer.syncRiceCropState(registries);
+                    farmer.setChanged();
+                } else if (canHarvest) {
+                    farmer.harvestMatureRice(level, registries);
+                    // Farmer's Delight keeps the mature submerged plant after the
+                    // panicles are harvested, so only the upper half regrows.
+                    farmer.paddyGrowth = 3;
+                    farmer.syncRiceCropState(registries);
+                    farmer.setChanged();
+                    level.playSound(null, pos, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
+            }
+
+            // Rich Paddy receives a separate opportunity at the same cadence. This
+            // models Rich Soil as part of the machine instead of requiring Minecraft
+            // to randomly select an imaginary Rich Soil block from a chunk section.
+            if (farmer.variant().isRich()
+                    && level.random.nextInt(farmSpeed) == 0) {
+                farmer.tryRichPaddyBoost(level, registries);
+            }
             return;
         }
 
-        if (farmer.paddyGrowth < MAX_PADDY_GROWTH) {
-            farmer.paddyGrowth++;
-            farmer.syncRiceCropState(registries);
-            farmer.setChanged();
+        BlockState crop = farmer.easyVillagers.getCrop(registries);
+        if (crop == null) {
             return;
         }
 
-        farmer.harvestMatureRice(level, registries);
-        // Farmer's Delight harvests the upper rice panicles without uprooting the
-        // mature submerged plant. Keep the lower crop at age 3 so subsequent
-        // harvests regrow only the panicles instead of restarting from a seed.
-        farmer.paddyGrowth = 3;
-        farmer.syncRiceCropState(registries);
-        farmer.setChanged();
-        level.playSound(null, pos, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+        // Base crop gets its own Easy Villagers work roll.
+        if (level.random.nextInt(farmSpeed) == 0) {
+            boolean changed;
+            if (isTomatoState(crop)) {
+                changed = farmer.ageTomato(level, registries);
+            } else {
+                changed = farmer.easyVillagers.ageCrop(registries);
+            }
+            if (changed) {
+                farmer.setChanged();
+            }
+        }
+
+        // Tomato rope sections are intentionally independent work rolls. Two ropes
+        // installed on the same tick can therefore diverge naturally instead of
+        // remaining synchronized forever.
+        BlockState afterBase = farmer.easyVillagers.getCrop(registries);
+        if (afterBase != null && TOMATO_CROP_ID.equals(BuiltInRegistries.BLOCK.getKey(afterBase.getBlock()))) {
+            if (farmer.ropeCount >= 1 && level.random.nextInt(farmSpeed) == 0) {
+                farmer.ageTomatoRopeSection(level, registries, 1);
+            }
+            if (farmer.ropeCount >= 2 && level.random.nextInt(farmSpeed) == 0) {
+                farmer.ageTomatoRopeSection(level, registries, 2);
+            }
+        }
+
+        // Rich Farmer gets a separate, farmSpeed-scaled Rich Soil opportunity. Once
+        // that opportunity occurs, Farmer's Delight's own richSoilBoostChance decides
+        // whether the equivalent of Bone Meal is applied.
+        if (farmer.variant().isRich()
+                && level.random.nextInt(farmSpeed) == 0) {
+            farmer.tryRichSoilBoost(level, registries);
+        }
     }
 
     /**
@@ -320,30 +335,34 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return;
         }
 
-        int randomTickSpeed = level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING);
-        if (randomTickSpeed <= 0) {
+        double boostChance = farmersDelight.richSoilBoostChance();
+        if (boostChance <= 0.0D || level.random.nextDouble() > boostChance) {
+            return;
+        }
+
+        applyRichSoilBoneMeal(level, registries);
+    }
+
+    private void tryRichPaddyBoost(ServerLevel level, HolderLookup.Provider registries) {
+        if (paddyGrowth >= MAX_PADDY_GROWTH) {
             return;
         }
 
         double boostChance = farmersDelight.richSoilBoostChance();
-        if (boostChance <= 0.0D) {
+        if (boostChance <= 0.0D || level.random.nextDouble() > boostChance) {
             return;
         }
 
-        // Minecraft performs randomTickSpeed draws per ticking chunk section. A real
-        // Rich Soil block can therefore be selected more than once in the same game
-        // tick. Replaying every draw preserves that behavior instead of collapsing it
-        // into a single approximate probability.
-        for (int draw = 0; draw < randomTickSpeed; draw++) {
-            if (level.random.nextInt(4096) != 0 || level.random.nextDouble() > boostChance) {
-                continue;
-            }
-            if (!applyRichSoilBoneMeal(level, registries)) {
-                return;
-            }
+        Block rice = BuiltInRegistries.BLOCK.get(RICE_CROP_ID);
+        int increment = getBoneMealAgeIncrease(rice, level);
+        if (increment <= 0) {
+            return;
         }
-    }
 
+        paddyGrowth = Math.min(MAX_PADDY_GROWTH, paddyGrowth + increment);
+        syncRiceCropState(registries);
+        setChanged();
+    }
 
     private boolean applyRichSoilBoneMeal(Level level, HolderLookup.Provider registries) {
         BlockState crop = easyVillagers.getCrop(registries);
@@ -365,6 +384,34 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             }
             setChanged();
             return true;
+        }
+
+        if (TOMATO_CROP_ID.equals(BuiltInRegistries.BLOCK.getKey(crop.getBlock()))) {
+            int increment = getBoneMealAgeIncrease(crop.getBlock(), level);
+            if (increment <= 0) {
+                return false;
+            }
+
+            int baseAge = getAge(crop);
+            if (baseAge < 3) {
+                int nextAge = Math.min(3, baseAge + increment);
+                easyVillagers.setCropState(withAge(crop, nextAge), registries);
+                baseProgress = nextAge;
+                setChanged();
+                return true;
+            }
+
+            if (ropeCount >= 1 && ropeOneProgress < 3) {
+                ropeOneProgress = Math.min(3, ropeOneProgress + increment);
+                setChanged();
+                return true;
+            }
+            if (ropeCount >= 2 && ropeTwoProgress < 3) {
+                ropeTwoProgress = Math.min(3, ropeTwoProgress + increment);
+                setChanged();
+                return true;
+            }
+            return false;
         }
 
         Optional<Property<?>> ageProperty = crop.getProperties().stream()
@@ -391,15 +438,11 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     }
 
     /**
-     * CropBlock exposes its bone-meal increment as a protected method. Reflection lets
-     * us respect overrides from compatible CropBlock subclasses instead of hardcoding
-     * vanilla's 2..5 increment. Unsupported crop types simply receive no virtual boost.
+     * Compatible crops expose their bone-meal increment as a protected method.
+     * Reflection lets us respect each implementation (CropBlock, RiceBlock,
+     * BuddingTomatoBlock, etc.) instead of hardcoding one arbitrary increment.
      */
     private static int getBoneMealAgeIncrease(Block block, Level level) {
-        if (!(block instanceof CropBlock)) {
-            return 0;
-        }
-
         Class<?> type = block.getClass();
         while (type != null) {
             try {
@@ -461,8 +504,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return true;
     }
 
-    private boolean ageTomatoRopes(ServerLevel level, HolderLookup.Provider registries) {
-        if (ropeCount <= 0) {
+    private boolean ageTomatoRopeSection(ServerLevel level, HolderLookup.Provider registries, int ropeIndex) {
+        if (ropeIndex < 1 || ropeIndex > ropeCount) {
             return false;
         }
 
@@ -470,34 +513,30 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         boolean canHarvest = villager != null
                 && !villager.isBaby()
                 && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
-        boolean changed = false;
 
-        if (ropeCount >= 1) {
-            if (ropeOneProgress < 3) {
+        int progress = ropeIndex == 1 ? ropeOneProgress : ropeTwoProgress;
+        if (progress < 3) {
+            if (ropeIndex == 1) {
                 ropeOneProgress++;
-                changed = true;
-            } else if (canHarvest) {
-                harvestTomatoSection(level, registries);
-                ropeOneProgress = 0;
-                changed = true;
-            }
-        }
-
-        if (ropeCount >= 2) {
-            if (ropeTwoProgress < 3) {
+            } else {
                 ropeTwoProgress++;
-                changed = true;
-            } else if (canHarvest) {
-                harvestTomatoSection(level, registries);
-                ropeTwoProgress = 0;
-                changed = true;
             }
+            setChanged();
+            return true;
         }
 
-        if (changed) {
-            setChanged();
+        if (!canHarvest) {
+            return false;
         }
-        return changed;
+
+        harvestTomatoSection(level, registries);
+        if (ropeIndex == 1) {
+            ropeOneProgress = 0;
+        } else {
+            ropeTwoProgress = 0;
+        }
+        setChanged();
+        return true;
     }
 
     private void harvestTomatoSection(ServerLevel level, HolderLookup.Provider registries) {

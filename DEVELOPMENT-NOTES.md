@@ -52,19 +52,19 @@ Unknown fields must survive load/save.
 - The delegate is not allowed to run its own `tickServer()`/sync cycle because it is not actually placed in the world.
 - Rich Soil is virtual and does not invent a flat speed multiplier.
 - Read Farmer's Delight `richSoilBoostChance` live at runtime.
-- Respect `randomTickSpeed`; each random-tick draw independently has the normal one-position-in-a-16³-section selection chance for this virtual Rich Soil.
+- Rich Soil opportunities use the same 20-tick / `farmSpeed` cadence as Easy Villagers, then roll Farmer's Delight's live `richSoilBoostChance`. The old extra physical chunk-section `1/4096` selection roll is intentionally not used for the virtual in-block soil.
 - Respect `farmersdelight:unaffected_by_rich_soil` by resource tag, without importing Farmer's Delight implementation constants.
-- For `CropBlock` subclasses, apply their own protected bone-meal age increment reflectively and cap at their real max age.
-- World-dependent bonemeal hooks cannot be reproduced literally for an unplaced virtual crop; special non-`CropBlock` crops are handled by dedicated engines rather than guessed here.
+- Apply each compatible crop's own protected bone-meal age increment reflectively where available (including `CropBlock`, Rice and Tomato implementations), capped at the crop engine's real virtual stage.
+- World-dependent bonemeal hooks cannot be reproduced literally for an unplaced virtual crop; stateful multi-block crops use dedicated virtual engines.
 - Tomato persistent vine is a dedicated Rich Farmer engine: `budding_tomatoes` age `0..3` transitions to `tomatoes` age `0..3`; harvest returns the mature vine to age 0 instead of consuming another seed.
-- Up to two `farmersdelight:rope` items may be installed. Base/Rope 1/Rope 2 persist their own progress values; sneak interaction removes the topmost Rope before removing the crop.
+- Up to two `farmersdelight:rope` items may be installed. Base/Rope 1/Rope 2 persist their own progress values and use independent `farmSpeed` rolls; sneak interaction removes the topmost Rope before removing the crop.
 - Red/Brown Mushroom Colonies: next Rich Farmer phase.
 
-### Rich Paddy Farmer — planned combined behavior
+### Rich Paddy Farmer — combined behavior implemented
 
-- The block and upgrade path exist and preserve Paddy state.
-- Current aquatic engine is the Paddy Rice engine.
-- Rich Soil acceleration for Rice is intentionally deferred to the dedicated Rich Paddy phase.
+- The block and upgrade path preserve Paddy state.
+- Uses the Paddy Rice engine plus an independent `farmSpeed`-scaled Rich Soil opportunity.
+- Farmer's Delight's live `richSoilBoostChance` controls each boost and Rice uses its own 1..4 bone-meal increment across the complete virtual `0..7` lifecycle.
 
 ## Optional integrations
 
@@ -81,3 +81,12 @@ Do not require the mod at runtime. Optional tag entries currently add:
 Provider will be registered only when Jade is present.
 Tomato target display:
 `Growth: Base 76% | Rope 1 53% | Rope 2 21%`
+
+
+## Rich Soil work-cycle fix
+
+- Rich Farmer and Rich Paddy now receive an independent Rich Soil opportunity on the same 20-tick / `farmSpeed` cadence used by Easy Villagers.
+- Once that opportunity occurs, Farmer's Delight's live `richSoilBoostChance` controls whether a virtual Bone Meal boost is applied.
+- Removed the old extra `1/4096` chunk-section selection roll, which made Rich variants practically indistinguishable from base Farmers.
+- Rice Bone Meal growth spans the complete virtual 0..7 lifecycle.
+- Tomato Base, Rope 1 and Rope 2 use independent work rolls so sections installed together are not permanently synchronized.
