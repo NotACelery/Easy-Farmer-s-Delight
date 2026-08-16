@@ -2,5 +2,13 @@
   "block.easyfarmersdelightcompat.paddy_farmer": "Granjero de arrozal",
   "block.easyfarmersdelightcompat.rich_farmer": "Granjero fértil",
   "block.easyfarmersdelightcompat.rich_paddy_farmer": "Granjero de arrozal fértil",
-  "itemGroup.easyfarmersdelightcompat": "Easy Farmer's Delight Compat"
+  "itemGroup.easyfarmersdelightcompat": "Easy Farmer's Delight Compat",
+  "jade.easyfarmersdelightcompat.crop": "Cultivo: %s",
+  "jade.easyfarmersdelightcompat.crop.none": "Cultivo: Ninguno",
+  "jade.easyfarmersdelightcompat.growth": "Crecimiento: %s%%",
+  "jade.easyfarmersdelightcompat.growth.tomato.base": "Crecimiento: Base %s%%",
+  "jade.easyfarmersdelightcompat.growth.tomato.one_rope": "Crecimiento: Base %s%% | Cuerda 1 %s%%",
+  "jade.easyfarmersdelightcompat.growth.tomato.two_ropes": "Crecimiento: Base %s%% | Cuerda 1 %s%% | Cuerda 2 %s%%",
+  "jade.easyfarmersdelightcompat.rich_soil.active": "Rich Soil: Activo",
+  "jade.easyfarmersdelightcompat.unknown": "Desconocido"
 }

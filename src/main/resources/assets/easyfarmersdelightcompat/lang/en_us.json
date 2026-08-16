@@ -2,5 +2,13 @@
   "block.easyfarmersdelightcompat.paddy_farmer": "Paddy Farmer",
   "block.easyfarmersdelightcompat.rich_farmer": "Rich Farmer",
   "block.easyfarmersdelightcompat.rich_paddy_farmer": "Rich Paddy Farmer",
-  "itemGroup.easyfarmersdelightcompat": "Easy Farmer's Delight Compat"
+  "itemGroup.easyfarmersdelightcompat": "Easy Farmer's Delight Compat",
+  "jade.easyfarmersdelightcompat.crop": "Crop: %s",
+  "jade.easyfarmersdelightcompat.crop.none": "Crop: None",
+  "jade.easyfarmersdelightcompat.growth": "Growth: %s%%",
+  "jade.easyfarmersdelightcompat.growth.tomato.base": "Growth: Base %s%%",
+  "jade.easyfarmersdelightcompat.growth.tomato.one_rope": "Growth: Base %s%% | Rope 1 %s%%",
+  "jade.easyfarmersdelightcompat.growth.tomato.two_ropes": "Growth: Base %s%% | Rope 1 %s%% | Rope 2 %s%%",
+  "jade.easyfarmersdelightcompat.rich_soil.active": "Rich Soil: Active",
+  "jade.easyfarmersdelightcompat.unknown": "Unknown"
 }

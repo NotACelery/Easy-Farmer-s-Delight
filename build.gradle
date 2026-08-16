@@ -16,8 +16,26 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 repositories {
     // Runtime mods are intentionally not embedded/shaded into this jar.
-    // The project can compile without their implementation classes because compatibility
-    // is performed through registries, vanilla data components and resource IDs.
+    // The project can compile without Easy Villagers/Farmer's Delight implementation
+    // classes because those integrations use registries/reflection.
+    // Jade is a compile-only optional API dependency and is never bundled.
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+}
+
+dependencies {
+    // Jade 15.10.6 for Minecraft 1.21.1 / NeoForge.
+    // compileOnly keeps Jade optional for players and out of our final JAR.
+    compileOnly "maven.modrinth:nvQzSEkH:eYz2YBGT"
 }
 
 neoForge {

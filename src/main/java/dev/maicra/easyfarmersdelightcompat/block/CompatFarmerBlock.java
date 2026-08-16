@@ -49,6 +49,8 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
     private static final ResourceLocation RICE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
     private static final ResourceLocation TOMATO_SEEDS_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomato_seeds");
     private static final ResourceLocation ROPE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rope");
+    private static final ResourceLocation RED_MUSHROOM_ITEM_ID = ResourceLocation.fromNamespaceAndPath("minecraft", "red_mushroom");
+    private static final ResourceLocation BROWN_MUSHROOM_ITEM_ID = ResourceLocation.fromNamespaceAndPath("minecraft", "brown_mushroom");
 
     private final FarmerVariant variant;
 
@@ -157,7 +159,7 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
         if (farmer.easyVillagers().getCrop(registries) == null) {
             boolean validCrop = variant.isAquatic()
                     ? isRice(heldItem)
-                    : (variant.isRich() && isTomatoSeeds(heldItem))
+                    : (variant.isRich() && (isTomatoSeeds(heldItem) || isMushroom(heldItem)))
                             || farmer.easyVillagers().isValidSeed(heldItem, registries);
 
             if (validCrop) {
@@ -169,6 +171,8 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
                     } else if (variant.isRich() && isTomatoSeeds(heldItem)) {
                         farmer.selectTomato(registries);
                         selected = true;
+                    } else if (variant.isRich() && isMushroom(heldItem)) {
+                        selected = farmer.selectMushroom(heldItem, registries);
                     } else {
                         selected = farmer.easyVillagers().setCropFromSeed(heldItem, registries);
                     }
@@ -280,6 +284,11 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
     private static boolean isRope(ItemStack stack) {
         return ROPE_ITEM_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+    }
+
+    private static boolean isMushroom(ItemStack stack) {
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return RED_MUSHROOM_ITEM_ID.equals(itemId) || BROWN_MUSHROOM_ITEM_ID.equals(itemId);
     }
 
     private static void consumeOne(ItemStack stack, Player player) {
