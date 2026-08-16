@@ -6,6 +6,7 @@ import dev.maicra.easyfarmersdelightcompat.integration.EasyVillagersFarmerAdapte
 import dev.maicra.easyfarmersdelightcompat.integration.FarmersDelightAdapter;
 import dev.maicra.easyfarmersdelightcompat.registry.ModBlockEntities;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -297,13 +298,16 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             // Growth itself still uses Easy Villagers' configured RNG. This prevents
             // fully-grown Rice from visually stalling for several extra work rolls.
             if (farmer.paddyGrowth >= MAX_PADDY_GROWTH && canHarvest) {
-                farmer.harvestMatureRice(level, registries);
-                // Farmer's Delight keeps the mature submerged plant after the
-                // panicles are harvested, so only the upper half regrows.
-                farmer.paddyGrowth = 3;
-                farmer.syncRiceCropState(registries);
-                farmer.setChanged();
-                level.playSound(null, pos, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+                if (farmer.harvestMatureRice(level, registries)) {
+                    // Farmer's Delight keeps the mature submerged plant after the
+                    // panicles are harvested, so only the upper half regrows.
+                    farmer.paddyGrowth = 3;
+                    farmer.syncRiceCropState(registries);
+                    farmer.setChanged();
+                    level.playSound(null, pos, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
+                // A mature Paddy waits here while output is full; it must not
+                // consume/reset its panicles until the complete harvest can fit.
                 return;
             }
 
@@ -338,7 +342,7 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             } else if (isMushroomColonyState(crop)) {
                 changed = farmer.ageMushroomColony(level, registries);
             } else {
-                changed = farmer.easyVillagers.ageCrop(registries);
+                changed = farmer.ageNormalCropSafely(level, registries);
             }
             if (changed) {
                 farmer.setChanged();
@@ -506,6 +510,59 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     }
 
     /**
+     * Generic Easy Villagers-style crop lifecycle with lossless output handling.
+     * Growth is unchanged, but a mature crop only resets after its exact generated
+     * loot can fit completely in the four-slot output inventory.
+     */
+    private boolean ageNormalCropSafely(ServerLevel level, HolderLookup.Provider registries) {
+        BlockState crop = easyVillagers.getCrop(registries);
+        if (crop == null) {
+            return false;
+        }
+
+        Optional<Property<?>> ageProperty = crop.getProperties().stream()
+                .filter(property -> property.getName().equals("age"))
+                .findFirst();
+        if (ageProperty.isEmpty() || !(ageProperty.get() instanceof IntegerProperty integerProperty)) {
+            return false;
+        }
+
+        int age = crop.getValue(integerProperty);
+        int maxAge = integerProperty.getPossibleValues().stream().max(Integer::compareTo).orElse(age);
+        if (age < maxAge) {
+            easyVillagers.setCropState(crop.setValue(integerProperty, age + 1), registries);
+            return true;
+        }
+
+        Villager villager = easyVillagers.getVillagerEntity(registries);
+        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
+            return false;
+        }
+
+        Container output = easyVillagers.getOutputInventory(registries);
+        if (output == null) {
+            return false;
+        }
+
+        LootParams.Builder context = new LootParams.Builder(level)
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(worldPosition))
+                .withParameter(LootContextParams.BLOCK_STATE, crop)
+                .withParameter(LootContextParams.TOOL, ItemStack.EMPTY);
+        List<ItemStack> drops = crop.getDrops(context);
+        if (!canFitAll(output, drops)) {
+            return false;
+        }
+
+        for (ItemStack drop : drops) {
+            insertIntoOutput(output, drop.copy());
+        }
+        output.setChanged();
+        easyVillagers.setCropState(crop.setValue(integerProperty, 0), registries);
+        level.playSound(null, worldPosition, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+        return true;
+    }
+
+    /**
      * Farmer's Delight Mushroom Colony lifecycle used by the Rich Farmer. The
      * colony itself is persistent: ages 0..3 grow progressively, and a mature
      * colony is harvested like a full knife harvest (3 mushrooms at age 3)
@@ -542,7 +599,11 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         // MushroomColonyBlock's full knife harvest returns colonyAge mushrooms
         // and resets the persistent colony to age 0. At max age (3), that is 3.
         Item mushroom = BuiltInRegistries.ITEM.get(mushroomItemId);
-        insertIntoOutput(output, new ItemStack(mushroom, maxAge));
+        ItemStack harvest = new ItemStack(mushroom, maxAge);
+        if (!canFitAll(output, List.of(harvest))) {
+            return false;
+        }
+        insertIntoOutput(output, harvest.copy());
         output.setChanged();
         easyVillagers.setCropState(withAge(crop, 0), registries);
         level.playSound(null, worldPosition, crop.getSoundType().getBreakSound(), SoundSource.BLOCKS, 0.8F, 1.0F);
@@ -587,7 +648,9 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return false;
         }
 
-        harvestTomatoSection(level, registries);
+        if (!harvestTomatoSection(level, registries)) {
+            return false;
+        }
         easyVillagers.setCropState(withAge(crop, 0), registries);
         baseProgress = 0;
         level.playSound(null, worldPosition, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -619,7 +682,9 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return false;
         }
 
-        harvestTomatoSection(level, registries);
+        if (!harvestTomatoSection(level, registries)) {
+            return false;
+        }
         if (ropeIndex == 1) {
             ropeOneProgress = 0;
         } else {
@@ -629,21 +694,30 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return true;
     }
 
-    private void harvestTomatoSection(ServerLevel level, HolderLookup.Provider registries) {
+    private boolean harvestTomatoSection(ServerLevel level, HolderLookup.Provider registries) {
         Container output = easyVillagers.getOutputInventory(registries);
         if (output == null) {
-            return;
+            return false;
         }
 
+        List<ItemStack> drops = new ArrayList<>(2);
         Item tomato = BuiltInRegistries.ITEM.get(TOMATO_ITEM_ID);
-        insertIntoOutput(output, new ItemStack(tomato, 1 + level.random.nextInt(2)));
+        drops.add(new ItemStack(tomato, 1 + level.random.nextInt(2)));
 
         // Mirrors TomatoBlock#useWithoutItem: 5% chance for one Rotten Tomato.
         if (level.random.nextFloat() < 0.05F) {
             Item rottenTomato = BuiltInRegistries.ITEM.get(ROTTEN_TOMATO_ID);
-            insertIntoOutput(output, new ItemStack(rottenTomato));
+            drops.add(new ItemStack(rottenTomato));
+        }
+
+        if (!canFitAll(output, drops)) {
+            return false;
+        }
+        for (ItemStack drop : drops) {
+            insertIntoOutput(output, drop.copy());
         }
         output.setChanged();
+        return true;
     }
 
     private static boolean isMushroomColonyState(BlockState state) {
@@ -692,10 +766,10 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
                 .orElse(0);
     }
 
-    private void harvestMatureRice(ServerLevel level, HolderLookup.Provider registries) {
+    private boolean harvestMatureRice(ServerLevel level, HolderLookup.Provider registries) {
         Container output = easyVillagers.getOutputInventory(registries);
         if (output == null) {
-            return;
+            return false;
         }
 
         Block panicles = BuiltInRegistries.BLOCK.get(RICE_PANICLES_ID);
@@ -707,10 +781,14 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
                 .withParameter(LootContextParams.TOOL, ItemStack.EMPTY);
 
         List<ItemStack> drops = mature.getDrops(context);
+        if (!canFitAll(output, drops)) {
+            return false;
+        }
         for (ItemStack drop : drops) {
             insertIntoOutput(output, drop.copy());
         }
         output.setChanged();
+        return true;
     }
 
     private void syncRiceCropState(HolderLookup.Provider registries) {
@@ -733,6 +811,53 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         int max = integerProperty.getPossibleValues().stream().max(Integer::compareTo).orElse(0);
         int safeAge = Math.max(0, Math.min(max, age));
         return state.setValue(integerProperty, safeAge);
+    }
+
+    /**
+     * Simulates the same stacking rules used by insertIntoOutput without mutating
+     * the real inventory. Harvesting is only committed when every generated drop
+     * can be stored, so no crop output can disappear due to a full container.
+     */
+    private static boolean canFitAll(Container output, List<ItemStack> stacks) {
+        ItemStack[] simulated = new ItemStack[output.getContainerSize()];
+        for (int slot = 0; slot < simulated.length; slot++) {
+            simulated[slot] = output.getItem(slot).copy();
+        }
+
+        for (ItemStack source : stacks) {
+            ItemStack remaining = source.copy();
+            for (int slot = 0; slot < simulated.length && !remaining.isEmpty(); slot++) {
+                ItemStack existing = simulated[slot];
+                if (existing.isEmpty()) {
+                    int move = Math.min(
+                            remaining.getCount(),
+                            Math.min(remaining.getMaxStackSize(), output.getMaxStackSize(remaining))
+                    );
+                    simulated[slot] = remaining.copyWithCount(move);
+                    remaining.shrink(move);
+                    continue;
+                }
+
+                if (!ItemStack.isSameItemSameComponents(existing, remaining)) {
+                    continue;
+                }
+
+                int max = Math.min(existing.getMaxStackSize(), output.getMaxStackSize(existing));
+                int room = max - existing.getCount();
+                if (room <= 0) {
+                    continue;
+                }
+
+                int move = Math.min(room, remaining.getCount());
+                existing.grow(move);
+                remaining.shrink(move);
+            }
+
+            if (!remaining.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static void insertIntoOutput(Container output, ItemStack stack) {
