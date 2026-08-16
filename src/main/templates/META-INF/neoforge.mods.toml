@@ -1,0 +1,58 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="Celerbi"
+credits="Independent compatibility addon for Easy Villagers by henkelmax and Farmer's Delight by vectorwing."
+description='''
+An independent, unofficial compatibility addon for Easy Villagers and Farmer's Delight.
+Adds specialized farmer blocks for Farmer's Delight crop mechanics without redistributing either dependency.
+'''
+
+[[dependencies.${mod_id}]]
+modId="neoforge"
+type="required"
+versionRange="[${neo_version},)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="minecraft"
+type="required"
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="easy_villagers"
+type="required"
+reason="Easy Villagers is required because its Farmer is the base block used by this compatibility addon."
+versionRange="[1.1.42,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="farmersdelight"
+type="required"
+reason="Farmer's Delight is required because this addon integrates its crops and Rich Soil mechanics."
+versionRange="[1.2.9,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="jade"
+type="optional"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="argentum"
+type="optional"
+versionRange="[0,)"
+ordering="AFTER"
+side="BOTH"

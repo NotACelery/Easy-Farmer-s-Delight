@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "farmersdelight:block/rich_soil",
+    "side": "minecraft:block/iron_block",
+    "top": "farmersdelight:block/rich_soil"
+  }
+}
