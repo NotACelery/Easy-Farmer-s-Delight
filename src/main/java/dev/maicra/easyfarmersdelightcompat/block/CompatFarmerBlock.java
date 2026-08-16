@@ -38,6 +38,8 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
  */
 public final class CompatFarmerBlock extends Block implements EntityBlock {
     private static final ResourceLocation RICE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
+    private static final ResourceLocation TOMATO_SEEDS_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomato_seeds");
+    private static final ResourceLocation ROPE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rope");
 
     private final FarmerVariant variant;
 
@@ -94,16 +96,43 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
+        // Tomato ropes are permanent infrastructure inside the Rich Farmer. Add them
+        // with Rope; sneak-interaction removes the topmost rope before the crop itself.
+        if (!variant.isAquatic() && variant.isRich() && farmer.hasTomatoCrop(registries)) {
+            if (player.isShiftKeyDown() && farmer.ropeCount() > 0) {
+                if (!level.isClientSide) {
+                    ItemStack removedRope = farmer.removeTopRope();
+                    if (!removedRope.isEmpty()) {
+                        ItemHandlerHelper.giveItemToPlayer(player, removedRope);
+                    }
+                    level.playSound(null, pos, SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+                }
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            }
+
+            if (isRope(heldItem) && farmer.ropeCount() < 2) {
+                if (!level.isClientSide && farmer.addRope()) {
+                    consumeOne(heldItem, player);
+                    level.playSound(null, pos, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 0.8F, 1.0F);
+                }
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            }
+        }
+
         if (farmer.easyVillagers().getCrop(registries) == null) {
             boolean validCrop = variant.isAquatic()
                     ? isRice(heldItem)
-                    : farmer.easyVillagers().isValidSeed(heldItem, registries);
+                    : (variant.isRich() && isTomatoSeeds(heldItem))
+                            || farmer.easyVillagers().isValidSeed(heldItem, registries);
 
             if (validCrop) {
                 if (!level.isClientSide) {
                     boolean selected;
                     if (variant.isAquatic()) {
                         farmer.selectRice(registries);
+                        selected = true;
+                    } else if (variant.isRich() && isTomatoSeeds(heldItem)) {
+                        farmer.selectTomato(registries);
                         selected = true;
                     } else {
                         selected = farmer.easyVillagers().setCropFromSeed(heldItem, registries);
@@ -153,6 +182,18 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
         }
 
         var registries = level.registryAccess();
+        if (player.isShiftKeyDown() && !variant.isAquatic() && variant.isRich()
+                && farmer.hasTomatoCrop(registries) && farmer.ropeCount() > 0) {
+            if (!level.isClientSide) {
+                ItemStack removedRope = farmer.removeTopRope();
+                if (!removedRope.isEmpty()) {
+                    ItemHandlerHelper.giveItemToPlayer(player, removedRope);
+                }
+                level.playSound(null, pos, SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+
         if (player.isShiftKeyDown() && farmer.easyVillagers().getCrop(registries) != null) {
             if (!level.isClientSide) {
                 ItemStack removed = farmer.removeSelectedCrop(registries);
@@ -196,6 +237,14 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
     private static boolean isRice(ItemStack stack) {
         return RICE_ITEM_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+    }
+
+    private static boolean isTomatoSeeds(ItemStack stack) {
+        return TOMATO_SEEDS_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+    }
+
+    private static boolean isRope(ItemStack stack) {
+        return ROPE_ITEM_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
     }
 
     private static void consumeOne(ItemStack stack, Player player) {

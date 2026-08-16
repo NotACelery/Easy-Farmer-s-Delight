@@ -6,7 +6,11 @@
 - Paddy Farmer Rice engine: implemented
 - Rich Farmer normal crop engine: implemented
 - Rich Farmer Rich Soil base behavior: implemented
-- Tomato / Rope: not yet implemented
+- Creative tab: implemented
+- Paddy/Rich recipe matcher slot-order hotfix: implemented
+- Farmer's Delight Rice IDs corrected for 1.21.1 (`rice` / `rice_panicles`)
+- Tomato persistent base lifecycle: implemented
+- Tomato Rope 1 / Rope 2 independent progress: implemented
 - Mushroom Colonies: not yet implemented
 - Rich Paddy Rich Soil boost: not yet implemented
 - Source compilation check: passed

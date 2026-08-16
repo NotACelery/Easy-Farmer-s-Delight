@@ -31,24 +31,24 @@ public final class RichFarmerRecipe extends CustomRecipe {
             return false;
         }
 
-        ItemStack center = input.getItem(1, 1);
+        ItemStack center = input.getItem(4);
         boolean validFarmer = RecipeUtil.isItem(center, "easy_villagers", "farmer")
                 || center.is(ModBlocks.PADDY_FARMER_ITEM.get());
 
         return validFarmer
-                && RecipeUtil.isBlock(input.getItem(0, 0), Items.GLASS_PANE)
-                && RecipeUtil.isBlock(input.getItem(0, 1), Items.GLASS_PANE)
-                && RecipeUtil.isBlock(input.getItem(0, 2), Items.GLASS_PANE)
-                && RecipeUtil.isBlock(input.getItem(1, 0), Items.GLASS_PANE)
-                && RecipeUtil.isBlock(input.getItem(1, 2), Items.GLASS_PANE)
-                && RecipeUtil.isBlock(input.getItem(2, 0), Items.IRON_BLOCK)
-                && RecipeUtil.isItem(input.getItem(2, 1), "farmersdelight", "rich_soil")
-                && RecipeUtil.isBlock(input.getItem(2, 2), Items.IRON_BLOCK);
+                && RecipeUtil.isBlock(input.getItem(0), Items.GLASS_PANE)
+                && RecipeUtil.isBlock(input.getItem(1), Items.GLASS_PANE)
+                && RecipeUtil.isBlock(input.getItem(2), Items.GLASS_PANE)
+                && RecipeUtil.isBlock(input.getItem(3), Items.GLASS_PANE)
+                && RecipeUtil.isBlock(input.getItem(5), Items.GLASS_PANE)
+                && RecipeUtil.isBlock(input.getItem(6), Items.IRON_BLOCK)
+                && RecipeUtil.isItem(input.getItem(7), "farmersdelight", "rich_soil")
+                && RecipeUtil.isBlock(input.getItem(8), Items.IRON_BLOCK);
     }
 
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
-        ItemStack source = input.getItem(1, 1);
+        ItemStack source = input.getItem(4);
         Block target = source.is(ModBlocks.PADDY_FARMER_ITEM.get())
                 ? ModBlocks.RICH_PADDY_FARMER.get()
                 : ModBlocks.RICH_FARMER.get();

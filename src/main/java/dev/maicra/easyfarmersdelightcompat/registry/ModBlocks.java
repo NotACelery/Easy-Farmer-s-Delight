@@ -60,5 +60,6 @@ public final class ModBlocks {
     public static void register(IEventBus bus) {
         BLOCKS.register(bus);
         ITEMS.register(bus);
+        ModCreativeTabs.register(bus);
     }
 }

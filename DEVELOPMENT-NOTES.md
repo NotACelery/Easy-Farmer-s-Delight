@@ -37,8 +37,8 @@ Unknown fields must survive load/save.
 - Farmer's Delight Rice only.
 - Permanent virtual shallow-water environment; no bucket interaction state.
 - Virtual progression `0..7`:
-  - `0..3`: lower `rice_crop` age `0..3`;
-  - `4..7`: upper `rice_crop_panicles` age `0..3`, while the lower crop remains mature.
+  - `0..3`: lower `farmersdelight:rice` age `0..3`;
+  - `4..7`: upper `farmersdelight:rice_panicles` age `0..3`, while the lower crop remains mature.
 - On mature harvest, use the actual panicles block loot table.
 - After harvest, return to virtual stage `3` so the lower Rice stays planted and only the panicles regrow.
 - Do **not** globally add Rice to `minecraft:villager_plantable_seeds`; the ordinary Easy Villagers Farmer would otherwise use its incompatible generic single-age crop engine.
@@ -56,8 +56,9 @@ Unknown fields must survive load/save.
 - Respect `farmersdelight:unaffected_by_rich_soil` by resource tag, without importing Farmer's Delight implementation constants.
 - For `CropBlock` subclasses, apply their own protected bone-meal age increment reflectively and cap at their real max age.
 - World-dependent bonemeal hooks cannot be reproduced literally for an unplaced virtual crop; special non-`CropBlock` crops are handled by dedicated engines rather than guessed here.
-- Tomato persistent vine + up to two Rope sections: next phase.
-- Red/Brown Mushroom Colonies: later Rich Farmer phase.
+- Tomato persistent vine is a dedicated Rich Farmer engine: `budding_tomatoes` age `0..3` transitions to `tomatoes` age `0..3`; harvest returns the mature vine to age 0 instead of consuming another seed.
+- Up to two `farmersdelight:rope` items may be installed. Base/Rope 1/Rope 2 persist their own progress values; sneak interaction removes the topmost Rope before removing the crop.
+- Red/Brown Mushroom Colonies: next Rich Farmer phase.
 
 ### Rich Paddy Farmer — planned combined behavior
 

@@ -1,5 +1,6 @@
 {
   "block.easyfarmersdelightcompat.paddy_farmer": "Granjero de arrozal",
   "block.easyfarmersdelightcompat.rich_farmer": "Granjero fértil",
-  "block.easyfarmersdelightcompat.rich_paddy_farmer": "Granjero de arrozal fértil"
+  "block.easyfarmersdelightcompat.rich_paddy_farmer": "Granjero de arrozal fértil",
+  "itemGroup.easyfarmersdelightcompat": "Easy Farmer's Delight Compat"
 }

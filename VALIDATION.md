@@ -1,4 +1,4 @@
-# Validation status — 0.1.0-dev Rich Farmer milestone
+# Validation status — 0.1.0-dev visibility + Tomato/Rope milestone
 
 Validated on 2026-08-16:
 
@@ -10,13 +10,20 @@ Validated on 2026-08-16:
 - Rich Farmer normal crop work invokes only Easy Villagers' internal crop-aging operation, not its complete tile-entity tick/sync cycle.
 - Farmer's Delight upstream source was checked for live `richSoilBoostChance`, default/range semantics and the `unaffected_by_rich_soil` tag behavior.
 - Rich Soil virtual boost respects `randomTickSpeed` draws and uses normal `CropBlock` bone-meal age increments instead of a fixed multiplier.
-- Farmer's Delight Rice lower/panicle block IDs and two-stage `age 0..3` lifecycle remain represented by the Paddy engine.
+- Farmer's Delight 1.21.1 Rice IDs are resolved as `farmersdelight:rice` and `farmersdelight:rice_panicles`; no stale `rice_crop` IDs remain.
+- Creative tab registration is wired through `ModBlocks.register(...)` and includes Paddy, Rich and Rich Paddy Farmer.
+- Paddy/Rich recipe matchers use flat CraftingInput slots `0..8`, avoiding the previous transposed two-coordinate access bug.
+- Tomato Seeds, persistent budding/mature Tomato lifecycle and up to two Rope progress states compile against the same NeoForge API baseline.
 - All JSON resources parse successfully.
 - No Java source directly imports Easy Villagers or Farmer's Delight implementation packages.
 - No Easy Villagers/Farmer's Delight classes or assets are copied into this project.
 - Rice is not globally injected into `minecraft:villager_plantable_seeds`.
 
 Implemented but still requiring a live modded instance test:
+
+- Creative tab visibility and global Creative search visibility.
+- Corrected manual Paddy and Rich crafting patterns.
+- Tomato Seeds insertion, budding transition, persistent harvest, Rope installation/removal and independent Rope output.
 
 - Insert/remove Easy Villagers villager item in Paddy and Rich Farmer.
 - Insert/remove Farmer's Delight Rice in Paddy.
@@ -36,7 +43,6 @@ Not yet validated/implemented:
 - Dedicated server launch.
 - Multiplayer synchronization.
 - Visual villager/crop block-entity renderer.
-- Tomato + Rope engine.
 - Mushroom Colony engine.
 - Rich Paddy Rich Soil acceleration.
 

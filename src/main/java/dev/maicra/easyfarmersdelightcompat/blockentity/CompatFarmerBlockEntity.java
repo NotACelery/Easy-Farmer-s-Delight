@@ -12,6 +12,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
@@ -53,8 +56,14 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     private static final String KEY_ROPE_COUNT = "EfdcRopeCount";
 
     private static final ResourceLocation RICE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
-    private static final ResourceLocation RICE_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice_crop");
-    private static final ResourceLocation RICE_PANICLES_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice_crop_panicles");
+    private static final ResourceLocation RICE_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
+    private static final ResourceLocation RICE_PANICLES_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice_panicles");
+    private static final ResourceLocation TOMATO_SEEDS_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomato_seeds");
+    private static final ResourceLocation BUDDING_TOMATO_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "budding_tomatoes");
+    private static final ResourceLocation TOMATO_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomatoes");
+    private static final ResourceLocation TOMATO_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomato");
+    private static final ResourceLocation ROTTEN_TOMATO_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rotten_tomato");
+    private static final ResourceLocation ROPE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rope");
     private static final TagKey<Block> UNAFFECTED_BY_RICH_SOIL = TagKey.create(
             Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath("farmersdelight", "unaffected_by_rich_soil")
@@ -124,6 +133,41 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return ropeCount;
     }
 
+    public boolean hasTomatoCrop(HolderLookup.Provider registries) {
+        return isTomatoState(easyVillagers.getCrop(registries));
+    }
+
+    public boolean addRope() {
+        if (variant() != FarmerVariant.RICH || ropeCount >= 2) {
+            return false;
+        }
+        ropeCount++;
+        if (ropeCount == 1) {
+            ropeOneProgress = 0;
+        } else {
+            ropeTwoProgress = 0;
+        }
+        setChanged();
+        return true;
+    }
+
+    public ItemStack removeTopRope() {
+        if (ropeCount <= 0) {
+            return ItemStack.EMPTY;
+        }
+
+        if (ropeCount == 2) {
+            ropeTwoProgress = 0;
+        } else {
+            ropeOneProgress = 0;
+        }
+        ropeCount--;
+        setChanged();
+
+        Item rope = BuiltInRegistries.ITEM.get(ROPE_ITEM_ID);
+        return new ItemStack(rope);
+    }
+
     public void selectRice(HolderLookup.Provider registries) {
         easyVillagers.setRiceCrop(registries);
         paddyGrowth = 0;
@@ -131,15 +175,33 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         setChanged();
     }
 
+    public void selectTomato(HolderLookup.Provider registries) {
+        Block buddingTomato = BuiltInRegistries.BLOCK.get(BUDDING_TOMATO_ID);
+        easyVillagers.setCropState(withAge(buddingTomato.defaultBlockState(), 0), registries);
+        baseProgress = 0;
+        ropeOneProgress = 0;
+        ropeTwoProgress = 0;
+        setChanged();
+    }
+
     public ItemStack removeSelectedCrop(HolderLookup.Provider registries) {
-        boolean rice = easyVillagers.hasRiceCrop(registries);
+        BlockState selected = easyVillagers.getCrop(registries);
+        boolean rice = selected != null && RICE_CROP_ID.equals(BuiltInRegistries.BLOCK.getKey(selected.getBlock()));
+        boolean tomato = isTomatoState(selected);
         ItemStack removed = easyVillagers.removeCrop(registries);
         paddyGrowth = 0;
+        baseProgress = 0;
+        ropeOneProgress = 0;
+        ropeTwoProgress = 0;
         setChanged();
 
         if (rice) {
             Item riceItem = BuiltInRegistries.ITEM.get(RICE_ITEM_ID);
             return new ItemStack(riceItem);
+        }
+        if (tomato) {
+            Item tomatoSeeds = BuiltInRegistries.ITEM.get(TOMATO_SEEDS_ID);
+            return new ItemStack(tomatoSeeds);
         }
         return removed;
     }
@@ -179,9 +241,24 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             }
 
             if (level.getGameTime() % 20L == 0L
-                    && level.random.nextInt(farmer.easyVillagers.farmSpeed()) == 0
-                    && farmer.easyVillagers.ageCrop(registries)) {
-                farmer.setChanged();
+                    && level.random.nextInt(farmer.easyVillagers.farmSpeed()) == 0) {
+                BlockState crop = farmer.easyVillagers.getCrop(registries);
+                boolean changed;
+                if (isTomatoState(crop)) {
+                    changed = farmer.ageTomato(level, registries);
+                    // Once the persistent base vine exists, each installed rope section
+                    // has its own growth/harvest cycle. Ropes installed later naturally
+                    // remain offset from the base and from each other.
+                    BlockState afterBase = farmer.easyVillagers.getCrop(registries);
+                    if (TOMATO_CROP_ID.equals(BuiltInRegistries.BLOCK.getKey(afterBase.getBlock()))) {
+                        changed |= farmer.ageTomatoRopes(level, registries);
+                    }
+                } else {
+                    changed = farmer.easyVillagers.ageCrop(registries);
+                }
+                if (changed) {
+                    farmer.setChanged();
+                }
             }
 
             if (farmer.variant().isRich()) {
@@ -274,6 +351,22 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return false;
         }
 
+        if (BUDDING_TOMATO_ID.equals(BuiltInRegistries.BLOCK.getKey(crop.getBlock()))) {
+            int currentAge = getAge(crop);
+            int ageGrowth = Math.min(currentAge + 1 + level.random.nextInt(4), 7);
+            if (ageGrowth <= 3) {
+                easyVillagers.setCropState(withAge(crop, ageGrowth), registries);
+                baseProgress = ageGrowth;
+            } else {
+                Block tomato = BuiltInRegistries.BLOCK.get(TOMATO_CROP_ID);
+                int remainingGrowth = ageGrowth - 4;
+                easyVillagers.setCropState(withAge(tomato.defaultBlockState(), remainingGrowth), registries);
+                baseProgress = remainingGrowth;
+            }
+            setChanged();
+            return true;
+        }
+
         Optional<Property<?>> ageProperty = crop.getProperties().stream()
                 .filter(property -> property.getName().equals("age"))
                 .findFirst();
@@ -321,6 +414,125 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             }
         }
         return 0;
+    }
+
+    private boolean ageTomato(ServerLevel level, HolderLookup.Provider registries) {
+        BlockState crop = easyVillagers.getCrop(registries);
+        if (!isTomatoState(crop)) {
+            return false;
+        }
+
+        ResourceLocation cropId = BuiltInRegistries.BLOCK.getKey(crop.getBlock());
+        int age = getAge(crop);
+
+        // Farmer's Delight starts tomatoes as budding_tomatoes (age 0..3), then
+        // transitions into the persistent tomatoes vine at age 0.
+        if (BUDDING_TOMATO_ID.equals(cropId)) {
+            if (age < 3) {
+                easyVillagers.setCropState(withAge(crop, age + 1), registries);
+                baseProgress = age + 1;
+            } else {
+                Block tomato = BuiltInRegistries.BLOCK.get(TOMATO_CROP_ID);
+                easyVillagers.setCropState(withAge(tomato.defaultBlockState(), 0), registries);
+                baseProgress = 0;
+            }
+            return true;
+        }
+
+        if (!TOMATO_CROP_ID.equals(cropId)) {
+            return false;
+        }
+
+        if (age < 3) {
+            easyVillagers.setCropState(withAge(crop, age + 1), registries);
+            baseProgress = age + 1;
+            return true;
+        }
+
+        Villager villager = easyVillagers.getVillagerEntity(registries);
+        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
+            return false;
+        }
+
+        harvestTomatoSection(level, registries);
+        easyVillagers.setCropState(withAge(crop, 0), registries);
+        baseProgress = 0;
+        level.playSound(null, worldPosition, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+        return true;
+    }
+
+    private boolean ageTomatoRopes(ServerLevel level, HolderLookup.Provider registries) {
+        if (ropeCount <= 0) {
+            return false;
+        }
+
+        Villager villager = easyVillagers.getVillagerEntity(registries);
+        boolean canHarvest = villager != null
+                && !villager.isBaby()
+                && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
+        boolean changed = false;
+
+        if (ropeCount >= 1) {
+            if (ropeOneProgress < 3) {
+                ropeOneProgress++;
+                changed = true;
+            } else if (canHarvest) {
+                harvestTomatoSection(level, registries);
+                ropeOneProgress = 0;
+                changed = true;
+            }
+        }
+
+        if (ropeCount >= 2) {
+            if (ropeTwoProgress < 3) {
+                ropeTwoProgress++;
+                changed = true;
+            } else if (canHarvest) {
+                harvestTomatoSection(level, registries);
+                ropeTwoProgress = 0;
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            setChanged();
+        }
+        return changed;
+    }
+
+    private void harvestTomatoSection(ServerLevel level, HolderLookup.Provider registries) {
+        Container output = easyVillagers.getOutputInventory(registries);
+        if (output == null) {
+            return;
+        }
+
+        Item tomato = BuiltInRegistries.ITEM.get(TOMATO_ITEM_ID);
+        insertIntoOutput(output, new ItemStack(tomato, 1 + level.random.nextInt(2)));
+
+        // Mirrors TomatoBlock#useWithoutItem: 5% chance for one Rotten Tomato.
+        if (level.random.nextFloat() < 0.05F) {
+            Item rottenTomato = BuiltInRegistries.ITEM.get(ROTTEN_TOMATO_ID);
+            insertIntoOutput(output, new ItemStack(rottenTomato));
+        }
+        output.setChanged();
+    }
+
+    private static boolean isTomatoState(BlockState state) {
+        if (state == null) {
+            return false;
+        }
+        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+        return BUDDING_TOMATO_ID.equals(id) || TOMATO_CROP_ID.equals(id);
+    }
+
+    private static int getAge(BlockState state) {
+        return state.getProperties().stream()
+                .filter(property -> property.getName().equals("age"))
+                .filter(IntegerProperty.class::isInstance)
+                .map(IntegerProperty.class::cast)
+                .findFirst()
+                .map(state::getValue)
+                .orElse(0);
     }
 
     private void harvestMatureRice(ServerLevel level, HolderLookup.Provider registries) {
@@ -390,6 +602,26 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             existing.grow(move);
             stack.shrink(move);
         }
+    }
+
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        saveAdditional(tag, registries);
+        return tag;
     }
 
     @Override

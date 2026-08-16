@@ -6,11 +6,12 @@ Independent, unofficial compatibility addon for **Easy Villagers** and **Farmer'
 
 ## Current development milestone (0.1.0-dev)
 
-The compatibility-safe foundation is in place. The **Paddy Farmer has a functional Rice engine**, and the **Rich Farmer now runs normal Easy Villagers crops with virtual Rich Soil acceleration**.
+The compatibility-safe foundation is in place. The **Paddy Farmer has a functional Rice engine**, the **Rich Farmer runs normal Easy Villagers crops with virtual Rich Soil acceleration**, and the first **Tomato + Rope** gameplay layer is implemented. This milestone also fixes creative-menu discoverability and the original custom-recipe slot-order bug.
 
 ### Foundation
 
 - Registers **Paddy Farmer**, **Rich Farmer** and **Rich Paddy Farmer** as original blocks.
+- Registers a dedicated **Easy Farmer's Delight Compat** Creative Mode tab containing all three blocks.
 - Adds the agreed recipes:
   - Paddy: `GGG / GFG / IWI`
   - Rich: `GGG / GFG / BRB`
@@ -50,7 +51,16 @@ Rice is intentionally **not** added globally to `minecraft:villager_plantable_se
 - Respects `randomTickSpeed` and Farmer's Delight's `farmersdelight:unaffected_by_rich_soil` block tag.
 - For normal `CropBlock`-style crops, applies the crop's own bone-meal age increment instead of an arbitrary speed multiplier.
 
-The special **Tomato + Rope** and **Mushroom Colony** engines are intentionally not part of this milestone; they are the next Rich Farmer layers.
+### Tomato + Rope test layer
+
+- Rich Farmer accepts `farmersdelight:tomato_seeds` as a dedicated persistent crop.
+- Models the real Farmer's Delight budding stage before switching to the reusable tomato vine.
+- Mature tomato harvest keeps the plant, resets its fruit age and produces 1-2 Tomatoes with the same 5% Rotten Tomato chance.
+- Right-clicking a Tomato Rich Farmer with `farmersdelight:rope` installs up to **2 Rope** sections.
+- Base, Rope 1 and Rope 2 store independent `0..3` progress values and harvest independently.
+- Sneak-right-click removes the uppermost Rope first and returns it. Once no Ropes remain, the next sneak interaction removes the Tomato Seeds selection.
+
+The **Mushroom Colony** engine is the next Rich Farmer crop layer.
 
 ## Rich Paddy status
 
@@ -62,13 +72,12 @@ The current models are intentionally developer placeholders made from vanilla/Fa
 
 ## Next implementation layers
 
-1. Live in-game validation of Paddy + Rich Farmer with the exact Easy Villagers/Farmer's Delight dependency JARs.
-2. Tomato lifecycle with Base / Rope 1 / Rope 2 independent progress and non-destructive harvest.
-3. Red/Brown Mushroom Colony lifecycle.
-4. Rich Paddy Rich Soil acceleration.
-5. Optional Jade HUD provider.
-6. Dedicated original block/entity renderers and final assets.
-7. Multiplayer/dedicated-server tests and balance pass.
+1. Live in-game validation of the Creative tab, corrected recipes, Paddy/Rice and Rich Farmer/Tomato/Rope flows.
+2. Red/Brown Mushroom Colony lifecycle.
+3. Rich Paddy Rich Soil acceleration.
+4. Optional Jade HUD provider.
+5. Dedicated original block/entity renderers and final assets, including visual Rope/crop state.
+6. Multiplayer/dedicated-server tests and balance pass.
 
 ## External projects
 

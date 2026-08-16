@@ -30,20 +30,23 @@ public final class PaddyFarmerRecipe extends CustomRecipe {
             return false;
         }
 
-        return RecipeUtil.isBlock(input.getItem(0, 0), Items.GLASS_PANE)
-                && RecipeUtil.isBlock(input.getItem(0, 1), Items.GLASS_PANE)
-                && RecipeUtil.isBlock(input.getItem(0, 2), Items.GLASS_PANE)
-                && RecipeUtil.isBlock(input.getItem(1, 0), Items.GLASS_PANE)
-                && RecipeUtil.isItem(input.getItem(1, 1), "easy_villagers", "farmer")
-                && RecipeUtil.isBlock(input.getItem(1, 2), Items.GLASS_PANE)
-                && RecipeUtil.isBlock(input.getItem(2, 0), Items.IRON_INGOT)
-                && RecipeUtil.isBlock(input.getItem(2, 1), Items.WATER_BUCKET)
-                && RecipeUtil.isBlock(input.getItem(2, 2), Items.IRON_INGOT);
+        // CraftingInput#getItem(row, column) is misleadingly named in 1.21.1:
+        // it indexes as first + second * width. Since this recipe is exactly 3x3,
+        // flat slots are clearer and cannot accidentally transpose the pattern.
+        return RecipeUtil.isBlock(input.getItem(0), Items.GLASS_PANE)
+                && RecipeUtil.isBlock(input.getItem(1), Items.GLASS_PANE)
+                && RecipeUtil.isBlock(input.getItem(2), Items.GLASS_PANE)
+                && RecipeUtil.isBlock(input.getItem(3), Items.GLASS_PANE)
+                && RecipeUtil.isItem(input.getItem(4), "easy_villagers", "farmer")
+                && RecipeUtil.isBlock(input.getItem(5), Items.GLASS_PANE)
+                && RecipeUtil.isBlock(input.getItem(6), Items.IRON_INGOT)
+                && RecipeUtil.isBlock(input.getItem(7), Items.WATER_BUCKET)
+                && RecipeUtil.isBlock(input.getItem(8), Items.IRON_INGOT);
     }
 
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
-        return RecipeUtil.upgradeFarmer(input.getItem(1, 1), ModBlocks.PADDY_FARMER.get());
+        return RecipeUtil.upgradeFarmer(input.getItem(4), ModBlocks.PADDY_FARMER.get());
     }
 
     @Override

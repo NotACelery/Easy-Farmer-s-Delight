@@ -32,7 +32,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  */
 public final class EasyVillagersFarmerAdapter {
     private static final ResourceLocation EASY_FARMER_ID = ResourceLocation.fromNamespaceAndPath("easy_villagers", "farmer");
-    private static final ResourceLocation RICE_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice_crop");
+    private static final ResourceLocation RICE_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
 
     private static final String FARMER_TILEENTITY = "de.maxhenkel.easyvillagers.blocks.tileentity.FarmerTileentity";
     private static final String VILLAGER_ITEM = "de.maxhenkel.easyvillagers.items.VillagerItem";
