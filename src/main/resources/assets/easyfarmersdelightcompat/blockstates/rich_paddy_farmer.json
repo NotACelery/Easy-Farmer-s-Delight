@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "easyfarmersdelightcompat:block/rich_paddy_farmer" }
+    "facing=north": { "model": "easyfarmersdelightcompat:block/rich_paddy_farmer" },
+    "facing=south": { "model": "easyfarmersdelightcompat:block/rich_paddy_farmer", "y": 180 },
+    "facing=west": { "model": "easyfarmersdelightcompat:block/rich_paddy_farmer", "y": 270 },
+    "facing=east": { "model": "easyfarmersdelightcompat:block/rich_paddy_farmer", "y": 90 }
   }
 }

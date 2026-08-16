@@ -51,7 +51,8 @@ public final class ModBlocks {
     private static BlockBehaviour.Properties farmerProperties() {
         return BlockBehaviour.Properties.of()
                 .strength(2.5F)
-                .sound(SoundType.METAL);
+                .sound(SoundType.METAL)
+                .noOcclusion();
     }
 
     private ModBlocks() {
