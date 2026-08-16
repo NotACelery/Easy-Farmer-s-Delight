@@ -62,8 +62,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     private static final ResourceLocation TOMATO_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomato");
     private static final ResourceLocation ROTTEN_TOMATO_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rotten_tomato");
     private static final ResourceLocation ROPE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rope");
-    private static final ResourceLocation RED_MUSHROOM_ITEM_ID = ResourceLocation.fromNamespaceAndPath("minecraft", "red_mushroom");
-    private static final ResourceLocation BROWN_MUSHROOM_ITEM_ID = ResourceLocation.fromNamespaceAndPath("minecraft", "brown_mushroom");
+    private static final ResourceLocation RED_MUSHROOM_ITEM_ID = ResourceLocation.withDefaultNamespace("red_mushroom");
+    private static final ResourceLocation BROWN_MUSHROOM_ITEM_ID = ResourceLocation.withDefaultNamespace("brown_mushroom");
     private static final ResourceLocation RED_MUSHROOM_COLONY_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "red_mushroom_colony");
     private static final ResourceLocation BROWN_MUSHROOM_COLONY_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "brown_mushroom_colony");
     private static final TagKey<Block> UNAFFECTED_BY_RICH_SOIL = TagKey.create(
@@ -139,6 +139,10 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return isTomatoState(easyVillagers.getCrop(registries));
     }
 
+    public boolean hasMushroomColony(HolderLookup.Provider registries) {
+        return isMushroomColonyState(easyVillagers.getCrop(registries));
+    }
+
     public boolean addRope() {
         if (variant() != FarmerVariant.RICH || ropeCount >= 2) {
             return false;
@@ -186,8 +190,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         setChanged();
     }
 
-    public boolean selectMushroom(ItemStack stack, HolderLookup.Provider registries) {
-        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+    public boolean selectMushroom(ItemStack mushroomStack, HolderLookup.Provider registries) {
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(mushroomStack.getItem());
         ResourceLocation colonyId;
         if (RED_MUSHROOM_ITEM_ID.equals(itemId)) {
             colonyId = RED_MUSHROOM_COLONY_ID;
@@ -198,6 +202,10 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         }
 
         Block colony = BuiltInRegistries.BLOCK.get(colonyId);
+        if (BuiltInRegistries.BLOCK.getKey(colony).equals(ResourceLocation.withDefaultNamespace("air"))) {
+            return false;
+        }
+
         easyVillagers.setCropState(withAge(colony.defaultBlockState(), 0), registries);
         baseProgress = 0;
         ropeOneProgress = 0;
@@ -228,7 +236,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return new ItemStack(tomatoSeeds);
         }
         if (mushroomItemId != null) {
-            return new ItemStack(BuiltInRegistries.ITEM.get(mushroomItemId));
+            Item mushroom = BuiltInRegistries.ITEM.get(mushroomItemId);
+            return new ItemStack(mushroom);
         }
         return removed;
     }
@@ -283,21 +292,27 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
                     && !villager.isBaby()
                     && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
 
-            // Normal Paddy work roll.
-            if (level.random.nextInt(farmSpeed) == 0) {
-                if (farmer.paddyGrowth < MAX_PADDY_GROWTH) {
-                    farmer.paddyGrowth++;
-                    farmer.syncRiceCropState(registries);
-                    farmer.setChanged();
-                } else if (canHarvest) {
-                    farmer.harvestMatureRice(level, registries);
-                    // Farmer's Delight keeps the mature submerged plant after the
-                    // panicles are harvested, so only the upper half regrows.
-                    farmer.paddyGrowth = 3;
-                    farmer.syncRiceCropState(registries);
-                    farmer.setChanged();
-                    level.playSound(null, pos, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
-                }
+            // Once the panicles are fully mature, harvesting happens on the next
+            // one-second Farmer cadence without requiring a second farmSpeed RNG roll.
+            // Growth itself still uses Easy Villagers' configured RNG. This prevents
+            // fully-grown Rice from visually stalling for several extra work rolls.
+            if (farmer.paddyGrowth >= MAX_PADDY_GROWTH && canHarvest) {
+                farmer.harvestMatureRice(level, registries);
+                // Farmer's Delight keeps the mature submerged plant after the
+                // panicles are harvested, so only the upper half regrows.
+                farmer.paddyGrowth = 3;
+                farmer.syncRiceCropState(registries);
+                farmer.setChanged();
+                level.playSound(null, pos, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+                return;
+            }
+
+            // Normal Paddy growth roll.
+            if (farmer.paddyGrowth < MAX_PADDY_GROWTH
+                    && level.random.nextInt(farmSpeed) == 0) {
+                farmer.paddyGrowth++;
+                farmer.syncRiceCropState(registries);
+                farmer.setChanged();
             }
 
             // Rich Paddy receives a separate opportunity at the same cadence. This
@@ -490,6 +505,12 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return 0;
     }
 
+    /**
+     * Farmer's Delight Mushroom Colony lifecycle used by the Rich Farmer. The
+     * colony itself is persistent: ages 0..3 grow progressively, and a mature
+     * colony is harvested like a full knife harvest (3 mushrooms at age 3)
+     * before returning to age 0 without consuming another mushroom item.
+     */
     private boolean ageMushroomColony(ServerLevel level, HolderLookup.Provider registries) {
         BlockState crop = easyVillagers.getCrop(registries);
         if (!isMushroomColonyState(crop)) {
@@ -497,7 +518,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         }
 
         int age = getAge(crop);
-        if (age < 3) {
+        int maxAge = maxAge(crop);
+        if (age < maxAge) {
             easyVillagers.setCropState(withAge(crop, age + 1), registries);
             return true;
         }
@@ -517,33 +539,14 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return false;
         }
 
-        // Farmer's Delight's full Knife harvest returns a mushroom count equal to
-        // the colony age and resets the persistent colony to age 0. At max age 3,
-        // that means three mushrooms per automated harvest without consuming another
-        // starter mushroom.
-        insertIntoOutput(output, new ItemStack(BuiltInRegistries.ITEM.get(mushroomItemId), age));
+        // MushroomColonyBlock's full knife harvest returns colonyAge mushrooms
+        // and resets the persistent colony to age 0. At max age (3), that is 3.
+        Item mushroom = BuiltInRegistries.ITEM.get(mushroomItemId);
+        insertIntoOutput(output, new ItemStack(mushroom, maxAge));
         output.setChanged();
         easyVillagers.setCropState(withAge(crop, 0), registries);
-        level.playSound(null, worldPosition, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+        level.playSound(null, worldPosition, crop.getSoundType().getBreakSound(), SoundSource.BLOCKS, 0.8F, 1.0F);
         return true;
-    }
-
-    private static boolean isMushroomColonyState(BlockState state) {
-        return mushroomItemForColony(state) != null;
-    }
-
-    private static ResourceLocation mushroomItemForColony(BlockState state) {
-        if (state == null) {
-            return null;
-        }
-        ResourceLocation colonyId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-        if (RED_MUSHROOM_COLONY_ID.equals(colonyId)) {
-            return RED_MUSHROOM_ITEM_ID;
-        }
-        if (BROWN_MUSHROOM_COLONY_ID.equals(colonyId)) {
-            return BROWN_MUSHROOM_ITEM_ID;
-        }
-        return null;
     }
 
     private boolean ageTomato(ServerLevel level, HolderLookup.Provider registries) {
@@ -641,6 +644,34 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             insertIntoOutput(output, new ItemStack(rottenTomato));
         }
         output.setChanged();
+    }
+
+    private static boolean isMushroomColonyState(BlockState state) {
+        return mushroomItemForColony(state) != null;
+    }
+
+    private static ResourceLocation mushroomItemForColony(BlockState state) {
+        if (state == null) {
+            return null;
+        }
+        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+        if (RED_MUSHROOM_COLONY_ID.equals(id)) {
+            return RED_MUSHROOM_ITEM_ID;
+        }
+        if (BROWN_MUSHROOM_COLONY_ID.equals(id)) {
+            return BROWN_MUSHROOM_ITEM_ID;
+        }
+        return null;
+    }
+
+    private static int maxAge(BlockState state) {
+        return state.getProperties().stream()
+                .filter(property -> property.getName().equals("age"))
+                .filter(IntegerProperty.class::isInstance)
+                .map(IntegerProperty.class::cast)
+                .findFirst()
+                .map(property -> property.getPossibleValues().stream().max(Integer::compareTo).orElse(0))
+                .orElse(0);
     }
 
     private static boolean isTomatoState(BlockState state) {
