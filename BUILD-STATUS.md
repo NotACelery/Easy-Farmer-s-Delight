@@ -1,32 +1,74 @@
 # Build status — 0.1.0-dev
 
-- Minecraft: 1.21.1
-- NeoForge baseline: 21.1.235
-- Java: 21
-- Paddy Farmer Rice engine: implemented
-- Rich Farmer normal crop engine: implemented
-- Rich Farmer Rich Soil base behavior: implemented
-- Creative tab: implemented
-- Paddy/Rich recipe matcher slot-order hotfix: implemented
-- Farmer's Delight Rice IDs corrected for 1.21.1 (`rice` / `rice_panicles`)
-- Tomato persistent base lifecycle: implemented
-- Tomato Rope 1 / Rope 2 independent progress: implemented
-- Mushroom Colonies: not yet implemented
-- Rich Paddy Rich Soil boost: not yet implemented
-- Source compilation check: passed
-- Included test JAR: `build/libs/easyfarmersdelightcompat-1.21.1-0.1.0-dev.jar`
-- Windows rebuild helper: `build-dev.bat`
-- Linux/WSL rebuild helper: `build-dev.sh`
+## Baseline
 
-The included JAR is assembled from the compiled addon classes, project resources and generated NeoForge metadata. Compile-only helper stubs used to satisfy external loader/library signatures in the isolated build environment are not packaged in the JAR.
+- Minecraft: **1.21.1**
+- NeoForge minimum/baseline: **21.1.235**
+- Java: **21**
+- Required runtime mods: **Easy Villagers 1.1.42+**, **Farmer's Delight 1.2.9+**
+- Optional integrations: **Jade**, **Argentum**, **Ars Nouveau**
 
-For a normal local build, run `build-dev.bat`; it resolves the real Gradle/NeoForge dependencies and writes the resulting JAR to `build/libs/`.
+## Implemented
 
-## 0.1.0-dev — source-based Farmer renderer correction
+- Paddy Farmer block, recipe and Rice engine
+- Rich Farmer block and upgrade recipe
+- Rich Paddy Farmer block and upgrade recipe
+- Upgrade preservation of source Farmer/Paddy block-entity data
+- Creative Mode tab
+- Correct 3x3 custom recipe slot matching
+- Easy Villagers four-slot output menu reuse
+- NeoForge item-handler capability for output automation
+- Farmer villager insertion/removal and age handling
+- Horizontal `FACING` state and Farmer-compatible orientation
+- Client villager/crop renderer
+- Crop-specific RenderType/tint rendering
+- Paddy shallow-water visual basin
+- Rich-only inset second glass shell
+- Correct breaking/particle textures
+- Farmer's Delight Rice IDs (`rice`, `rice_panicles`)
+- Full Rice virtual lifecycle `0..7`
+- Mature Rice harvest on the next Farmer cadence without an extra `farmSpeed` RNG roll
+- Rich Soil virtual work-cycle behavior using Farmer's Delight `richSoilBoostChance`
+- Rich Soil acceleration for Rich Farmer compatible crops
+- Rich Soil acceleration across the full Rich Paddy Rice lifecycle
+- Persistent Tomato lifecycle
+- Tomato Rope 1 / Rope 2 installation, removal, rendering and independent progress/work rolls
+- Red/Brown Mushroom Colony lifecycle
+- Optional Argentum seed-tag compatibility
+- Optional Ars Nouveau Magebloom compatibility
+- Optional Jade Farmer-status integration
+- Mod-list logo and resource-pack icon assets
 
-- Farmer variants now have a horizontal `FACING` state and rotate like Easy Villagers' Farmer.
-- Client content renderer now follows Easy Villagers' 1.21.1 spatial layout: villager behind, crop in front, both at 0.45 scale.
-- Crop rendering now uses the crop's own RenderType/model/tint pipeline instead of `renderSingleBlock`.
-- Rich Farmer floor is flush at Y=0..1 rather than raised.
-- Paddy variants use an internal iron retaining wall and water basin; only Rich variants receive the inset second glass shell.
-- Blocks use `noOcclusion` like the Easy Villagers Farmer.
+## Live singleplayer validation completed
+
+Validated in a real modded 1.21.1 instance:
+
+- block placement and visual orientation;
+- visible villager and crop rendering;
+- Rice growth and repeated harvest;
+- corrected mature-Rice harvest timing;
+- Rich Soil acceleration on terrestrial crops;
+- Rich Soil acceleration on Rice;
+- Tomato persistent harvesting;
+- independent Tomato Base / Rope 1 / Rope 2 progress;
+- Red/Brown Mushroom Colony growth and repeated harvesting;
+- non-vanilla Farmer's Delight crops tested successfully;
+- Ars Nouveau Magebloom accepted and accelerated by Rich Soil;
+- Jade tooltip displaying crop, growth, Rope progress, Rich Soil status and output inventory context.
+
+An accelerated comparison at `tick rate 2000` observed Rich Paddy producing roughly **30% more Rice harvests** than Paddy over the tested interval. This is a validation observation, not a guaranteed fixed multiplier; the system remains RNG/config driven.
+
+## Remaining release validation
+
+- Dedicated-server startup
+- Multiplayer synchronization with multiple players observing/interacting
+- Chunk unload/reload persistence
+- Full server restart persistence
+- Hopper/item capability behavior under multiplayer/server conditions
+- Upgrade round-trip preservation under server conditions
+- Optional-mod test matrix (Jade / Argentum / Ars Nouveau absent and present)
+- JEI recipe visibility
+- EMI recipe visibility
+- Final balance/smoke test after the multiplayer pass
+
+See `MULTIPLAYER-TEST-CHECKLIST.md`.

@@ -1,97 +1,203 @@
 # Easy Farmer's Delight Compat
 
-Independent, unofficial compatibility addon for **Easy Villagers** and **Farmer's Delight** on Minecraft 1.21.1 / NeoForge.
+<p align="center">
+  <img src="easy-farmers-delight-compat-cover.webp" alt="Easy Farmer's Delight Compat" width="320">
+</p>
 
-> This project is not affiliated with, endorsed by, sponsored by, or maintained by the authors of Easy Villagers or Farmer's Delight. It does not redistribute either dependency.
+Independent, unofficial compatibility addon for **Easy Villagers** and **Farmer's Delight** on **Minecraft 1.21.1 / NeoForge**.
 
-## Current development milestone (0.1.0-dev)
+> This project is not affiliated with, endorsed by, sponsored by, or maintained by the authors of Easy Villagers, Farmer's Delight, Jade, Argentum or Ars Nouveau. It does not redistribute their code or assets.
 
-The compatibility-safe foundation is in place. The **Paddy Farmer has a functional Rice engine**, the **Rich Farmer runs normal Easy Villagers crops with virtual Rich Soil acceleration**, and the first **Tomato + Rope** gameplay layer is implemented. This milestone also fixes creative-menu discoverability and the original custom-recipe slot-order bug.
+## Current status — 0.1.0-dev
 
-### Foundation
+The main gameplay feature set is implemented and has passed live singleplayer validation. The remaining release gate is primarily **multiplayer/dedicated-server validation**, plus final JEI/EMI recipe-visibility checks and any issues found during that pass.
 
-- Registers **Paddy Farmer**, **Rich Farmer** and **Rich Paddy Farmer** as original blocks.
-- Registers a dedicated **Easy Farmer's Delight Compat** Creative Mode tab containing all three blocks.
-- Adds the agreed recipes:
-  - Paddy: `GGG / GFG / IWI`
-  - Rich: `GGG / GFG / BRB`
-- Preserves the source Farmer's item data/components during upgrades.
-- Rewrites only the placed block-entity type to this mod's own block entity.
-- Preserves unknown block-entity NBT so Easy Villagers data is not discarded.
-- Preserves our own farmer data when broken/picked.
-- Adds optional Argentum support for Yerba Mate, Té, Batata and Membrillo through `minecraft:villager_plantable_seeds`.
-- Declares Easy Villagers and Farmer's Delight as required dependencies; Jade and Argentum are optional.
+### Farmer family
 
-### Functional Paddy Farmer
+| Farmer | Supported crops / behavior |
+| --- | --- |
+| Easy Villagers Farmer | Existing vanilla-compatible crops, Cabbage, Onion and compatible tagged crops. This addon also adds optional Argentum crops and Ars Nouveau Magebloom to `minecraft:villager_plantable_seeds`. |
+| Paddy Farmer | Farmer's Delight Rice using its complete lower-rice + panicle lifecycle. |
+| Rich Farmer | Everything accepted by the normal Farmer, accelerated by Rich Soil, plus persistent Tomato + up to 2 Rope sections and Red/Brown Mushroom Colonies. |
+| Rich Paddy Farmer | Rice with the Paddy lifecycle plus Rich Soil acceleration across the complete virtual Rice progression. |
 
-- Accepts the Easy Villagers villager item and keeps the villager payload intact.
-- Uses a Farmer villager for work, including stored baby-villager aging.
-- Accepts **Farmer's Delight Rice** directly as its crop.
-- Models the full two-part Rice lifecycle:
-  - submerged Rice crop: ages `0..3`;
-  - Rice panicles: ages `0..3`.
-- Harvests the mature panicles through Farmer's Delight's actual block loot table instead of hardcoding Rice drops.
-- Keeps the mature submerged Rice plant after harvest so only the panicles need to regrow.
-- Uses Easy Villagers' configured Farmer speed.
-- Reuses Easy Villagers' four-slot output menu through a narrow runtime adapter.
-- Exposes the four output slots through NeoForge's block item-handler capability for hopper/mod automation.
-- Tracks GUI/capability mutations so output inventory changes are persisted by this addon's block entity.
+## Features
 
-Rice is intentionally **not** added globally to `minecraft:villager_plantable_seeds`: doing that would also make the normal Easy Villagers Farmer try to process Rice with its generic single-block age logic.
+### Paddy Farmer
 
-### Functional Rich Farmer base
+Recipe:
 
-- Upgrades an Easy Villagers Farmer with `GGG / GFG / BRB` while preserving its block-entity payload.
-- Accepts the same normal seed set Easy Villagers validates, including its `villager_plantable_seeds` tag and crop blacklist.
-- Reuses Easy Villagers' normal crop aging, mature harvest, loot generation, Farmer requirement and four-slot output logic.
-- Uses Easy Villagers' configured Farmer speed.
-- Keeps the Easy Villagers delegate unplaced and avoids invoking its own block-entity sync packets.
-- References `farmersdelight:block/rich_soil` directly in the current model rather than copying Farmer's Delight's texture.
-- Reads Farmer's Delight's live `richSoilBoostChance` value.
-- Uses an independent Easy Villagers `farmSpeed`-scaled Rich Soil opportunity and then applies Farmer's Delight's live `richSoilBoostChance`; this avoids the previous effectively-invisible extra `1/4096` chunk-selection roll while preserving the configured boost chance and `farmersdelight:unaffected_by_rich_soil`.
-- For normal `CropBlock`-style crops, applies the crop's own bone-meal age increment instead of an arbitrary speed multiplier.
+```text
+G G G
+G F G
+I W I
+```
 
-### Tomato + Rope test layer
+- `G` = Glass Pane
+- `F` = Easy Villagers Farmer
+- `I` = Iron Ingot
+- `W` = Water Bucket
 
-- Rich Farmer accepts `farmersdelight:tomato_seeds` as a dedicated persistent crop.
-- Models the real Farmer's Delight budding stage before switching to the reusable tomato vine.
-- Mature tomato harvest keeps the plant, resets its fruit age and produces 1-2 Tomatoes with the same 5% Rotten Tomato chance.
-- Right-clicking a Tomato Rich Farmer with `farmersdelight:rope` installs up to **2 Rope** sections.
-- Base, Rope 1 and Rope 2 store independent `0..3` progress values, use independent `farmSpeed` work rolls, and harvest independently.
-- Sneak-right-click removes the uppermost Rope first and returns it. Once no Ropes remain, the next sneak interaction removes the Tomato Seeds selection.
+The Water Bucket leaves its empty Bucket as the crafting remainder.
 
-The **Mushroom Colony** engine is the next Rich Farmer crop layer.
+Paddy Farmer:
 
-## Rich Paddy status
+- preserves the Farmer villager and output data during crafting;
+- accepts Farmer's Delight Rice directly;
+- models lower Rice ages `0..3` and panicle ages `0..3` as one virtual `0..7` lifecycle;
+- harvests mature panicles using Farmer's Delight's real loot table;
+- keeps the mature lower Rice after harvest so only the upper portion regrows;
+- harvests a fully mature Rice plant on the next Farmer cadence instead of waiting for another `farmSpeed` RNG success;
+- exposes the four Easy Villagers output slots through the normal output menu and NeoForge item-handler capability.
 
-The Rich Paddy block and upgrade recipe preserve Paddy data and now apply the same virtual Rich Soil opportunity model as Rich Farmer. Rice uses Farmer's Delight's own bone-meal age increment across the full lower-rice + panicle lifecycle.
+Rice is intentionally **not** added globally to `minecraft:villager_plantable_seeds`, because the normal Easy Villagers Farmer does not implement Rice's two-block lifecycle.
 
-## Why the block models currently look simple
+### Rich Farmer
 
-The current models are intentionally developer placeholders made from vanilla/Farmer's Delight runtime textures. No Easy Villagers models or textures were copied. Final models/renderers will be original and will visually represent the villager, soil/water and crop state.
+Upgrade recipe:
 
-## Next implementation layers
+```text
+G G G
+G F G
+B R B
+```
 
-1. Live in-game validation of the Creative tab, corrected recipes, Paddy/Rice and Rich Farmer/Tomato/Rope flows.
-2. Red/Brown Mushroom Colony lifecycle.
-3. Rich Paddy Rich Soil acceleration.
-4. Optional Jade HUD provider.
-5. Dedicated original block/entity renderers and final assets, including visual Rope/crop state.
-6. Multiplayer/dedicated-server tests and balance pass.
+- `G` = Glass Pane
+- `F` = Easy Villagers Farmer
+- `B` = Iron Block
+- `R` = Farmer's Delight Rich Soil
 
-## External projects
+The upgrade preserves the Farmer item/block-entity payload instead of resetting its villager, crop or output.
 
-- Easy Villagers — required dependency, separate project.
-- Farmer's Delight — required dependency, separate project.
-- Jade — optional integration.
-- Argentum — optional integration.
+Rich Farmer:
+
+- accepts the same normal crops validated by Easy Villagers;
+- uses Easy Villagers' configured `farmSpeed` for normal crop work;
+- reads Farmer's Delight's live `richSoilBoostChance`;
+- gives Rich Soil its own `farmSpeed`-scaled opportunity and applies the crop's real Bone Meal age increment when supported;
+- respects `farmersdelight:unaffected_by_rich_soil`;
+- does not use the old physical `1/4096` chunk-section selection roll, because the Rich Soil is virtual and permanently belongs to the Farmer.
+
+### Tomato + Rope
+
+Tomato is a dedicated persistent Rich Farmer crop:
+
+- Tomato Seeds grow through Farmer's Delight's budding stage into the reusable Tomato vine;
+- harvesting does not consume another seed;
+- mature harvest produces 1-2 Tomatoes and preserves Farmer's Delight's Rotten Tomato chance;
+- up to **2 Rope** sections may be installed;
+- Base, Rope 1 and Rope 2 keep independent progress and independent work rolls;
+- sneak-right-click removes the topmost Rope first, then the Tomato crop selection once no Rope remains.
+
+### Mushroom Colonies
+
+Rich Farmer accepts:
+
+- Red Mushroom;
+- Brown Mushroom.
+
+Each is converted into the corresponding Farmer's Delight Mushroom Colony. The colony grows through its normal age states, produces mushrooms when mature, resets to its initial colony state and continues growing without consuming another mushroom.
+
+### Rich Paddy Farmer
+
+Rich Paddy uses the same Rich upgrade structure, with Paddy Farmer in the center:
+
+```text
+G G G
+G P G
+B R B
+```
+
+It preserves Paddy state and applies Rich Soil acceleration across the **entire Rice lifecycle**, including the upper panicle stages.
+
+### Optional crop compatibility
+
+The addon adds optional `minecraft:villager_plantable_seeds` entries without requiring the corresponding mods.
+
+**Argentum**
+
+- `argentum:yerba_semilla`
+- `argentum:te_semilla`
+- `argentum:batata`
+- `argentum:membrillo_semilla`
+
+**Ars Nouveau**
+
+- `ars_nouveau:magebloom_crop`
+
+Magebloom is therefore usable by the normal Easy Villagers Farmer and by Rich Farmer; Rich Farmer also applies its Rich Soil acceleration.
+
+### Jade
+
+Jade support is optional. When Jade is installed, looking at a compat Farmer can show:
+
+- selected crop;
+- growth percentage;
+- Rich Soil status;
+- Tomato Base / Rope 1 / Rope 2 progress on a single line.
+
+The gameplay addon does not require Jade to run.
+
+## Rendering
+
+The three compat Farmers use original models/rendering owned by this addon while following the spatial behavior expected from an Easy Villagers Farmer:
+
+- horizontal facing and rotation;
+- visible villager and crop;
+- crop-specific render type and tint handling;
+- shallow-water Paddy basin;
+- Rich Soil floor on Rich variants;
+- inset second glass shell only on Rich variants;
+- visual Tomato-on-Rope sections;
+- block-breaking particle textures.
+
+No Easy Villagers models or textures are copied into this project. Farmer's Delight resources such as Rich Soil are referenced from the installed dependency at runtime.
+
+## Dependencies
+
+Required:
+
+- Minecraft 1.21.1
+- NeoForge 21.1.235+
+- Easy Villagers 1.1.42+
+- Farmer's Delight 1.2.9+
+
+Optional integrations:
+
+- Jade
+- Argentum
+- Ars Nouveau
+
+JEI and EMI are not required by the addon; they are useful during the final recipe-visibility validation pass.
 
 ## Building
 
-The project uses Java 21 and NeoForge ModDevGradle. A normal developer checkout should build with Gradle once dependencies are available. The repository intentionally does not vendor Easy Villagers or Farmer's Delight JARs.
+The project uses Java 21 and NeoForge ModDevGradle.
 
-## Local build
+On Windows:
 
-On Windows, run `build-dev.bat`. It searches for Java 21 (including common Prism Launcher locations), downloads Gradle 9.2.1 locally if needed, and runs `clean build`. The resulting mod JAR is written to `build/libs/`.
+```text
+build-dev.bat
+```
 
-On Linux/WSL, the equivalent helper is `build-dev.sh`.
+On Linux/WSL:
+
+```text
+./build-dev.sh
+```
+
+The resulting JAR is written to `build/libs/`.
+
+Runtime dependency mods are not embedded or shaded into this JAR. Jade is a compile-only optional API dependency.
+
+## Release gate
+
+Before promoting `0.1.0-dev` to a public release candidate, complete the tests in [`MULTIPLAYER-TEST-CHECKLIST.md`](MULTIPLAYER-TEST-CHECKLIST.md), especially:
+
+- dedicated-server startup;
+- client/server synchronization;
+- data persistence after chunk unload and server restart;
+- simultaneous multiplayer interactions;
+- hopper/item capability behavior;
+- optional Jade / Argentum / Ars Nouveau matrices;
+- JEI and EMI recipe visibility.
