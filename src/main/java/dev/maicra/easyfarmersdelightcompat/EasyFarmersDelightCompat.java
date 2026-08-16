@@ -14,6 +14,7 @@ public final class EasyFarmersDelightCompat {
     public EasyFarmersDelightCompat(IEventBus modEventBus, ModContainer modContainer) {
         ModBlocks.register(modEventBus);
         ModBlockEntities.register(modEventBus);
+        modEventBus.addListener(ModBlockEntities::onRegisterCapabilities);
         ModRecipeSerializers.register(modEventBus);
     }
 }

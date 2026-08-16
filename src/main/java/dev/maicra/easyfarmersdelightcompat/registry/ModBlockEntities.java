@@ -5,6 +5,8 @@ import dev.maicra.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -23,6 +25,14 @@ public final class ModBlockEntities {
                     ModBlocks.RICH_PADDY_FARMER.get()
             ).build(null)
     );
+
+    public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                COMPAT_FARMER.get(),
+                (farmer, context) -> farmer.getItemHandler()
+        );
+    }
 
     private ModBlockEntities() {
     }
