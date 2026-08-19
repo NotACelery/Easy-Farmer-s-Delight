@@ -4,6 +4,7 @@ import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
 import dev.celerbi.easyfarmersdelightcompat.block.FarmerVariant;
 import dev.celerbi.easyfarmersdelightcompat.integration.EasyVillagersFarmerAdapter;
 import dev.celerbi.easyfarmersdelightcompat.integration.FarmersDelightAdapter;
+import dev.celerbi.easyfarmersdelightcompat.integration.FarmerToolSupport;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -53,6 +54,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     private static final String KEY_ROPE_ONE_PROGRESS = "EfdcRopeOneProgress";
     private static final String KEY_ROPE_TWO_PROGRESS = "EfdcRopeTwoProgress";
     private static final String KEY_ROPE_COUNT = "EfdcRopeCount";
+    private static final String KEY_KNIFE = "EfdcKnife";
+    private static final String LEGACY_ERURUU_KNIFE = "EruruuKnife";
 
     private static final ResourceLocation RICE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
     private static final ResourceLocation RICE_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
@@ -89,6 +92,7 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     private int ropeOneProgress;
     private int ropeTwoProgress;
     private int ropeCount;
+    private ItemStack knife = ItemStack.EMPTY;
 
     public CompatFarmerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.COMPAT_FARMER.get(), pos, state);
@@ -134,6 +138,22 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
 
     public int ropeCount() {
         return ropeCount;
+    }
+
+    public ItemStack getKnife() {
+        return knife.copy();
+    }
+
+    public void setKnife(ItemStack stack) {
+        ItemStack normalized = variant().isRich() ? FarmerToolSupport.normalizeKnife(stack) : ItemStack.EMPTY;
+        if (!ItemStack.isSameItemSameComponents(knife, normalized) || knife.getCount() != normalized.getCount()) {
+            knife = normalized;
+            setChanged();
+        }
+    }
+
+    private ItemStack harvestTool() {
+        return variant().isRich() && FarmerToolSupport.isKnife(knife) ? knife : ItemStack.EMPTY;
     }
 
     public boolean hasTomatoCrop(HolderLookup.Provider registries) {
@@ -547,7 +567,7 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         LootParams.Builder context = new LootParams.Builder(level)
                 .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(worldPosition))
                 .withParameter(LootContextParams.BLOCK_STATE, crop)
-                .withParameter(LootContextParams.TOOL, ItemStack.EMPTY);
+                .withParameter(LootContextParams.TOOL, harvestTool());
         List<ItemStack> drops = crop.getDrops(context);
         if (!canFitAll(output, drops)) {
             return false;
@@ -583,6 +603,13 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
 
         Villager villager = easyVillagers.getVillagerEntity(registries);
         if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
+            return false;
+        }
+
+        // Farmer's Delight colonies require a Knife for their mature harvest.
+        // Growth is allowed to finish normally; a mature colony simply waits until
+        // the Rich Farmer is equipped, matching the validated sandbox behaviour.
+        if (variant().isRich() && !FarmerToolSupport.isKnife(knife)) {
             return false;
         }
 
@@ -778,7 +805,7 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         LootParams.Builder context = new LootParams.Builder(level)
                 .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(worldPosition))
                 .withParameter(LootContextParams.BLOCK_STATE, mature)
-                .withParameter(LootContextParams.TOOL, ItemStack.EMPTY);
+                .withParameter(LootContextParams.TOOL, harvestTool());
 
         List<ItemStack> drops = mature.getDrops(context);
         if (!canFitAll(output, drops)) {
@@ -924,6 +951,17 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         ropeOneProgress = Math.max(0, tag.getInt(KEY_ROPE_ONE_PROGRESS));
         ropeTwoProgress = Math.max(0, tag.getInt(KEY_ROPE_TWO_PROGRESS));
         ropeCount = Math.max(0, Math.min(2, tag.getInt(KEY_ROPE_COUNT)));
+
+        CompoundTag knifeTag = null;
+        if (tag.contains(KEY_KNIFE, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+            knifeTag = tag.getCompound(KEY_KNIFE);
+        } else if (tag.contains(LEGACY_ERURUU_KNIFE, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+            // One-way migration from Eruruu's sandbox storage.
+            knifeTag = tag.getCompound(LEGACY_ERURUU_KNIFE);
+        }
+        knife = variant().isRich() && knifeTag != null
+                ? FarmerToolSupport.normalizeKnife(ItemStack.parseOptional(registries, knifeTag))
+                : ItemStack.EMPTY;
     }
 
     @Override
@@ -936,12 +974,18 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         stripAddonKeys(preserved);
         tag.merge(preserved);
 
-        tag.putInt(KEY_SCHEMA, 2);
+        tag.putInt(KEY_SCHEMA, 3);
         tag.putInt(KEY_PADDY_GROWTH, paddyGrowth);
         tag.putInt(KEY_BASE_PROGRESS, baseProgress);
         tag.putInt(KEY_ROPE_ONE_PROGRESS, ropeOneProgress);
         tag.putInt(KEY_ROPE_TWO_PROGRESS, ropeTwoProgress);
         tag.putInt(KEY_ROPE_COUNT, ropeCount);
+        tag.remove(LEGACY_ERURUU_KNIFE);
+        if (variant().isRich() && FarmerToolSupport.isKnife(knife)) {
+            tag.put(KEY_KNIFE, knife.save(registries));
+        } else {
+            tag.remove(KEY_KNIFE);
+        }
     }
 
     private static int inferLegacyRiceGrowth(CompoundTag tag) {
@@ -972,6 +1016,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         tag.remove(KEY_ROPE_ONE_PROGRESS);
         tag.remove(KEY_ROPE_TWO_PROGRESS);
         tag.remove(KEY_ROPE_COUNT);
+        tag.remove(KEY_KNIFE);
+        tag.remove(LEGACY_ERURUU_KNIFE);
     }
 
     private static void stripMetadata(CompoundTag tag) {

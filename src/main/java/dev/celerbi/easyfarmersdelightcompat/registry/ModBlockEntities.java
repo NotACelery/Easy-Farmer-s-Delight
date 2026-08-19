@@ -2,6 +2,7 @@ package dev.celerbi.easyfarmersdelightcompat.registry;
 
 import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.blockentity.CutterBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -26,11 +27,21 @@ public final class ModBlockEntities {
             ).build(null)
     );
 
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CutterBlockEntity>> CUTTER = BLOCK_ENTITIES.register(
+            "cutter",
+            () -> BlockEntityType.Builder.of(CutterBlockEntity::new, ModBlocks.CUTTER.get()).build(null)
+    );
+
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 COMPAT_FARMER.get(),
                 (farmer, context) -> farmer.getItemHandler()
+        );
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                CUTTER.get(),
+                (cutter, direction) -> cutter.getAutomationHandler(direction)
         );
     }
 

@@ -3,6 +3,8 @@ package dev.celerbi.easyfarmersdelightcompat.compat.jade;
 import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
 import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.block.CutterBlock;
+import dev.celerbi.easyfarmersdelightcompat.blockentity.CutterBlockEntity;
 import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -56,11 +58,15 @@ public final class EfdcJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(ServerDataProvider.INSTANCE, CompatFarmerBlockEntity.class);
+        registration.registerBlockDataProvider(FarmerKnifeJadeProvider.INSTANCE, CompatFarmerBlockEntity.class);
+        registration.registerBlockDataProvider(CutterJadeProvider.INSTANCE, CutterBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(ClientProvider.INSTANCE, CompatFarmerBlock.class);
+        registration.registerBlockComponent(FarmerKnifeJadeProvider.INSTANCE, CompatFarmerBlock.class);
+        registration.registerBlockComponent(CutterJadeProvider.INSTANCE, CutterBlock.class);
     }
 
     private enum ServerDataProvider implements IServerDataProvider<BlockAccessor> {

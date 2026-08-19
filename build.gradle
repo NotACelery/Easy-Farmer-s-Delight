@@ -30,12 +30,18 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+
+    maven { url = 'https://maven.blamejared.com' } // JEI
+    maven { url = 'https://repo.sleeping.town/' } // EMI
 }
 
 dependencies {
     // Jade 15.10.6 for Minecraft 1.21.1 / NeoForge.
     // compileOnly keeps Jade optional for players and out of our final JAR.
     compileOnly "maven.modrinth:nvQzSEkH:eYz2YBGT"
+    compileOnly "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
 }
 
 neoForge {

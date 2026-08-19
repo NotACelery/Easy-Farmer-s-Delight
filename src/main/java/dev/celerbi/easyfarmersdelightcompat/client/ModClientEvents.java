@@ -3,6 +3,7 @@ package dev.celerbi.easyfarmersdelightcompat.client;
 import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModMenus;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -11,6 +12,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 @EventBusSubscriber(modid = EasyFarmersDelightCompat.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ModClientEvents {
@@ -22,6 +24,15 @@ public final class ModClientEvents {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.COMPAT_FARMER.get(), CompatFarmerBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.CUTTER.get(), CutterBlockEntityRenderer::new);
+    }
+
+
+    @SubscribeEvent
+    public static void registerScreens(RegisterMenuScreensEvent event) {
+        event.register(ModMenus.RICH_FARMER, RichFarmerScreen::new);
+        event.register(ModMenus.PADDY_FARMER, PaddyFarmerScreen::new);
+        event.register(ModMenus.CUTTER, CutterScreen::new);
     }
 
     @SubscribeEvent

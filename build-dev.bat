@@ -10,7 +10,7 @@ set "DIST_ZIP=%DIST_ROOT%\gradle-%GRADLE_VERSION%-bin.zip"
 set "JAVA_EXE="
 
  echo ============================================================
- echo     EASY FARMER'S DELIGHT COMPAT - BUILD 0.1.0-dev
+ echo     EASY FARMER'S DELIGHT COMPAT - DEV BUILD
  echo ============================================================
  echo Directorio: %CD%
  echo.
@@ -77,7 +77,7 @@ rem ------------------------------------------------------------
 rem 3. Compilar el mod con ModDevGradle.
 rem ------------------------------------------------------------
 echo.
-echo Compilando Easy Farmer's Delight Compat 0.1.0-dev...
+echo Compilando Easy Farmer's Delight Compat...
 echo La primera compilacion puede descargar dependencias de NeoForge.
 echo.
 call "%DIST_DIR%\bin\gradle.bat" --no-daemon clean build --stacktrace

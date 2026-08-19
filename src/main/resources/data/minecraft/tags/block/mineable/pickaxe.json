@@ -3,6 +3,7 @@
   "values": [
     "easyfarmersdelightcompat:paddy_farmer",
     "easyfarmersdelightcompat:rich_farmer",
-    "easyfarmersdelightcompat:rich_paddy_farmer"
+    "easyfarmersdelightcompat:rich_paddy_farmer",
+    "easyfarmersdelightcompat:cutter"
   ]
 }

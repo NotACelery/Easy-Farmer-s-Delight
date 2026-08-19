@@ -2,6 +2,9 @@ package dev.celerbi.easyfarmersdelightcompat.block;
 
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
+import dev.celerbi.easyfarmersdelightcompat.integration.FarmerToolSupport;
+import dev.celerbi.easyfarmersdelightcompat.menu.PaddyFarmerMenu;
+import dev.celerbi.easyfarmersdelightcompat.menu.RichFarmerMenu;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -9,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -122,6 +126,19 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
         }
 
         var registries = level.registryAccess();
+
+        // Rich variants have one protected Knife equipment slot. Direct right-click
+        // equips exactly one Knife without opening the menu; sneaking keeps removal
+        // interactions authoritative.
+        if (!player.isShiftKeyDown() && variant.isRich() && FarmerToolSupport.isKnife(heldItem)
+                && farmer.getKnife().isEmpty()) {
+            if (!level.isClientSide) {
+                farmer.setKnife(heldItem.copyWithCount(1));
+                consumeOne(heldItem, player);
+                level.playSound(null, pos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 0.7F, 1.0F);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
 
         if (!farmer.easyVillagers().hasVillager(registries) && farmer.easyVillagers().isVillagerItem(heldItem)) {
             if (!level.isClientSide) {
@@ -259,19 +276,18 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
     }
 
     private void openOutput(Level level, BlockPos pos, Player player, CompatFarmerBlockEntity farmer, BlockState state) {
-        if (level.isClientSide) {
+        if (level.isClientSide || !(player instanceof ServerPlayer serverPlayer)) {
             return;
         }
-        player.openMenu(new SimpleMenuProvider(
-                (id, inventory, menuPlayer) -> farmer.easyVillagers().createOutputMenu(
-                        id,
-                        inventory,
-                        level,
-                        this,
-                        level.registryAccess()
+        serverPlayer.openMenu(
+                new SimpleMenuProvider(
+                        (id, inventory, menuPlayer) -> farmer.variant().isRich()
+                                ? new RichFarmerMenu(id, inventory, farmer)
+                                : new PaddyFarmerMenu(id, inventory, farmer),
+                        Component.translatable(state.getBlock().getDescriptionId())
                 ),
-                Component.translatable(state.getBlock().getDescriptionId())
-        ));
+                buffer -> buffer.writeBlockPos(pos)
+        );
     }
 
     private static boolean isRice(ItemStack stack) {
@@ -309,11 +325,8 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        ItemStack stack = new ItemStack(this);
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity instanceof CompatFarmerBlockEntity compatFarmer) {
-            compatFarmer.saveToItem(stack, level.registryAccess());
-        }
-        return stack;
+        // Creative Pick Block is intentionally clean. Normal block drops still
+        // preserve the complete machine state through getDrops().
+        return new ItemStack(this);
     }
 }

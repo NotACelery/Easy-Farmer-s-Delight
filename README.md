@@ -8,9 +8,9 @@ Independent, unofficial compatibility addon for **Easy Villagers** and **Farmer'
 
 > This project is not affiliated with, endorsed by, sponsored by, or maintained by the authors of Easy Villagers, Farmer's Delight, Jade, Argentum or Ars Nouveau. It does not redistribute their code or assets.
 
-## Release — 1.0.0
+## Release — 1.1.0
 
-The initial feature set is complete and has passed the final gameplay and multiplayer test pass.
+Version 1.1.0 expands the stable 1.0.0 Farmer family with native Knife-aware harvesting and the automated **Cutter**, migrating the validated behavior previously prototyped in Eruruu's Patch into this addon itself.
 
 ### Farmer family
 
@@ -18,8 +18,8 @@ The initial feature set is complete and has passed the final gameplay and multip
 | --- | --- |
 | Easy Villagers Farmer | Existing vanilla-compatible crops, Cabbage, Onion and compatible tagged crops. This addon also adds optional Argentum crops and Ars Nouveau Magebloom to `minecraft:villager_plantable_seeds`. |
 | Paddy Farmer | Farmer's Delight Rice using its complete lower-rice + panicle lifecycle. |
-| Rich Farmer | Everything accepted by the normal Farmer, accelerated by Rich Soil, plus persistent Tomato + up to 2 Rope sections and Red/Brown Mushroom Colonies. |
-| Rich Paddy Farmer | Rice with the Paddy lifecycle plus Rich Soil acceleration across the complete virtual Rice progression. |
+| Rich Farmer | Everything accepted by the normal Farmer, accelerated by Rich Soil, plus persistent Tomato + up to 2 Rope sections, Red/Brown Mushroom Colonies and a protected Knife slot for Knife-aware loot. |
+| Rich Paddy Farmer | Rice with the Paddy lifecycle plus Rich Soil acceleration across the complete virtual Rice progression and Knife-aware Rice loot. |
 
 ## Features
 
@@ -106,6 +106,37 @@ B R B
 
 It preserves Paddy state and applies Rich Soil acceleration across the **entire Rice lifecycle**, including upper panicle stages. Mature Rice also waits instead of deleting drops when the output inventory cannot hold the complete harvest.
 
+
+### Knife-aware Rich Farmers
+
+Rich Farmer and Rich Paddy Farmer now have one protected Knife slot using the conventional `#c:tools/knife` tag.
+
+- right-clicking an empty Rich Farmer with a Knife equips exactly one without opening the menu;
+- the Knife is passed into the real crop/Rice loot context, enabling Farmer's Delight Knife byproducts and compatible modded loot;
+- the Farmer does **not** damage the Knife while harvesting;
+- mature Mushroom Colonies grow normally but wait for a Knife before they can be harvested;
+- Knife storage is native (`EfdcKnife`) and automatically imports the old `EruruuKnife` sandbox key once;
+- the Knife slot is protected from hopper/item-handler extraction.
+
+### Cutter
+
+The Cutter automates Farmer's Delight Cutting Board recipes inside an Easy-Villagers-style enclosure. Its recipe is:
+
+```text
+G G G
+G C G
+B L B
+```
+
+- `G` = Glass Pane
+- `C` = Farmer's Delight Cutting Board
+- `B` = Bricks
+- `L` = Oak, Spruce, Birch, Jungle, Acacia, Dark Oak, Mangrove, Cherry log, or Bamboo Block
+
+The selected work-surface material is preserved as a Cutter variant. The machine has **4 inputs + 1 protected Knife/Axe slot + 4 outputs**, requires one adult stored villager to work, prioritizes Farmer's Delight Cutting recipes, and falls back to Axe strip/scrape/unwax actions. Processing is atomic: input and tool durability are consumed only when every generated output fits. Fortune is forwarded to compatible cutting recipes.
+
+Automation is sided: top inserts tools/materials, sides insert materials only, and bottom extracts finished outputs only.
+
 ### Optional crop compatibility
 
 The addon adds optional `minecraft:villager_plantable_seeds` entries without requiring the corresponding mods.
@@ -130,7 +161,9 @@ Jade support is optional. When Jade is installed, compat Farmers can display:
 - selected crop;
 - growth percentage;
 - Rich Soil status;
-- Tomato Base / Rope 1 / Rope 2 progress on a single line.
+- Tomato Base / Rope 1 / Rope 2 progress on a single line;
+- equipped Rich Farmer Knife;
+- Cutter material variant, equipped tool and finished outputs.
 
 ## Rendering
 
@@ -159,6 +192,8 @@ Required:
 Optional integrations:
 
 - Jade
+- JEI
+- EMI
 - Argentum
 - Ars Nouveau
 
@@ -182,7 +217,7 @@ Linux/WSL:
 ./build-dev.sh
 ```
 
-The resulting JAR is written to `build/libs/`. Runtime dependency mods are not embedded or shaded into this JAR. Jade is a compile-only optional API dependency.
+The resulting JAR is written to `build/libs/`. Runtime dependency mods are not embedded or shaded into this JAR. Jade, JEI and EMI are compile-only optional API dependencies.
 
 ## License
 
