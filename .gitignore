@@ -105,3 +105,10 @@ node_modules/
 !gradle/wrapper/gradle-wrapper.properties
 !gradlew
 !gradlew.bat
+
+# Internal development documentation (keep local, do not publish)
+/*-INTEGRATION-BACKLOG.md
+/BUILD-STATUS.md
+/DESIGN.md
+/DEVELOPMENT-NOTES.md
+/VALIDATION.md
