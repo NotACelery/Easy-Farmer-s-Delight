@@ -4,7 +4,6 @@ import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,76 +21,115 @@ import net.minecraft.world.item.crafting.Ingredient;
  * second gameplay ruleset.</p>
  */
 public final class RecipeViewerData {
-    public static final List<FarmerHarvestInfo> FARMER_HARVESTS = List.of(
+    /** General tool reference shown only for Rich Farmer variants with a Harvest Tool slot. */
+    public static final List<FarmerHarvestInfo> FARMER_TOOL_GUIDES = List.of(
             new FarmerHarvestInfo(
-                    id("farmer_harvest/rice_with_knife"),
+                    id("farmer_harvest/tools/knife"),
+                    Ingredient.of(FarmerToolSupport.KNIVES),
+                    Ingredient.EMPTY,
+                    ToolUse.NONE,
+                    false,
+                    false,
+                    List.of(),
+                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_tools.knife")
+            ),
+            new FarmerHarvestInfo(
+                    id("farmer_harvest/tools/hoe"),
+                    Ingredient.of(ItemTags.HOES),
+                    Ingredient.EMPTY,
+                    ToolUse.NONE,
+                    false,
+                    false,
+                    List.of(),
+                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_tools.hoe")
+            ),
+            new FarmerHarvestInfo(
+                    id("farmer_harvest/tools/axe"),
+                    Ingredient.of(ItemTags.AXES),
+                    Ingredient.EMPTY,
+                    ToolUse.NONE,
+                    false,
+                    false,
+                    List.of(),
+                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_tools.axe")
+            )
+    );
+
+    /** Paddy-only harvesting reference. Applies to Paddy Farmer and Rich Paddy Farmer. */
+    public static final List<FarmerHarvestInfo> PADDY_HARVESTS = List.of(
+            new FarmerHarvestInfo(
+                    id("paddy_harvest/rice"),
                     ingredient("farmersdelight", "rice"),
                     Ingredient.of(FarmerToolSupport.KNIVES),
                     ToolUse.OPTIONAL,
                     false,
                     true,
                     List.of(stack("farmersdelight", "rice")),
-                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_harvest.rice")
+                    Component.translatable("easyfarmersdelightcompat.viewer.paddy_harvest.rice")
             ),
             new FarmerHarvestInfo(
-                    id("farmer_harvest/brown_mushroom_colony"),
-                    ingredient("farmersdelight", "brown_mushroom_colony"),
-                    Ingredient.of(FarmerToolSupport.KNIVES),
-                    ToolUse.REQUIRED,
+                    id("paddy_harvest/sugar_cane"),
+                    Ingredient.of(Items.SUGAR_CANE),
+                    Ingredient.EMPTY,
+                    ToolUse.NONE,
                     false,
                     false,
-                    List.of(new ItemStack(Items.BROWN_MUSHROOM, 3)),
-                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_harvest.mushroom")
-            ),
+                    List.of(new ItemStack(Items.SUGAR_CANE, 2)),
+                    Component.translatable("easyfarmersdelightcompat.viewer.paddy_harvest.sugar_cane")
+            )
+    );
+
+    /** Rich Farmer harvesting reference. Paddy-only crops intentionally do not live here. */
+    public static final List<FarmerHarvestInfo> RICH_FARMER_HARVESTS = List.of(
             new FarmerHarvestInfo(
-                    id("farmer_harvest/red_mushroom_colony"),
-                    ingredient("farmersdelight", "red_mushroom_colony"),
-                    Ingredient.of(FarmerToolSupport.KNIVES),
-                    ToolUse.REQUIRED,
-                    false,
-                    false,
-                    List.of(new ItemStack(Items.RED_MUSHROOM, 3)),
-                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_harvest.mushroom")
-            ),
-            new FarmerHarvestInfo(
-                    id("farmer_harvest/normal_crop_with_hoe"),
+                    id("rich_farmer_harvest/normal_crops"),
                     Ingredient.of(Items.CARROT, Items.POTATO, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS),
                     Ingredient.of(ItemTags.HOES),
                     ToolUse.OPTIONAL,
                     false,
                     true,
                     List.of(new ItemStack(Items.CARROT)),
-                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_harvest.hoe")
+                    Component.translatable("easyfarmersdelightcompat.viewer.rich_farmer_harvest.normal_crops")
             ),
             new FarmerHarvestInfo(
-                    id("farmer_harvest/tomato_with_hoe"),
+                    id("rich_farmer_harvest/tomato"),
                     ingredient("farmersdelight", "tomato_seeds"),
                     Ingredient.of(ItemTags.HOES),
                     ToolUse.OPTIONAL,
                     false,
                     true,
                     List.of(stack("farmersdelight", "tomato")),
-                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_harvest.tomato")
+                    Component.translatable("easyfarmersdelightcompat.viewer.rich_farmer_harvest.tomato")
             ),
             new FarmerHarvestInfo(
-                    id("farmer_harvest/melon_with_axe"),
+                    id("rich_farmer_harvest/mushroom_colonies"),
+                    Ingredient.of(Items.RED_MUSHROOM, Items.BROWN_MUSHROOM),
+                    Ingredient.of(FarmerToolSupport.KNIVES),
+                    ToolUse.REQUIRED,
+                    false,
+                    false,
+                    List.of(new ItemStack(Items.RED_MUSHROOM, 3), new ItemStack(Items.BROWN_MUSHROOM, 3)),
+                    Component.translatable("easyfarmersdelightcompat.viewer.rich_farmer_harvest.mushrooms")
+            ),
+            new FarmerHarvestInfo(
+                    id("rich_farmer_harvest/melon"),
                     Ingredient.of(Items.MELON_SEEDS),
                     Ingredient.of(ItemTags.AXES),
                     ToolUse.REQUIRED,
                     true,
                     true,
                     List.of(new ItemStack(Items.MELON_SLICE)),
-                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_harvest.melon")
+                    Component.translatable("easyfarmersdelightcompat.viewer.rich_farmer_harvest.melon")
             ),
             new FarmerHarvestInfo(
-                    id("farmer_harvest/pumpkin_with_axe"),
+                    id("rich_farmer_harvest/pumpkin"),
                     Ingredient.of(Items.PUMPKIN_SEEDS),
                     Ingredient.of(ItemTags.AXES),
                     ToolUse.REQUIRED,
                     true,
                     true,
                     List.of(new ItemStack(Items.PUMPKIN)),
-                    Component.translatable("easyfarmersdelightcompat.viewer.farmer_harvest.pumpkin")
+                    Component.translatable("easyfarmersdelightcompat.viewer.rich_farmer_harvest.pumpkin")
             )
     );
 
@@ -122,20 +160,6 @@ public final class RecipeViewerData {
                             output(Ingredient.of(new ItemStack(Items.SUGAR_CANE, 2)), Component.translatable("easyfarmersdelightcompat.viewer.label.sugar_cane"))
                     ),
                     lines("easyfarmersdelightcompat.viewer.guide.paddy_sugar_cane", 6)
-            ),
-            new BlockGuideInfo(
-                    id("block_guide/harvest_tools"),
-                    Component.translatable("easyfarmersdelightcompat.viewer.guide.harvest_tools.title"),
-                    List.of(
-                            catalyst(
-                                    Ingredient.of(ModBlocks.RICH_FARMER_ITEM.get(), ModBlocks.RICH_PADDY_FARMER_ITEM.get()),
-                                    "easyfarmersdelightcompat.viewer.label.machine"
-                            ),
-                            tool(Ingredient.of(FarmerToolSupport.KNIVES), "easyfarmersdelightcompat.viewer.label.knife"),
-                            tool(Ingredient.of(ItemTags.HOES), "easyfarmersdelightcompat.viewer.label.hoe"),
-                            tool(Ingredient.of(ItemTags.AXES), "easyfarmersdelightcompat.viewer.label.axe")
-                    ),
-                    lines("easyfarmersdelightcompat.viewer.guide.harvest_tools", 5)
             ),
             new BlockGuideInfo(
                     id("block_guide/rich_normal_crops"),
@@ -226,25 +250,75 @@ public final class RecipeViewerData {
     }
 
     public static List<CutterAxeInfo> cutterAxeActions() {
-        List<CutterAxeInfo> out = new ArrayList<>();
-        ItemStack axe = new ItemStack(Items.IRON_AXE);
         Ingredient axes = Ingredient.of(ItemTags.AXES);
+
+        CutterAxeActionRow copper = new CutterAxeActionRow(
+                Ingredient.of(Items.WAXED_COPPER_BLOCK),
+                Ingredient.of(Items.COPPER_BLOCK),
+                Component.translatable("easyfarmersdelightcompat.viewer.cutter_axe.any_copper")
+        );
+
+        List<ItemStack> logInputs = new ArrayList<>();
+        List<ItemStack> strippedOutputs = new ArrayList<>();
+        addStripPair(logInputs, strippedOutputs, Items.OAK_LOG, Items.STRIPPED_OAK_LOG);
+        addStripPair(logInputs, strippedOutputs, Items.SPRUCE_LOG, Items.STRIPPED_SPRUCE_LOG);
+        addStripPair(logInputs, strippedOutputs, Items.BIRCH_LOG, Items.STRIPPED_BIRCH_LOG);
+        addStripPair(logInputs, strippedOutputs, Items.JUNGLE_LOG, Items.STRIPPED_JUNGLE_LOG);
+        addStripPair(logInputs, strippedOutputs, Items.ACACIA_LOG, Items.STRIPPED_ACACIA_LOG);
+        addStripPair(logInputs, strippedOutputs, Items.DARK_OAK_LOG, Items.STRIPPED_DARK_OAK_LOG);
+        addStripPair(logInputs, strippedOutputs, Items.MANGROVE_LOG, Items.STRIPPED_MANGROVE_LOG);
+        addStripPair(logInputs, strippedOutputs, Items.CHERRY_LOG, Items.STRIPPED_CHERRY_LOG);
+        addStripPair(logInputs, strippedOutputs, Items.BAMBOO_BLOCK, Items.STRIPPED_BAMBOO_BLOCK);
+
+        ItemStack probeAxe = new ItemStack(Items.IRON_AXE);
         for (Item item : BuiltInRegistries.ITEM) {
+            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+            if ("minecraft".equals(itemId.getNamespace())) continue;
+
             ItemStack input = item.getDefaultInstance();
-            if (input.isEmpty()) continue;
-            AxeActionResolver.resolve(input, axe).ifPresent(result -> {
-                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
-                String action = result.action().name().toLowerCase(Locale.ROOT);
-                out.add(new CutterAxeInfo(
-                        id("cutter_axe/" + action + "/" + itemId.getNamespace() + "/" + itemId.getPath()),
-                        input.copyWithCount(1),
-                        axes,
-                        result.output().copy(),
-                        Component.translatable("easyfarmersdelightcompat.viewer.cutter_axe." + action)
-                ));
+            if (input.isEmpty() || !isModdedLogLike(input, itemId)) continue;
+
+            AxeActionResolver.resolve(input, probeAxe).ifPresent(result -> {
+                if (result.action() != AxeActionResolver.Action.STRIP) return;
+                if (containsItem(logInputs, input.getItem())) return;
+                addStripPair(logInputs, strippedOutputs, input, result.output());
             });
         }
-        return List.copyOf(out);
+
+        CutterAxeActionRow logs = new CutterAxeActionRow(
+                Ingredient.of(logInputs.stream()),
+                Ingredient.of(strippedOutputs.stream()),
+                Component.translatable("easyfarmersdelightcompat.viewer.cutter_axe.any_log")
+        );
+
+        return List.of(new CutterAxeInfo(
+                id("cutter_axe/summary"),
+                axes,
+                List.of(copper, logs)
+        ));
+    }
+
+    private static void addStripPair(List<ItemStack> inputs, List<ItemStack> outputs, Item input, Item output) {
+        addStripPair(inputs, outputs, new ItemStack(input), new ItemStack(output));
+    }
+
+    private static void addStripPair(List<ItemStack> inputs, List<ItemStack> outputs, ItemStack input, ItemStack output) {
+        if (input.isEmpty() || output.isEmpty()) return;
+        inputs.add(input.copyWithCount(1));
+        outputs.add(output.copyWithCount(1));
+    }
+
+    private static boolean containsItem(List<ItemStack> stacks, Item item) {
+        for (ItemStack stack : stacks) {
+            if (stack.getItem() == item) return true;
+        }
+        return false;
+    }
+
+    private static boolean isModdedLogLike(ItemStack stack, ResourceLocation id) {
+        if (stack.is(ItemTags.LOGS)) return true;
+        String path = id.getPath();
+        return path.contains("log") || path.contains("wood") || path.contains("stem") || path.contains("hyphae");
     }
 
     private static GuideIngredient input(Ingredient ingredient, String labelKey) {

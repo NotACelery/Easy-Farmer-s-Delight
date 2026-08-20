@@ -107,8 +107,8 @@ Implemented in source:
 - [x] `GuideIngredient`
 - [x] `BlockGuideInfo`
 - [x] shared `RecipeViewerData`
-- [x] seven Farmer Harvesting entries
-- [x] ten Block Guide entries
+- [x] three Harvest Tool + two Paddy + five Rich Farmer viewer entries
+- [x] nine contextual Block Guide entries
 - [x] JEI Block Guide category
 - [x] JEI catalysts
 - [x] EMI Block Guide recipe/category
@@ -118,6 +118,17 @@ Implemented in source:
 - [x] durability metadata
 - [x] real-loot / illustrative-output metadata
 - [x] Cutter remains registered as a Farmer's Delight Cutting catalyst/workstation in the integration code
+- [x] Cutter Axe Actions reduced to one two-row summary page in JEI/EMI, with grouped copper/log semantics and dynamic modded stripping entries
+
+### Required Farmer guide scoping check
+
+- [ ] Paddy Farmer shows Paddy Farmer Harvesting only
+- [ ] Rich Paddy Farmer shows Paddy Farmer Harvesting + Farmer Harvest Tools
+- [ ] Rich Farmer shows Rich Farmer Harvesting + Farmer Harvest Tools
+- [ ] Paddy pages contain Rice and Sugar Cane only
+- [ ] Rich Farmer pages contain normal crops, Tomato/Rope, Mushroom Colonies, Melon and Pumpkin only
+- [ ] Mushroom page clearly says a mature Colony requires a Knife
+- [ ] viewer text is casual/player-facing and does not expose virtual age or loot-table implementation language
 
 ### Required viewer launch matrix
 
@@ -129,11 +140,20 @@ Implemented in source:
 - [ ] Jade + EMI
 - [ ] dedicated server without client-only viewer mods
 
+### Required Cutter Axe Actions check
+
+- [ ] JEI shows exactly one Cutter Axe Actions page
+- [ ] EMI shows exactly one Cutter Axe Actions page
+- [ ] copper row tooltip says `Any waxed/oxidized copper item` (localized equivalent outside English)
+- [ ] log row tooltip says `Any compatible log` (localized equivalent outside English)
+- [ ] eight vanilla logs + Bamboo Block rotate through the log input
+- [ ] corresponding stripped outputs rotate in the same order
+- [ ] compatible modded logs such as Ars Nouveau woods appear when installed
+
 ### Required Block Guide page check
 
 - [ ] Paddy Farmer — Rice
 - [ ] Paddy Farmer — Sugar Cane
-- [ ] Rich Farmer — Harvest Tools
 - [ ] Rich Farmer — Normal Crops
 - [ ] Rich Farmer — Tomatoes & Rope
 - [ ] Rich Farmer — Mushroom Colonies

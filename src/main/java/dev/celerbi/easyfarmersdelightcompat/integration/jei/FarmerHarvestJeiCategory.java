@@ -2,9 +2,6 @@ package dev.celerbi.easyfarmersdelightcompat.integration.jei;
 
 import dev.celerbi.easyfarmersdelightcompat.integration.FarmerHarvestInfo;
 import dev.celerbi.easyfarmersdelightcompat.integration.ToolUse;
-import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
-import java.util.ArrayList;
-import java.util.List;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -18,24 +15,34 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-/** JEI rendering adapter for the shared FarmerHarvestInfo dataset. */
+/** JEI rendering adapter shared by the Farmer tool/Paddy/Rich Farmer guide categories. */
 public final class FarmerHarvestJeiCategory implements IRecipeCategory<FarmerHarvestInfo> {
     private static final int WIDTH = 180;
     private static final int HEIGHT = 106;
+
+    private final RecipeType<FarmerHarvestInfo> recipeType;
+    private final Component title;
     private final IDrawable icon;
 
-    public FarmerHarvestJeiCategory(IGuiHelper guiHelper) {
-        this.icon = guiHelper.createDrawableItemStack(new ItemStack(ModBlocks.RICH_FARMER_ITEM.get()));
+    public FarmerHarvestJeiCategory(
+            IGuiHelper guiHelper,
+            RecipeType<FarmerHarvestInfo> recipeType,
+            String titleKey,
+            ItemStack iconStack
+    ) {
+        this.recipeType = recipeType;
+        this.title = Component.translatable(titleKey);
+        this.icon = guiHelper.createDrawableItemStack(iconStack);
     }
 
     @Override
     public RecipeType<FarmerHarvestInfo> getRecipeType() {
-        return EasyFdJeiPlugin.FARMER_HARVEST;
+        return recipeType;
     }
 
     @Override
     public Component getTitle() {
-        return Component.translatable("jei.easyfarmersdelightcompat.farmer_harvest");
+        return title;
     }
 
     @Override
@@ -86,30 +93,15 @@ public final class FarmerHarvestJeiCategory implements IRecipeCategory<FarmerHar
         if (recipe.hasTool()) {
             graphics.drawString(font, "+", 35, 13, 0x404040, false);
         }
-        graphics.drawString(font, "→", 82, 13, 0x404040, false);
-
-        List<Component> text = new ArrayList<>();
-        text.add(recipe.description());
-        if (recipe.hasTool()) {
-            text.add(Component.translatable(recipe.toolUse() == ToolUse.REQUIRED
-                    ? "easyfarmersdelightcompat.viewer.tool.required"
-                    : "easyfarmersdelightcompat.viewer.tool.optional"));
-            text.add(Component.translatable(recipe.toolDamaged()
-                    ? "easyfarmersdelightcompat.viewer.tool.damaged"
-                    : "easyfarmersdelightcompat.viewer.tool.not_damaged"));
-        }
-        if (recipe.realLoot()) {
-            text.add(Component.translatable("easyfarmersdelightcompat.viewer.real_loot"));
-            text.add(Component.translatable("easyfarmersdelightcompat.viewer.outputs_illustrative"));
+        if (!recipe.outputs().isEmpty()) {
+            graphics.drawString(font, "→", 82, 13, 0x404040, false);
         }
 
         int y = 36;
-        for (Component paragraph : text) {
-            for (var line : font.split(paragraph, 170)) {
-                if (y > HEIGHT - 9) return;
-                graphics.drawString(font, line, 5, y, 0x555555, false);
-                y += 9;
-            }
+        for (var line : font.split(recipe.description(), 170)) {
+            if (y > HEIGHT - 9) return;
+            graphics.drawString(font, line, 5, y, 0x555555, false);
+            y += 9;
         }
     }
 }

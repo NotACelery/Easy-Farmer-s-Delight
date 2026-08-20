@@ -33,8 +33,8 @@
 - client-local persistent Villager Noise Switch
 - expanded Jade machine diagnostics
 - shared viewer-neutral Farmer Harvest / Block Guide model
-- 7 Farmer Harvest documentation entries
-- 10 Block Guide pages
+- 3 Harvest Tool + 2 Paddy + 5 Rich Farmer documentation entries
+- 9 Block Guide pages
 - JEI Block Guide category + catalysts
 - EMI Block Guide category + per-block Recipes-tab discovery
 - wrapped EMI guide text
@@ -48,7 +48,7 @@
 3. launch with EMI only;
 4. launch with JEI + EMI;
 5. launch with neither viewer;
-6. validate all ten Block Guide pages and seven Farmer Harvest entries;
+6. validate all nine Block Guide pages plus the scoped 3/2/5 Farmer guide entries;
 7. run remaining gameplay/Jade persistence and edge-case regression from `VALIDATION.md`;
 8. only after those checks promote 1.2.0 to stable/public.
 

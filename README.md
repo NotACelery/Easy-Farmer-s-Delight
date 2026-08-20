@@ -151,35 +151,31 @@ Jade inspection uses non-destructive machine probes and never rolls Cutting reci
 
 JEI and EMI are optional. Both read the same viewer-neutral data model.
 
-### Farmer Harvesting
+### Farmer harvesting guides
 
-Seven documentation entries explain:
+Farmer documentation is deliberately split by machine instead of putting every crop into one global category:
 
-- Rice + optional Knife;
-- Red/Brown Mushroom Colony + required Knife;
-- normal crops + optional Fortune Hoe;
-- Tomato + optional Fortune Hoe;
-- Melon + required Axe;
-- Pumpkin + required Axe.
+- **Farmer Harvest Tools** — 3 short pages explaining Knife, Hoe and Axe. This category is only attached to Rich Farmer and Rich Paddy Farmer because those are the variants with a Harvest Tool slot.
+- **Paddy Farmer Harvesting** — 2 pages for Rice and Sugar Cane, shared by Paddy Farmer and Rich Paddy Farmer. Rice explains the Rich Paddy Knife bonus; Sugar Cane explains the Sand setup and its lack of Rich Soil acceleration.
+- **Rich Farmer Harvesting** — 5 pages for normal crops, Tomato/Rope, Mushroom Colonies, Melon and Pumpkin.
 
-Entries distinguish optional vs required tools, durability behavior, and when displayed outputs are illustrative because the real loot table is authoritative.
+The wording is player-facing: pages explain what to insert, whether a tool is needed, useful enchantments and when durability is consumed without exposing internal state names or implementation details.
 
 ### Block Guide
 
-Both viewers expose the same ten guide pages:
+Both viewers expose the same nine contextual guide pages:
 
 1. Paddy Farmer — Rice
 2. Paddy Farmer — Sugar Cane
-3. Rich Farmer — Harvest Tools
-4. Rich Farmer — Normal Crops
-5. Rich Farmer — Tomatoes & Rope
-6. Rich Farmer — Mushroom Colonies
-7. Rich Farmer — Melon
-8. Rich Farmer — Pumpkin
-9. Cutter
-10. Villager Noise Switch
+3. Rich Farmer — Normal Crops
+4. Rich Farmer — Tomatoes & Rope
+5. Rich Farmer — Mushroom Colonies
+6. Rich Farmer — Melon
+7. Rich Farmer — Pumpkin
+8. Cutter
+9. Villager Noise Switch
 
-The guide uses actual ingredients/tags so correctly tagged modded Knives/Hoes/Axes participate automatically.
+The guide uses actual ingredients/tags so correctly tagged modded Knives/Hoes/Axes participate automatically. Harvest Tools have their own shared viewer category instead of being duplicated as a Block Guide page.
 
 In EMI, Block Guide is contextual to the documented machine: opening **Recipes** for Paddy Farmer, Rich Farmer, Rich Paddy Farmer, Cutter or Villager Noise Switch exposes a **Block Guide** category beside normal crafting categories. Guide ingredients are presentation-only for lookup purposes, so they do not make Block Guide appear through unrelated **Uses** searches.
 

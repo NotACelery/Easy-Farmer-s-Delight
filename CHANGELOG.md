@@ -2,6 +2,23 @@
 
 ## 1.2.0 — 2026-08-19
 
+### Viewer cleanup — Farmer guides split by machine
+
+- Split the previous mixed `Farmer Harvesting` viewer category into three player-facing sections: `Farmer Harvest Tools`, `Paddy Farmer Harvesting`, and `Rich Farmer Harvesting`.
+- `Paddy Farmer Harvesting` is now exclusive to Paddy Farmer / Rich Paddy Farmer and documents Rice plus Sugar Cane; Rich Paddy Rice explicitly explains the optional Knife behaviour.
+- `Rich Farmer Harvesting` now contains only Rich Farmer crops: normal Easy Villagers crops, Tomato/Rope, Mushroom Colonies, Melon and Pumpkin.
+- `Farmer Harvest Tools` is a short shared reference for Knife, Hoe and Axe and is only attached to Rich variants that actually have the Harvest Tool slot.
+- Removed the duplicate Harvest Tools page from Block Guide; specialized Block Guide pages now explain their own required/optional tools in context.
+- Rewrote Farmer viewer text for casual players, removing implementation-facing wording such as virtual ages and authoritative loot tables while preserving useful behaviour such as Fortune/Silk Touch, tool requirements and durability.
+
+### Viewer cleanup — compact Cutter Axe Actions
+
+- Replaced the exhaustive per-item Cutter Axe Actions listing with one compact two-row documentation page.
+- The copper row now uses a representative waxed Copper Block → Copper Block action with the tooltip `Any waxed/oxidized copper item`, covering scrape and wax-removal semantics without enumerating every copper state.
+- The stripping row now groups the eight vanilla logs plus Bamboo Block under `Any compatible log` and displays their corresponding stripped outputs.
+- Compatible modded stripping entries are discovered from the live axe transformation rules and added to the same rotating ingredient group, so supported woods such as Ars Nouveau logs can appear without hardcoded per-mod pages.
+- JEI and EMI consume the same compact shared dataset, reducing the category from dozens of redundant pages to a single explanatory page.
+
 ### Integration correction — contextual EMI Block Guide
 
 - Corrected EMI Block Guide discovery so each guide page is sourced by the machine it documents; opening that block's **Recipes** view now groups `Block Guide` beside normal crafting categories instead of routing the guide through **Uses**.
@@ -33,8 +50,8 @@
 
 - Jade now reports hard tool blockers, Sugar Cane mode, Melon/Pumpkin phases and the local Noise Switch state.
 - Added shared viewer-neutral Block Guide data rendered by both JEI and EMI.
-- Added ten guide pages covering Paddy Rice/Sugar Cane, Harvest Tools, normal crops, Tomato/Rope, Mushroom Colonies, Melon, Pumpkin, Cutter and Noise Switch.
-- Expanded Farmer Harvesting with optional/required tool semantics, durability information and real-loot/illustrative output markers.
+- Added nine contextual Block Guide pages covering Paddy Rice/Sugar Cane, normal crops, Tomato/Rope, Mushroom Colonies, Melon, Pumpkin, Cutter and Noise Switch.
+- Added scoped Farmer viewer categories for general Harvest Tools, Paddy harvesting and Rich Farmer harvesting.
 - Added explicit EMI category localization and wrapped EMI text.
 - Preserved Cutter integration as a Farmer's Delight Cutting catalyst/workstation.
 
@@ -42,10 +59,10 @@
 ### Viewer source-completion pass
 
 - Implemented the viewer-neutral `ToolUse`, expanded `FarmerHarvestInfo`, `GuideIngredient` and `BlockGuideInfo` data model.
-- Expanded Farmer Harvesting to seven entries covering Rice, both Mushroom Colonies, normal Fortune-Hoe crops, Tomato, Melon and Pumpkin.
-- Implemented the ten-page Block Guide in both JEI and EMI from one shared `RecipeViewerData` source.
+- Farmer viewer documentation is split into 3 Harvest Tool pages, 2 Paddy pages and 5 Rich Farmer pages.
+- Implemented the nine-page contextual Block Guide in both JEI and EMI from one shared `RecipeViewerData` source.
 - Added JEI Block Guide categories/catalysts and EMI contextual Block Guide categories while preserving Cutter integration with Farmer's Delight Cutting.
-- Added wrapped EMI guide text and viewer tooltips that distinguish required/optional tools, durability and real-loot/illustrative outputs.
+- Added wrapped EMI guide text and concise tooltips for required/optional tools and durability.
 - Updated Sugar Cane guide wording to match the final sneak-use dismantle interaction.
 - The viewer layer is source-complete but remains an integration candidate until JEI-only, EMI-only, combined and no-viewer launch tests pass.
 

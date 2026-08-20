@@ -169,8 +169,8 @@ Shared viewer model:
 
 JEI and EMI are rendering adapters only. They must not maintain separate gameplay or guide rules.
 
-Farmer Harvesting has 7 documentation entries.
-Block Guide has 10 pages.
+Farmer viewer docs are split into 3 Harvest Tool, 2 Paddy and 5 Rich Farmer entries.
+Block Guide has 9 contextual pages; Harvest Tools are documented separately.
 
 Documentation recipes intentionally do not represent deterministic crafting where real loot/RNG is authoritative.
 

@@ -830,7 +830,7 @@ Client-local persistent Villager mute control presented as a physical EasyFD mac
 Jade displays live machine blockers/phases without rolling recipe RNG.
 
 JEI and EMI share one viewer-neutral dataset:
-- 7 Farmer Harvest documentation entries;
-- 10 Block Guide pages.
+- 3 Harvest Tool + 2 Paddy + 5 Rich Farmer documentation entries;
+- 9 Block Guide pages.
 
 Both viewers are presentation adapters only. Gameplay remains authoritative.
