@@ -64,7 +64,6 @@
 - Added JEI Block Guide categories/catalysts and EMI contextual Block Guide categories while preserving Cutter integration with Farmer's Delight Cutting.
 - Added wrapped EMI guide text and concise tooltips for required/optional tools and durability.
 - Updated Sugar Cane guide wording to match the final sneak-use dismantle interaction.
-- The viewer layer is source-complete but remains an integration candidate until JEI-only, EMI-only, combined and no-viewer launch tests pass.
 
 ### Reliability / compatibility
 

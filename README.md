@@ -8,11 +8,11 @@ Independent, unofficial compatibility addon for **Easy Villagers** and **Farmer'
 
 > This project is not affiliated with, endorsed by, sponsored by, or maintained by the authors of Easy Villagers, Farmer's Delight, Jade, JEI, EMI, Argentum or Ars Nouveau. It does not redistribute their code or assets.
 
-## 1.2.0 integration candidate
+## 1.2.0
 
 Version 1.2.0 expands the Farmer family with generalized Harvest Tools, virtual Melon/Pumpkin and Sugar Cane farming, the Villager Noise Switch, richer Jade diagnostics, and matching in-game documentation for JEI and EMI.
 
-The gameplay foundation is built on the validated 1.0/1.1 Farmer/Cutter behavior. The viewer layer is source-complete in this candidate but still requires the local JEI-only / EMI-only / combined regression pass before publication.
+The gameplay foundation builds on the validated 1.0/1.1 Farmer/Cutter behavior, while the 1.2.0 viewer layer shares one player-facing data model across JEI and EMI.
 
 ## Farmer family
 
@@ -221,7 +221,7 @@ build-dev.bat
 Linux/WSL:
 
 ```text
-./build-dev.sh
+bash build-dev.sh
 ```
 
 The resulting JAR is written to `build/libs/`. Optional integrations are compile-only and are not bundled into the final mod JAR.
