@@ -1,4 +1,4 @@
-# Development notes
+# Development notes — 1.2.0
 
 ## Compatibility boundary
 
@@ -6,14 +6,18 @@ Do not copy, port or redistribute implementation code/assets from Easy Villagers
 
 Interop preference:
 
-1. Minecraft/NeoForge public data components and registries.
-2. Resource IDs/tags.
-3. Public APIs/events where available.
-4. Small runtime adapters only when necessary.
+1. Minecraft/NeoForge public data/components/registries.
+2. Resource IDs and tags.
+3. Public APIs/events.
+4. Small runtime adapters only where necessary.
 
-The Farmer integration remains isolated in `integration/EasyVillagersFarmerAdapter.java`. Farmer's Delight configuration access remains isolated in `integration/FarmersDelightAdapter.java`. Addon-specific crop rules belong in `CompatFarmerBlockEntity`.
+Easy Villagers Farmer access stays isolated in `integration/EasyVillagersFarmerAdapter.java`.
+Farmer's Delight configuration access stays isolated in `integration/FarmersDelightAdapter.java`.
+Crop-specific behavior belongs in `CompatFarmerBlockEntity`.
 
 ## Stable addon NBT
+
+Current owned keys include:
 
 - `EfdcSchema`
 - `EfdcPaddyGrowth`
@@ -21,77 +25,180 @@ The Farmer integration remains isolated in `integration/EasyVillagersFarmerAdapt
 - `EfdcRopeOneProgress`
 - `EfdcRopeTwoProgress`
 - `EfdcRopeCount`
+- `EfdcHarvestTool`
+- `EfdcFruitReady`
+- `EfdcPaddySand`
+- `EfdcSugarCaneHeight`
+- `EfdcSugarCaneAge`
 
-Unknown fields must survive load/save and upgrade round trips.
+Harvest Tool read fallback:
 
-## Crop rules
+```text
+EfdcHarvestTool
+-> EfdcKnife
+```
 
-### Paddy Farmer
+Save only the current key. Unknown Easy Villagers payload data must survive round trips.
 
-- Farmer's Delight Rice only.
-- Virtual progression `0..7`: lower Rice `0..3`, then panicles `0..3`.
-- Mature harvest uses the real panicles loot table.
-- After harvest, return to virtual stage `3` so the lower mature Rice stays planted.
-- Once fully mature, harvest on the next Farmer cadence without another `farmSpeed` RNG roll.
-- Never globally add Rice to `minecraft:villager_plantable_seeds`.
+## Harvest Tool policy
 
-### Rich Farmer
+Accepted categories:
 
-- Generic terrestrial crops are resolved/validated by Easy Villagers.
-- Rich Soil receives an independent `farmSpeed`-scaled opportunity and then uses Farmer's Delight's live `richSoilBoostChance`.
-- Respect `farmersdelight:unaffected_by_rich_soil`.
-- Use compatible crops' real Bone Meal age increments where possible.
+```text
+Harvest Tool = Knife + Hoe + Axe
+Cutting Tool = Knife + Axe
+```
 
-#### Tomato
+Gameplay routing is crop-specific:
 
-- Persistent `budding_tomatoes` -> `tomatoes` lifecycle.
-- Base / Rope 1 / Rope 2 store independent progress and use independent work rolls.
-- Up to two Rope sections.
-- Render Rope-grown sections using Farmer's Delight Tomato-on-Rope state.
+```text
+normal crops / Tomato -> optional Hoe
+Rice                  -> optional Knife
+Mushroom Colony       -> required Knife
+Melon / Pumpkin       -> required Axe
+Sugar Cane            -> none
+```
 
-#### Mushroom Colonies
+Do not pass an arbitrary equipped tool into generic crop loot: that would allow Fortune Axe/Knife leakage.
 
-- Red/Brown Mushroom only through Rich Farmer special handling.
-- Convert to matching Farmer's Delight colony state.
-- Mature harvest resets colony age without consuming another mushroom.
-- Rich Soil may accelerate colony growth.
+Tool acceptance and UI/tooltips must derive from `FarmerToolSupport`.
 
-### Rich Paddy Farmer
+## Mature harvest policy
 
-- Paddy Rice engine plus Rich Soil opportunity.
-- Rich Soil applies across the complete virtual `0..7` Rice lifecycle.
+Growth and harvest are separate phases.
 
-## Lossless harvest rule
+Once a compat-managed crop is mature, it must not require another `farmSpeed` success merely to attempt harvesting.
 
-Before any compat-managed mature crop is harvested, simulate insertion of the **complete generated harvest** into a copy of the four output slots.
+Normal crops, Tomato sections and Mushroom Colonies attempt mature harvest on the next one-second Farmer cadence. Required-tool/output/villager blockers keep the crop mature in standby.
 
-- If every generated stack fits, commit the harvest and reset/regrow the crop as appropriate.
-- If any remainder would be lost, keep the crop mature and retry later.
-- This rule applies to Rice, Tomato sections, Mushroom Colonies and generic Rich Farmer harvests managed by the compat engine.
+## Paddy
 
-Never reset a mature crop after silently discarding output remainder.
+### Rice
 
-## Optional integrations
+Virtual progression:
 
-### Argentum
+```text
+lower Rice 0..3
+panicles 0..3
+mature harvest
+return to mature lower-Rice stage
+```
 
-Optional `minecraft:villager_plantable_seeds` entries:
+Mature panicle harvest uses real loot and preserves the lower plant.
 
-- `argentum:yerba_semilla`
-- `argentum:te_semilla`
-- `argentum:batata`
-- `argentum:membrillo_semilla`
+### Sugar Cane
 
-### Ars Nouveau
+State:
 
-Optional entry: `ars_nouveau:magebloom_crop`.
+```text
+Sand installed
+Sugar Cane height 0..3
+Sugar Cane internal age 0..15
+```
 
-### Jade
+A Farmer growth success advances internal age. Completing age 15 creates the next section. Height 3 harvests the upper two and returns to height 1.
 
-Jade remains compile-only and optional. The provider exposes selected crop, growth, Rich Soil status and Tomato Base/Rope progress.
+Rich Soil never accelerates Sugar Cane.
 
-## Release state
+Sneak-use dismantling is prioritized in the block interaction path and returns installed state losslessly.
 
-**1.0.0 is the first stable public release.**
+## Rich Farmer special crops
 
-After 1.0.0, prefer compatibility fixes, bug fixes and explicitly scoped enhancements. Preserve registry IDs and addon NBT compatibility whenever possible.
+### Tomato
+
+Base / Rope 1 / Rope 2 progress independently. Hoe is optional for compatible Fortune loot.
+
+### Mushroom Colonies
+
+Mature Colony requires Knife. Knife is not damaged. A mature blocked Colony stays ready instead of continuing growth RNG.
+
+### Melon / Pumpkin
+
+Virtual stem 0..7 followed by separate fruit generation.
+
+Rich Soil only affects the stem phase. Fruit generation remains normal Farmer speed. Ready fruit requires Axe and uses the real block loot table. Tool damage occurs only after successful output commit.
+
+Renderer locations: stem center = 1/3 crop width; fruit center = 2/3. Ready fruit uses vanilla attached-stem state.
+
+## Cutter
+
+Processing may start only when at least one queued input is processable with the currently equipped Cutting Tool.
+
+Inspection uses the non-RNG `CutterOperationProbe`; never call Cutting `rollResults()` merely to decide if a tool is valid.
+
+Missing/wrong required tool means:
+
+```text
+progress = 0
+standby
+```
+
+Processability cache must invalidate when relevant tool/input/output/villager state changes.
+
+Output simulation remains transactional.
+
+## Villager Noise Switch
+
+`villagersMuted` is a client-local global preference.
+
+Never encode the local ON/OFF state in server BlockState or BlockEntity NBT.
+
+Visual Lever/Redstone is renderer-only. There must be no redstone signal, comparator output, neighbor update, Observer-detectable state, or cross-player synchronization of the preference.
+
+Persist immediately on successful toggle.
+
+## Jade
+
+Jade may read server machine state but must not mutate it.
+
+Noise Switch mute display reads client preference locally; server data only answers physical facts such as whether the switch contains a Villager.
+
+Cutter diagnostics use non-RNG operation probes.
+
+Keep the historical Jade provider UID `farmer_knife` for Harvest Tool preference compatibility. The old `FarmerKnifeJadeProvider` implementation is obsolete.
+
+## JEI / EMI
+
+Shared viewer model:
+
+- `ToolUse`
+- `FarmerHarvestInfo`
+- `GuideIngredient`
+- `BlockGuideInfo`
+- `RecipeViewerData`
+
+JEI and EMI are rendering adapters only. They must not maintain separate gameplay or guide rules.
+
+Farmer Harvesting has 7 documentation entries.
+Block Guide has 10 pages.
+
+Documentation recipes intentionally do not represent deterministic crafting where real loot/RNG is authoritative.
+
+Cutter remains a Farmer's Delight Cutting catalyst/workstation.
+
+## Optional viewer safety
+
+JEI/EMI/Jade are optional.
+
+Final validation must launch:
+
+- JEI only
+- EMI only
+- JEI + EMI
+- neither
+
+No optional integration class may cause dedicated-server classloading failures when the corresponding mod is absent.
+
+## Localization
+
+All viewer/Jade text must maintain exact key parity across:
+
+- `en_us`
+- `en_gb`
+- `en_au`
+- `en_ca`
+- `en_nz`
+- `es_cl`
+- `es_ar`
+- `es_es`
+- `es_mx`

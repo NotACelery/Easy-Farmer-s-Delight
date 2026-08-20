@@ -1,10 +1,81 @@
 package dev.celerbi.easyfarmersdelightcompat.integration.jei;
-import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;import dev.celerbi.easyfarmersdelightcompat.integration.CutterAxeInfo;import dev.celerbi.easyfarmersdelightcompat.integration.FarmerHarvestInfo;import dev.celerbi.easyfarmersdelightcompat.integration.RecipeViewerData;import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;import mezz.jei.api.IModPlugin;import mezz.jei.api.JeiPlugin;import mezz.jei.api.recipe.RecipeType;import mezz.jei.api.registration.IRecipeCatalystRegistration;import mezz.jei.api.registration.IRecipeCategoryRegistration;import mezz.jei.api.registration.IRecipeRegistration;import net.minecraft.core.registries.BuiltInRegistries;import net.minecraft.resources.ResourceLocation;import net.minecraft.world.item.ItemStack;
-@JeiPlugin public final class EasyFdJeiPlugin implements IModPlugin{
- public static final RecipeType<FarmerHarvestInfo> FARMER_HARVEST=RecipeType.create(EasyFarmersDelightCompat.MOD_ID,"farmer_harvest",FarmerHarvestInfo.class);public static final RecipeType<CutterAxeInfo> CUTTER_AXE=RecipeType.create(EasyFarmersDelightCompat.MOD_ID,"cutter_axe",CutterAxeInfo.class);
- public ResourceLocation getPluginUid(){return ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID,"jei_plugin");}
- public void registerCategories(IRecipeCategoryRegistration r){var g=r.getJeiHelpers().getGuiHelper();r.addRecipeCategories(new FarmerHarvestJeiCategory(g),new CutterAxeJeiCategory(g));}
- public void registerRecipes(IRecipeRegistration r){r.addRecipes(FARMER_HARVEST,RecipeViewerData.FARMER_HARVESTS);r.addRecipes(CUTTER_AXE,RecipeViewerData.cutterAxeActions());}
- public void registerRecipeCatalysts(IRecipeCatalystRegistration r){r.addRecipeCatalyst(new ItemStack(ModBlocks.RICH_FARMER_ITEM.get()),FARMER_HARVEST);r.addRecipeCatalyst(new ItemStack(ModBlocks.RICH_PADDY_FARMER_ITEM.get()),FARMER_HARVEST);r.addRecipeCatalyst(new ItemStack(ModBlocks.CUTTER_ITEM.get()),CUTTER_AXE);registerCutting(r);}
- @SuppressWarnings({"rawtypes","unchecked"}) private static void registerCutting(IRecipeCatalystRegistration r){var vanilla=BuiltInRegistries.RECIPE_TYPE.get(ResourceLocation.fromNamespaceAndPath("farmersdelight","cutting"));if(vanilla!=null)r.addRecipeCatalyst(new ItemStack(ModBlocks.CUTTER_ITEM.get()),RecipeType.createFromVanilla((net.minecraft.world.item.crafting.RecipeType)vanilla));}
+
+import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
+import dev.celerbi.easyfarmersdelightcompat.integration.BlockGuideInfo;
+import dev.celerbi.easyfarmersdelightcompat.integration.CutterAxeInfo;
+import dev.celerbi.easyfarmersdelightcompat.integration.FarmerHarvestInfo;
+import dev.celerbi.easyfarmersdelightcompat.integration.RecipeViewerData;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
+import mezz.jei.api.IModPlugin;
+import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
+import mezz.jei.api.registration.IRecipeCategoryRegistration;
+import mezz.jei.api.registration.IRecipeRegistration;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+
+@JeiPlugin
+public final class EasyFdJeiPlugin implements IModPlugin {
+    public static final RecipeType<FarmerHarvestInfo> FARMER_HARVEST =
+            RecipeType.create(EasyFarmersDelightCompat.MOD_ID, "farmer_harvest", FarmerHarvestInfo.class);
+    public static final RecipeType<CutterAxeInfo> CUTTER_AXE =
+            RecipeType.create(EasyFarmersDelightCompat.MOD_ID, "cutter_axe", CutterAxeInfo.class);
+    public static final RecipeType<BlockGuideInfo> BLOCK_GUIDE =
+            RecipeType.create(EasyFarmersDelightCompat.MOD_ID, "block_guide", BlockGuideInfo.class);
+
+    @Override
+    public ResourceLocation getPluginUid() {
+        return ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID, "jei_plugin");
+    }
+
+    @Override
+    public void registerCategories(IRecipeCategoryRegistration registration) {
+        var gui = registration.getJeiHelpers().getGuiHelper();
+        registration.addRecipeCategories(
+                new FarmerHarvestJeiCategory(gui),
+                new CutterAxeJeiCategory(gui),
+                new BlockGuideJeiCategory(gui)
+        );
+    }
+
+    @Override
+    public void registerRecipes(IRecipeRegistration registration) {
+        registration.addRecipes(FARMER_HARVEST, RecipeViewerData.FARMER_HARVESTS);
+        registration.addRecipes(CUTTER_AXE, RecipeViewerData.cutterAxeActions());
+        registration.addRecipes(BLOCK_GUIDE, RecipeViewerData.BLOCK_GUIDES);
+    }
+
+    @Override
+    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        // Farmer Harvesting
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.PADDY_FARMER_ITEM.get()), FARMER_HARVEST);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.RICH_FARMER_ITEM.get()), FARMER_HARVEST);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.RICH_PADDY_FARMER_ITEM.get()), FARMER_HARVEST);
+
+        // Cutter-specific fallback actions + Farmer's Delight Cutting.
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.CUTTER_ITEM.get()), CUTTER_AXE);
+        registerCutting(registration);
+
+        // In-game Block Guide / manual.
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.PADDY_FARMER_ITEM.get()), BLOCK_GUIDE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.RICH_FARMER_ITEM.get()), BLOCK_GUIDE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.RICH_PADDY_FARMER_ITEM.get()), BLOCK_GUIDE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.CUTTER_ITEM.get()), BLOCK_GUIDE);
+        registration.addRecipeCatalyst(new ItemStack(ModBlocks.VILLAGER_NOISE_SWITCH_ITEM.get()), BLOCK_GUIDE);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void registerCutting(IRecipeCatalystRegistration registration) {
+        var vanilla = BuiltInRegistries.RECIPE_TYPE.get(
+                ResourceLocation.fromNamespaceAndPath("farmersdelight", "cutting")
+        );
+        if (vanilla != null) {
+            registration.addRecipeCatalyst(
+                    new ItemStack(ModBlocks.CUTTER_ITEM.get()),
+                    RecipeType.createFromVanilla((net.minecraft.world.item.crafting.RecipeType) vanilla)
+            );
+        }
+    }
 }

@@ -6,179 +6,190 @@
 
 Independent, unofficial compatibility addon for **Easy Villagers** and **Farmer's Delight** on **Minecraft 1.21.1 / NeoForge**.
 
-> This project is not affiliated with, endorsed by, sponsored by, or maintained by the authors of Easy Villagers, Farmer's Delight, Jade, Argentum or Ars Nouveau. It does not redistribute their code or assets.
+> This project is not affiliated with, endorsed by, sponsored by, or maintained by the authors of Easy Villagers, Farmer's Delight, Jade, JEI, EMI, Argentum or Ars Nouveau. It does not redistribute their code or assets.
 
-## Release — 1.1.0
+## 1.2.0 integration candidate
 
-Version 1.1.0 expands the stable 1.0.0 Farmer family with native Knife-aware harvesting and the automated **Cutter**, migrating the validated behavior previously prototyped in Eruruu's Patch into this addon itself.
+Version 1.2.0 expands the Farmer family with generalized Harvest Tools, virtual Melon/Pumpkin and Sugar Cane farming, the Villager Noise Switch, richer Jade diagnostics, and matching in-game documentation for JEI and EMI.
 
-### Farmer family
+The gameplay foundation is built on the validated 1.0/1.1 Farmer/Cutter behavior. The viewer layer is source-complete in this candidate but still requires the local JEI-only / EMI-only / combined regression pass before publication.
 
-| Farmer | Supported crops / behavior |
+## Farmer family
+
+| Farmer | Supported behavior |
 | --- | --- |
-| Easy Villagers Farmer | Existing vanilla-compatible crops, Cabbage, Onion and compatible tagged crops. This addon also adds optional Argentum crops and Ars Nouveau Magebloom to `minecraft:villager_plantable_seeds`. |
-| Paddy Farmer | Farmer's Delight Rice using its complete lower-rice + panicle lifecycle. |
-| Rich Farmer | Everything accepted by the normal Farmer, accelerated by Rich Soil, plus persistent Tomato + up to 2 Rope sections, Red/Brown Mushroom Colonies and a protected Knife slot for Knife-aware loot. |
-| Rich Paddy Farmer | Rice with the Paddy lifecycle plus Rich Soil acceleration across the complete virtual Rice progression and Knife-aware Rice loot. |
+| Easy Villagers Farmer | Existing compatible crops. Optional tagged compatibility remains available for supported addons. |
+| Paddy Farmer | Farmer's Delight Rice plus virtual Sugar Cane farming after installing Sand. |
+| Rich Farmer | Normal crops with Rich Soil behavior, Tomato + up to 2 Rope sections, Mushroom Colonies, virtual Melon/Pumpkin, and a protected Harvest Tool slot. |
+| Rich Paddy Farmer | Paddy behavior plus Rich Soil where applicable and the same protected Harvest Tool slot. Rich Soil intentionally does **not** accelerate Sugar Cane. |
 
-## Features
+## Harvest Tools
 
-### Paddy Farmer
+Rich Farmer and Rich Paddy Farmer accept:
+
+- Knife (`#c:tools/knife`)
+- Hoe (`#minecraft:hoes`)
+- Axe (`#minecraft:axes`)
+
+The accepted tool categories are broader than the tool used by any individual crop:
+
+- normal crops / Tomato: optional Hoe, forwarding Fortune where their real loot table supports it;
+- Rice: optional Knife;
+- mature Mushroom Colonies: Knife required;
+- ready Melon/Pumpkin fruit: Axe required;
+- Sugar Cane: no tool.
+
+Normal crop, Rice and Mushroom harvesting do not receive artificial tool durability loss. Melon/Pumpkin use the real Axe as the loot tool and damage it only after a successful harvest.
+
+Existing worlds migrate Harvest Tool data from the legacy `EfdcKnife` key into `EfdcHarvestTool`.
+
+The empty Harvest Tool slot uses an icon-only rotating tooltip. Rich Farmers show Knife/Hoe/Axe; Cutter shows Knife/Axe.
+
+## Paddy Farmer
+
+The Paddy Farmer preserves the Easy Villagers Farmer payload while adding crop behavior that requires an aquatic lifecycle.
+
+### Rice
+
+Rice is modeled as a complete virtual lifecycle: submerged lower Rice followed by upper panicles. Mature lower Rice remains after panicle harvest, and a fully mature crop attempts harvest on the next one-second Farmer cadence instead of waiting for another `farmSpeed` RNG success.
+
+### Sugar Cane
+
+Right-click an empty Paddy/Rich Paddy with Sand, then plant Sugar Cane.
+
+Sugar Cane keeps a virtual height plus internal `0..15` age. Each successful Farmer growth event advances the age; a new section appears after the age cycle completes. At height 3, the upper two sections are harvested while the base remains.
+
+Rich Soil does not accelerate Sugar Cane.
+
+Sneak-use dismantles the installed Paddy content. Sugar Cane mode returns its Sand and represented Cane; Rice mode returns the installed crop.
+
+The villager support and Sugar Cane Sand are visual islands submerged to the same waterline inside the Paddy enclosure.
+
+## Rich Farmer
+
+### Rich Soil
+
+Rich Soil uses Farmer's Delight semantics where applicable. Normal crops retain the established Rich Farmer behavior. Melon/Pumpkin stems use a separated occasional Rich Soil boost; once the stem is mature, fruit generation runs at normal Farmer speed.
+
+### Tomato + Rope
+
+Tomato remains a persistent crop. Up to two Rope extensions can be installed, with Base / Rope 1 / Rope 2 progression tracked independently. A Fortune Hoe is optional.
+
+### Mushroom Colonies
+
+Red and Brown Mushrooms become their matching Farmer's Delight Mushroom Colony. Colonies can finish growing without a Knife, but mature harvesting waits for a Knife. Successful harvest produces the colony's configured mushrooms and resets the colony without damaging the Knife.
+
+### Melon / Pumpkin
+
+Melon Seeds and Pumpkin Seeds use a virtual stem-and-fruit lifecycle.
+
+- stem grows from age 0 to 7;
+- Rich Soil may accelerate the stem only;
+- fruit generation begins after the stem reaches 7 and is not Rich Soil accelerated;
+- ready fruit waits for an Axe;
+- real block loot handles Silk Touch/Fortune behavior;
+- the Axe is damaged only after successful harvest;
+- full outputs leave the fruit ready and do not damage the tool.
+
+The renderer places stem and fruit at the 1/3 and 2/3 crop-field positions and uses the vanilla attached-stem state when fruit is ready.
+
+## Cutter
+
+The Cutter automates Farmer's Delight Cutting Board recipes and Axe block actions.
+
+- 4 input slots
+- 1 protected Knife/Axe Cutting Tool slot
+- 4 output slots
+- one stored adult Villager
+- 10-tick serial processing
+- Farmer's Delight Cutting recipes first
+- Axe fallback: strip, scrape, wax-off
+- full output simulation before consuming input or damaging a tool
+
+A Cutter with a missing or wrong required tool remains at 0% standby. It does not loop through failed processing attempts.
+
+Cutter remains registered as a Farmer's Delight Cutting catalyst/workstation in supported recipe viewers.
+
+## Villager Noise Switch
 
 Recipe:
 
 ```text
 G G G
-G F G
-I W I
+G L G
+R I R
 ```
 
 - `G` = Glass Pane
-- `F` = Easy Villagers Farmer
-- `I` = Iron Ingot
-- `W` = Water Bucket
+- `L` = Lever
+- `R` = Redstone Block
+- `I` = Iron Block
 
-The Water Bucket leaves its empty Bucket as the crafting remainder.
+Insert an Easy Villagers Villager, then right-click the block to toggle Villager vocalizations for your **local client**.
 
-Paddy Farmer:
+The preference is global to that Minecraft instance and persists independently of worlds, servers and dimensions. The Lever and Redstone floor are visual only: toggling does not alter server BlockState, emit Redstone, update neighbors or create Observer behavior.
 
-- preserves the Farmer villager and output data during crafting;
-- accepts Farmer's Delight Rice directly;
-- models lower Rice ages `0..3` and panicle ages `0..3` as one virtual `0..7` lifecycle;
-- harvests mature panicles using Farmer's Delight's real loot table;
-- keeps the mature lower Rice after harvest so only the upper portion regrows;
-- harvests fully mature Rice on the next Farmer cadence instead of waiting for another `farmSpeed` RNG success;
-- exposes the four Easy Villagers output slots through the normal output menu and NeoForge item-handler capability.
+## Jade
 
-Rice is intentionally **not** added globally to `minecraft:villager_plantable_seeds`, because the normal Easy Villagers Farmer does not implement Rice's two-block lifecycle.
+Optional Jade integration reports the real machine state, including:
 
-### Rich Farmer
+- selected crop and growth;
+- Rich Soil state;
+- Sugar Cane mode, height and internal segment progress;
+- Tomato Base / Rope 1 / Rope 2 progress;
+- Melon/Pumpkin stem / fruit phase;
+- `Ready to harvest` for relevant mature states;
+- `Waiting for Knife/Axe` when a required tool is missing;
+- Cutter `Wrong tool` diagnostics and processing progress;
+- equipped Harvest/Cutting Tool;
+- Cutter outputs;
+- local Villager Noise Switch enabled/muted state.
 
-Upgrade recipe:
+Jade inspection uses non-destructive machine probes and never rolls Cutting recipe outputs.
 
-```text
-G G G
-G F G
-B R B
-```
+## JEI / EMI
 
-- `G` = Glass Pane
-- `F` = Easy Villagers Farmer
-- `B` = Iron Block
-- `R` = Farmer's Delight Rich Soil
+JEI and EMI are optional. Both read the same viewer-neutral data model.
 
-The upgrade preserves the Farmer item/block-entity payload instead of resetting its villager, crop or output.
+### Farmer Harvesting
 
-Rich Farmer:
+Seven documentation entries explain:
 
-- accepts the same normal crops validated by Easy Villagers;
-- uses Easy Villagers' configured `farmSpeed` for normal crop work;
-- reads Farmer's Delight's live `richSoilBoostChance`;
-- gives Rich Soil its own `farmSpeed`-scaled opportunity and applies the crop's real Bone Meal age increment when supported;
-- respects `farmersdelight:unaffected_by_rich_soil`;
-- keeps mature crops waiting when the four output slots cannot accept the complete harvest, preventing silent item loss.
+- Rice + optional Knife;
+- Red/Brown Mushroom Colony + required Knife;
+- normal crops + optional Fortune Hoe;
+- Tomato + optional Fortune Hoe;
+- Melon + required Axe;
+- Pumpkin + required Axe.
 
-### Tomato + Rope
+Entries distinguish optional vs required tools, durability behavior, and when displayed outputs are illustrative because the real loot table is authoritative.
 
-Tomato is a dedicated persistent Rich Farmer crop:
+### Block Guide
 
-- Tomato Seeds grow through Farmer's Delight's budding stage into the reusable Tomato vine;
-- harvesting does not consume another seed;
-- mature harvest produces 1-2 Tomatoes and preserves Farmer's Delight's Rotten Tomato chance;
-- up to **2 Rope** sections may be installed;
-- Base, Rope 1 and Rope 2 keep independent progress and independent work rolls;
-- each mature section waits for sufficient output capacity before harvesting;
-- sneak-right-click removes the topmost Rope first, then the Tomato crop selection once no Rope remains.
+Both viewers expose the same ten guide pages:
 
-### Mushroom Colonies
+1. Paddy Farmer — Rice
+2. Paddy Farmer — Sugar Cane
+3. Rich Farmer — Harvest Tools
+4. Rich Farmer — Normal Crops
+5. Rich Farmer — Tomatoes & Rope
+6. Rich Farmer — Mushroom Colonies
+7. Rich Farmer — Melon
+8. Rich Farmer — Pumpkin
+9. Cutter
+10. Villager Noise Switch
 
-Rich Farmer accepts Red and Brown Mushrooms and converts them into the corresponding Farmer's Delight Mushroom Colony. Colonies grow through their normal age states, harvest repeatedly without consuming another mushroom, benefit from Rich Soil, and wait at maturity when the output inventory is full.
+The guide uses actual ingredients/tags so correctly tagged modded Knives/Hoes/Axes participate automatically.
 
-### Rich Paddy Farmer
+In EMI, Block Guide is contextual to the documented machine: opening **Recipes** for Paddy Farmer, Rich Farmer, Rich Paddy Farmer, Cutter or Villager Noise Switch exposes a **Block Guide** category beside normal crafting categories. Guide ingredients are presentation-only for lookup purposes, so they do not make Block Guide appear through unrelated **Uses** searches.
 
-Rich Paddy uses the same Rich upgrade structure, with Paddy Farmer in the center:
+## Optional crop compatibility
 
-```text
-G G G
-G P G
-B R B
-```
-
-It preserves Paddy state and applies Rich Soil acceleration across the **entire Rice lifecycle**, including upper panicle stages. Mature Rice also waits instead of deleting drops when the output inventory cannot hold the complete harvest.
-
-
-### Knife-aware Rich Farmers
-
-Rich Farmer and Rich Paddy Farmer now have one protected Knife slot using the conventional `#c:tools/knife` tag.
-
-- right-clicking an empty Rich Farmer with a Knife equips exactly one without opening the menu;
-- the Knife is passed into the real crop/Rice loot context, enabling Farmer's Delight Knife byproducts and compatible modded loot;
-- the Farmer does **not** damage the Knife while harvesting;
-- mature Mushroom Colonies grow normally but wait for a Knife before they can be harvested;
-- Knife storage is native (`EfdcKnife`) and automatically imports the old `EruruuKnife` sandbox key once;
-- the Knife slot is protected from hopper/item-handler extraction.
-
-### Cutter
-
-The Cutter automates Farmer's Delight Cutting Board recipes inside an Easy-Villagers-style enclosure. Its recipe is:
-
-```text
-G G G
-G C G
-B L B
-```
-
-- `G` = Glass Pane
-- `C` = Farmer's Delight Cutting Board
-- `B` = Bricks
-- `L` = Oak, Spruce, Birch, Jungle, Acacia, Dark Oak, Mangrove, Cherry log, or Bamboo Block
-
-The selected work-surface material is preserved as a Cutter variant. The machine has **4 inputs + 1 protected Knife/Axe slot + 4 outputs**, requires one adult stored villager to work, prioritizes Farmer's Delight Cutting recipes, and falls back to Axe strip/scrape/unwax actions. Processing is atomic: input and tool durability are consumed only when every generated output fits. Fortune is forwarded to compatible cutting recipes.
-
-Automation is sided: top inserts tools/materials, sides insert materials only, and bottom extracts finished outputs only.
-
-### Optional crop compatibility
-
-The addon adds optional `minecraft:villager_plantable_seeds` entries without requiring the corresponding mods.
-
-**Argentum**
-
-- `argentum:yerba_semilla`
-- `argentum:te_semilla`
-- `argentum:batata`
-- `argentum:membrillo_semilla`
-
-**Ars Nouveau**
-
-- `ars_nouveau:magebloom_crop`
-
-Magebloom can be farmed by the normal Easy Villagers Farmer and by Rich Farmer; Rich Farmer also applies Rich Soil acceleration.
-
-### Jade
-
-Jade support is optional. When Jade is installed, compat Farmers can display:
-
-- selected crop;
-- growth percentage;
-- Rich Soil status;
-- Tomato Base / Rope 1 / Rope 2 progress on a single line;
-- equipped Rich Farmer Knife;
-- Cutter material variant, equipped tool and finished outputs.
+Optional data-pack/tag integrations remain available for configured addons such as Argentum and Ars Nouveau without making them mandatory dependencies.
 
 ## Rendering
 
-The three compat Farmers use original models/rendering owned by this addon while following the spatial behavior expected from an Easy Villagers Farmer:
-
-- horizontal facing and rotation;
-- visible villager and crop;
-- crop-specific render type and tint handling;
-- shallow-water Paddy basin;
-- Rich Soil floor on Rich variants;
-- inset second glass shell only on Rich variants;
-- visual Tomato-on-Rope sections;
-- valid block-breaking particle textures.
-
-No Easy Villagers models or textures are copied into this project. Farmer's Delight resources such as Rich Soil are referenced from the installed dependency at runtime.
+Compat Farmers, Cutter and Noise Switch use addon-owned models/rendering. Easy Villagers and Farmer's Delight code/assets are not redistributed; installed dependency resources are referenced at runtime where appropriate.
 
 ## Dependencies
 
@@ -189,7 +200,7 @@ Required:
 - Easy Villagers **1.1.42+**
 - Farmer's Delight **1.2.9+**
 
-Optional integrations:
+Optional:
 
 - Jade
 - JEI
@@ -199,11 +210,11 @@ Optional integrations:
 
 ## Installation
 
-Install the mod on **both client and server** together with Easy Villagers and Farmer's Delight. Optional integrations are detected when their corresponding mods are present.
+Install Easy Farmer's Delight Compat on both client and server together with Easy Villagers and Farmer's Delight. JEI, EMI and Jade remain optional client-facing integrations.
 
 ## Building
 
-The project uses Java 21 and NeoForge ModDevGradle.
+Java 21 + NeoForge ModDevGradle.
 
 Windows:
 
@@ -217,7 +228,7 @@ Linux/WSL:
 ./build-dev.sh
 ```
 
-The resulting JAR is written to `build/libs/`. Runtime dependency mods are not embedded or shaded into this JAR. Jade, JEI and EMI are compile-only optional API dependencies.
+The resulting JAR is written to `build/libs/`. Optional integrations are compile-only and are not bundled into the final mod JAR.
 
 ## License
 

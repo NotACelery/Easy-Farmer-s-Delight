@@ -792,3 +792,45 @@ La primera versión pública ya tendría suficiente contenido para justificar pl
 - Rich Soil integration;
 - Jade integration;
 - Argentum compatibility.
+
+---
+
+# 1.2.0 implementation snapshot
+
+This section is authoritative for the 1.2.0 implementation where older design notes above describe the original 1.0/1.1 plan.
+
+## Harvest tools
+
+Rich Farmer / Rich Paddy use a generalized protected Harvest Tool slot accepting Knife, Hoe and Axe. Tool behavior remains crop-specific: Hoe is optional for compatible normal/Tomato Fortune loot, Knife is optional for Rice and required for mature Mushroom Colonies, and Axe is required for ready Melon/Pumpkin fruit.
+
+The empty-slot tooltip is icon-only and rotates actual registered tools from the relevant tags.
+
+## Paddy extensions
+
+Paddy and Rich Paddy support Rice plus a Sand-installed virtual Sugar Cane mode. Sugar Cane has virtual height and internal age, does not receive Rich Soil acceleration, and can be dismantled losslessly with sneak-use.
+
+The villager support and Sugar Cane Sand are submerged at the same visible waterline.
+
+## Melon / Pumpkin
+
+Rich Farmer models a virtual stem (0..7) and separate fruit-generation phase. Rich Soil only boosts the stem phase. Fruit requires Axe, uses real block loot and only damages the Axe after a successful committed harvest.
+
+Renderer layout is 1/3 stem + 2/3 fruit with vanilla attached-stem state when ready.
+
+## Cutter standby
+
+The Cutter performs non-RNG processability inspection before progress starts. Missing/wrong tool leaves progress at zero instead of repeatedly running failed work cycles.
+
+## Villager Noise Switch
+
+Client-local persistent Villager mute control presented as a physical EasyFD machine. Lever/Redstone state is visual only and has no server redstone behavior.
+
+## Jade / JEI / EMI
+
+Jade displays live machine blockers/phases without rolling recipe RNG.
+
+JEI and EMI share one viewer-neutral dataset:
+- 7 Farmer Harvest documentation entries;
+- 10 Block Guide pages.
+
+Both viewers are presentation adapters only. Gameplay remains authoritative.

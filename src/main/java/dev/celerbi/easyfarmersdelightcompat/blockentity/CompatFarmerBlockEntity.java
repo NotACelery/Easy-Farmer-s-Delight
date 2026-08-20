@@ -61,7 +61,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     private static final String KEY_ROPE_COUNT = "EfdcRopeCount";
     private static final String KEY_HARVEST_TOOL = "EfdcHarvestTool";
     private static final String LEGACY_EFDC_KNIFE = "EfdcKnife";
-    private static final String LEGACY_ERURUU_KNIFE = "EruruuKnife";
     private static final String KEY_FRUIT_READY = "EfdcFruitReady";
     private static final String KEY_PADDY_SAND = "EfdcPaddySand";
     private static final String KEY_SUGAR_CANE_HEIGHT = "EfdcSugarCaneHeight";
@@ -1397,8 +1396,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             toolTag = tag.getCompound(KEY_HARVEST_TOOL);
         } else if (tag.contains(LEGACY_EFDC_KNIFE, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
             toolTag = tag.getCompound(LEGACY_EFDC_KNIFE);
-        } else if (tag.contains(LEGACY_ERURUU_KNIFE, net.minecraft.nbt.Tag.TAG_COMPOUND)) {
-            toolTag = tag.getCompound(LEGACY_ERURUU_KNIFE);
         }
         harvestTool = variant().isRich() && toolTag != null
                 ? FarmerToolSupport.normalizeHarvestTool(ItemStack.parseOptional(registries, toolTag))
@@ -1426,7 +1423,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         tag.putInt(KEY_SUGAR_CANE_HEIGHT, variant().isAquatic() && paddySand ? sugarCaneHeight : 0);
         tag.putInt(KEY_SUGAR_CANE_AGE, variant().isAquatic() && paddySand ? sugarCaneAge : 0);
         tag.remove(LEGACY_EFDC_KNIFE);
-        tag.remove(LEGACY_ERURUU_KNIFE);
         if (variant().isRich() && FarmerToolSupport.isHarvestTool(harvestTool)) {
             tag.put(KEY_HARVEST_TOOL, harvestTool.save(registries));
         } else {
@@ -1464,7 +1460,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         tag.remove(KEY_ROPE_COUNT);
         tag.remove(KEY_HARVEST_TOOL);
         tag.remove(LEGACY_EFDC_KNIFE);
-        tag.remove(LEGACY_ERURUU_KNIFE);
         tag.remove(KEY_FRUIT_READY);
         tag.remove(KEY_PADDY_SAND);
         tag.remove(KEY_SUGAR_CANE_HEIGHT);

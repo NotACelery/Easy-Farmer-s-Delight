@@ -1,86 +1,176 @@
 # Validation status — 1.2.0 integration candidate
 
-Validation date: **2026-08-19**
+Validation basis: Minecraft **1.21.1**, NeoForge **21.1.235**, Java **21**.
 
-## Architecture / packaging
+The gameplay base was committed before the final JEI/EMI viewer-completion pass. This file separates already confirmed gameplay from source-implemented behavior that still needs a local build/launch regression.
 
-- Java 21 / Minecraft 1.21.1 / NeoForge 21.1.235 baseline.
-- Easy Villagers Farmer integration remains isolated behind `EasyVillagersFarmerAdapter`.
-- Farmer's Delight configuration access remains isolated behind `FarmersDelightAdapter`.
-- No Easy Villagers or Farmer's Delight implementation classes/assets are redistributed.
-- Upgrade recipes preserve source ItemStack components / block-entity data.
-- Compat BlockEntity owns persistence and synchronization.
-- Jade is compile-only/optional and is not bundled.
-- Argentum and Ars Nouveau tag entries are optional.
+## Confirmed in-game
 
-## Gameplay validation — passed
+- [x] Paddy / Rich Paddy final geometry
+- [x] villager support and Sugar Cane Sand remain inside the enclosure and flush with the waterline
+- [x] Paddy / Rich Paddy sneak-use dismantling
+- [x] Sugar Cane revised virtual growth cadence feels comparable to normal farming
+- [x] Melon/Pumpkin stem + fruit 1/3 / 2/3 layout
+- [x] vanilla attached/curved stem render when fruit is ready
+- [x] Cutter stays at 0% with missing/wrong required tool
+- [x] Cutter no longer loops failed 0→100→0 processing
+- [x] Jade `Waiting for ...`
+- [x] Jade `Wrong tool: ... required`
+- [x] Harvest Tool / Cutting Tool rotating icon-only tooltips
+- [x] Villager Noise Switch basic local toggle behavior
+- [x] Melon Silk Touch behavior
 
-Validated during development and final release testing:
+## Source-implemented; focused gameplay regression still required
 
-- Paddy Farmer, Rich Farmer and Rich Paddy Farmer placement/orientation/rendering;
-- villager and crop visualization;
-- Rice lower crop + panicle lifecycle and repeated harvest;
-- mature Rice harvest timing;
-- Rich Soil acceleration on terrestrial crops and Rice;
-- Tomato persistent harvesting and independent Base / Rope 1 / Rope 2 progression;
-- Red/Brown Mushroom Colony repeated harvesting;
-- Farmer's Delight non-vanilla crops used during the test pass;
-- Ars Nouveau Magebloom acceptance, harvest and Rich Soil acceleration;
-- Jade crop/growth/Rich Soil/Tomato progress integration;
-- output inventory automation and persistence during the multiplayer/server pass;
-- full-output behavior: mature crops wait for enough capacity to hold the complete harvest instead of deleting remainder items.
+### Mature harvest cadence
 
-## Multiplayer / server release pass
+- [ ] mature normal crop harvests within the next one-second Farmer cadence
+- [ ] mature Tomato base section harvests within the next one-second cadence
+- [ ] mature Rope 1 / Rope 2 section harvests without another `farmSpeed` RNG roll
+- [ ] mature Mushroom Colony + valid Knife harvests within the next one-second cadence
+- [ ] blocked mature crop remains mature without consuming resources
 
-The final multiplayer/dedicated-server test pass was completed before promoting the project to **1.0.0**. The detailed `MULTIPLAYER-TEST-CHECKLIST.md` remains in the repository for future regression testing.
+### Harvest Tool routing
 
-## Release note
+- [ ] normal crop without Hoe
+- [ ] normal crop with Fortune Hoe
+- [ ] Hoe is not damaged by crop harvesting
+- [ ] Rice without Knife
+- [ ] Rice with Knife
+- [ ] Rice does not accidentally use Hoe/Axe enchants
+- [ ] Mushroom Colony waits for Knife
+- [ ] Mushroom Knife is not damaged
+- [ ] Melon/Pumpkin wait for Axe
+- [ ] Fortune/Silk Touch remain delegated to real block loot
+- [ ] Melon/Pumpkin Axe durability only after successful harvest
+- [ ] Unbreaking behaves normally
+- [ ] full output prevents harvest and tool damage
+- [ ] legacy `EfdcKnife` migrates into `EfdcHarvestTool`
 
-The approximately 30% Rich Paddy advantage observed in one accelerated Rice comparison is not a guaranteed multiplier. Rich Soil uses Farmer's Delight configuration and RNG-driven work opportunities.
+### Melon / Pumpkin timing
 
+- [ ] at normal tick rate, Rich Soil is an occasional stem-only advantage rather than a farmSpeed-coupled second growth engine
+- [ ] `randomTickSpeed 0` disables the virtual Rich Soil stem bonus while ordinary Farmer growth still proceeds
+- [ ] mature stem fruit generation is not Rich Soil accelerated
+- [ ] Pumpkin timing matches the Melon model
 
-## 1.2.0 regression matrix still required locally
+### Sugar Cane persistence
 
-- Paddy/Rich Paddy geometry: support island and Sand top faces are exactly flush with the model waterline; neither protrudes above water; Paddy villager scale is 90% and profession hats stay inside the glass.
-- Growth pacing: Easy Villagers `farmer.farm_speed` is read live; failure falls back to 10 without disabling the adapter; Sugar Cane requires 16 successful age advances per new section and Rich Soil never accelerates it.
-- Melon/Pumpkin rendering: stem center is at local 1/3, fruit center at local 2/3, ready fruit uses the matching attached-stem state facing the fruit, and the fruit remains fully inside the Farmer soil area.
-- Jade: Rice, Sugar Cane heights 0..3 plus internal next-segment progress, Tomato 0/1/2 Rope, mature Mushroom `Ready to harvest` + waiting Knife, Melon/Pumpkin stem/growing fruit/ready fruit, Cutter missing/wrong/correct tool and Noise Switch local state.
-- Multiplayer: two clients may see opposite Noise Switch visual/Jade states on the same world block.
-- JEI only, EMI only, JEI+EMI and neither viewer installed.
-- Viewer discoverability through machine blocks plus Sand, Sugar Cane, Rope, Melon Seeds, Pumpkin Seeds and tool ingredients.
-- Verify Cutter remains a Farmer's Delight Cutting workstation/catalyst.
-- Verify all nine locale JSON files contain identical keys.
-- Final `build-dev.bat` and in-game pass must succeed before publication.
+- [ ] save/reload preserves Sand, height and internal age
+- [ ] chunk/dimension unload/reload preserves state
+- [ ] Rich Paddy and Paddy have the same Sugar Cane speed
 
-## Cutter standby regression
+### Cutter
 
-- [ ] Beef + no tool: progress stays at 0; Jade says `Waiting for Knife`.
-- [ ] Beef + Axe: progress stays at 0; Jade says wrong tool / Knife required.
-- [ ] Strippable Log + no tool: progress stays at 0; Jade says `Waiting for Axe`.
-- [ ] Strippable Log + Knife: progress stays at 0; Jade says wrong tool / Axe required.
-- [ ] Correct tool inserted: processing starts from 0 and completes once.
-- [ ] Leave a wrong-tool Cutter loaded for several minutes: no 0→100→0 loop and no repeated work sounds.
-- [ ] Change only the tool to the correct category: machine wakes immediately without replacing the input.
+- [ ] Knife Cutting recipe
+- [ ] Axe-compatible Cutting recipe
+- [ ] stripping fallback
+- [ ] scraping fallback
+- [ ] wax-off fallback
+- [ ] correct tool starts the 10-tick serial process
+- [ ] full outputs block operation atomically
+- [ ] tool durability happens only after success
+- [ ] mixed input queue does not falsely report the whole Cutter blocked when the current tool can process at least one entry
+- [ ] changing tool/input/output invalidates standby cache
+- [ ] Jade inspection does not alter Cutting RNG
 
-## Melon / Pumpkin Rich Soil cadence
+### Villager Noise Switch
 
-- [ ] At `tick rate 20` and `randomTickSpeed 3`, compare Rich stem growth with a normal Farmer stem over a long run. Rich Soil should be an occasional bonus, not a frequent farmSpeed-coupled bonemeal burst.
-- [ ] Set `randomTickSpeed 0`: Rich Soil gives no virtual stem boost, while ordinary Easy Villagers stem growth still proceeds.
-- [ ] Mature stem fruit generation is unchanged by Rich Soil.
+- [ ] no-Villager localized failure
+- [ ] preference survives Minecraft restart
+- [ ] preference survives world/server/dimension changes
+- [ ] breaking every Noise Switch does not clear the preference
+- [ ] two clients can hold opposite preferences for the same block
+- [ ] Jade shows each client's local state
+- [ ] Observer does not react
+- [ ] Comparator output remains zero
+- [ ] no neighbor update / real Redstone signal
+- [ ] hostile/player/environment sounds remain unaffected
 
-## Melon Fortune measurement
+## Jade viewer regression
 
-- [ ] Test Fortune by **fixed fruit count**, not only a fixed time window. Record at least 100 harvested Melons per tool.
-- [ ] Unenchanted Axe: expected vanilla branch is 3–7 slices before explosion decay.
-- [ ] Fortune III Axe: real vanilla loot table must be used and should converge above the unenchanted average over a large sample.
-- [ ] Silk Touch Axe: 1 Melon block; Fortune branch is not used.
+- [ ] generic mature `Ready to harvest`
+- [ ] Melon/Pumpkin `Stem Growth`, `Fruit: Growing`, `Fruit: Ready`
+- [ ] Rich Soil `Stem only`
+- [ ] Sugar Cane height + internal next-segment percentage
+- [ ] Noise Switch enabled / muted / missing-villager states
+- [ ] multiplayer-local Noise Switch state
 
-## Mature harvest cadence regression
-- [ ] Mature normal crop harvests within the next one-second Farmer cadence.
-- [ ] Mature Mushroom Colony + valid Knife harvests within the next one-second Farmer cadence.
-- [ ] Mature Mushroom Colony + missing/wrong Knife remains mature and waits without rerolling growth.
-- [ ] Inserting the correct Knife into a waiting mature Mushroom Colony resumes harvest within the next cadence.
-- [ ] Mature Tomato base harvests without a second `farmSpeed` RNG gate.
-- [ ] Mature Tomato Rope 1 / Rope 2 harvest without a second `farmSpeed` RNG gate.
-- [ ] A Tomato section harvested on a cadence does not also advance to age/progress 1 on that same cadence.
-- [ ] Full outputs leave mature crops intact and retry on later one-second cadences.
+Cutter `Output full` is deliberately not a Jade line in 1.2.0 until a deterministic non-RNG check can be guaranteed for chance-result Cutting recipes.
+
+## JEI / EMI source implementation
+
+Implemented in source:
+
+- [x] shared `ToolUse`
+- [x] expanded `FarmerHarvestInfo`
+- [x] `GuideIngredient`
+- [x] `BlockGuideInfo`
+- [x] shared `RecipeViewerData`
+- [x] seven Farmer Harvesting entries
+- [x] ten Block Guide entries
+- [x] JEI Block Guide category
+- [x] JEI catalysts
+- [x] EMI Block Guide recipe/category
+- [x] EMI Block Guide per-block source routing (no Block Guide workstations)
+- [x] wrapped EMI guide text
+- [x] optional/required tool metadata
+- [x] durability metadata
+- [x] real-loot / illustrative-output metadata
+- [x] Cutter remains registered as a Farmer's Delight Cutting catalyst/workstation in the integration code
+
+### Required viewer launch matrix
+
+- [ ] JEI only
+- [ ] EMI only
+- [ ] JEI + EMI
+- [ ] neither JEI nor EMI
+- [ ] Jade + JEI
+- [ ] Jade + EMI
+- [ ] dedicated server without client-only viewer mods
+
+### Required Block Guide page check
+
+- [ ] Paddy Farmer — Rice
+- [ ] Paddy Farmer — Sugar Cane
+- [ ] Rich Farmer — Harvest Tools
+- [ ] Rich Farmer — Normal Crops
+- [ ] Rich Farmer — Tomatoes & Rope
+- [ ] Rich Farmer — Mushroom Colonies
+- [ ] Rich Farmer — Melon
+- [ ] Rich Farmer — Pumpkin
+- [ ] Cutter
+- [ ] Villager Noise Switch
+
+### Required discoverability check
+
+EMI Block Guide navigation:
+
+- [ ] Paddy Farmer **Recipes** shows `Crafting | Block Guide`
+- [ ] Rich Farmer **Recipes** shows `Crafting | Block Guide`
+- [ ] Rich Paddy Farmer **Recipes** shows `Crafting | Block Guide`
+- [ ] Cutter **Recipes** shows `Crafting | Block Guide`
+- [ ] Villager Noise Switch **Recipes** shows `Crafting | Block Guide`
+- [ ] right-click **Uses** on those five blocks does not surface Block Guide merely as a workstation/catalyst
+- [ ] right-click **Uses** on Sand, Sugar Cane, Rope, Melon Seeds, Pumpkin Seeds, Knife, Hoe or Axe does not surface Block Guide pages
+
+JEI keeps its normal catalyst/focus discoverability checks for the same guide data.
+
+## Resource / localization integrity
+
+Before publication:
+
+- [ ] all JSON parses without duplicate keys
+- [ ] all nine locale files have identical key sets
+- [ ] no raw translation key appears in Jade/JEI/EMI
+- [ ] long Spanish Block Guide text remains inside JEI/EMI bounds
+- [ ] all Farmer Harvest and Block Guide IDs are unique
+
+## Build gate
+
+- [ ] `build-dev.bat` succeeds from the committed 1.2.0 gameplay baseline + viewer-completion patch
+- [ ] final JAR launches
+- [ ] no optional-integration `ClassNotFoundException`
+- [ ] no dedicated-server client-class loading crash
+
+Only after the unchecked release-gate items above pass should 1.2.0 be promoted from integration candidate to stable/public.

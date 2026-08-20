@@ -2,6 +2,12 @@
 
 ## 1.2.0 — 2026-08-19
 
+### Integration correction — contextual EMI Block Guide
+
+- Corrected EMI Block Guide discovery so each guide page is sourced by the machine it documents; opening that block's **Recipes** view now groups `Block Guide` beside normal crafting categories instead of routing the guide through **Uses**.
+- Removed Block Guide workstation/input/catalyst lookup semantics from EMI while keeping those ingredients visible inside the guide page itself.
+- Removed standalone-addon references to experimental patch-era branding and kept only the native `EfdcKnife` → `EfdcHarvestTool` legacy migration path.
+
 ### Runtime hotfix — Cutter standby and stem Rich Soil cadence
 
 - Cutter processing now starts only when at least one queued input can actually be processed by the equipped Knife/Axe. Missing or wrong tools remain at 0% instead of looping 0→100→0.
@@ -32,6 +38,17 @@
 - Added explicit EMI category localization and wrapped EMI text.
 - Preserved Cutter integration as a Farmer's Delight Cutting catalyst/workstation.
 
+
+### Viewer source-completion pass
+
+- Implemented the viewer-neutral `ToolUse`, expanded `FarmerHarvestInfo`, `GuideIngredient` and `BlockGuideInfo` data model.
+- Expanded Farmer Harvesting to seven entries covering Rice, both Mushroom Colonies, normal Fortune-Hoe crops, Tomato, Melon and Pumpkin.
+- Implemented the ten-page Block Guide in both JEI and EMI from one shared `RecipeViewerData` source.
+- Added JEI Block Guide categories/catalysts and EMI contextual Block Guide categories while preserving Cutter integration with Farmer's Delight Cutting.
+- Added wrapped EMI guide text and viewer tooltips that distinguish required/optional tools, durability and real-loot/illustrative outputs.
+- Updated Sugar Cane guide wording to match the final sneak-use dismantle interaction.
+- The viewer layer is source-complete but remains an integration candidate until JEI-only, EMI-only, combined and no-viewer launch tests pass.
+
 ### Reliability / compatibility
 
 - Fixed Paddy/Rich Paddy visual geometry: the villager support and Sugar Cane Sand now sit submerged with their top faces exactly flush to the internal waterline; Paddy villagers render at 90% scale to keep profession hats inside the enclosure.
@@ -51,7 +68,7 @@
 - Added a protected Knife slot to Rich Farmer and Rich Paddy Farmer.
 - Knife-aware normal-crop and Rice loot now use the real equipped Knife in the loot context.
 - Mature Mushroom Colonies wait for a Knife before harvesting.
-- Added one-way migration from the experimental `EruruuKnife` NBT key to native `EfdcKnife` storage.
+- Added one-way migration from the legacy `EfdcKnife` NBT key into the generalized Harvest Tool storage.
 - Added dedicated Farmer menus/screens for the protected Knife slot.
 
 ### Cutter

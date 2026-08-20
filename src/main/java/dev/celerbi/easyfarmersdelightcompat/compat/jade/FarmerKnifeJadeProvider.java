@@ -1,54 +1,15 @@
 package dev.celerbi.easyfarmersdelightcompat.compat.jade;
 
-import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
-import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import snownee.jade.api.BlockAccessor;
-import snownee.jade.api.IBlockComponentProvider;
-import snownee.jade.api.IServerDataProvider;
-import snownee.jade.api.ITooltip;
-import snownee.jade.api.config.IPluginConfig;
-
-/** Existing Jade equipment line, generalized from Knife to the Rich Farmer Harvest Tool slot. */
-public enum FarmerKnifeJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
-    INSTANCE;
-
-    private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(
-            EasyFarmersDelightCompat.MOD_ID,
-            // Preserve the 1.1.0 provider UID so existing Jade per-provider
-            // preferences do not reset merely because the slot now accepts more tools.
-            "farmer_knife"
-    );
-    private static final String KEY = "EfdcFarmerKnife";
-
-    @Override
-    public void appendServerData(CompoundTag data, BlockAccessor accessor) {
-        data.remove(KEY);
-        if (accessor.getBlockEntity() instanceof CompatFarmerBlockEntity farmer && farmer.variant().isRich()) {
-            ItemStack tool = farmer.getHarvestTool();
-            if (!tool.isEmpty()) data.put(KEY, tool.save(accessor.getLevel().registryAccess()));
-        }
-    }
-
-    @Override
-    public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-        CompoundTag data = accessor.getServerData();
-        if (!data.contains(KEY, Tag.TAG_COMPOUND)) return;
-        ItemStack tool = ItemStack.parseOptional(accessor.getLevel().registryAccess(), data.getCompound(KEY));
-        if (!tool.isEmpty()) {
-            tooltip.add(Component.translatable(
-                    "jade.easyfarmersdelightcompat.farmer.tool",
-                    tool.getHoverName()
-            ));
-        }
-    }
-
-    @Override
-    public ResourceLocation getUid() {
-        return UID;
+/**
+ * Compatibility tombstone for the pre-1.2.0 source name.
+ *
+ * <p>The live provider is {@link FarmerHarvestToolJadeProvider}. The historical
+ * Jade UID remains {@code farmer_knife} inside that provider so user-side Jade
+ * preferences do not reset. This class intentionally implements no Jade API and
+ * is never registered.</p>
+ */
+@Deprecated(forRemoval = true)
+final class FarmerKnifeJadeProvider {
+    private FarmerKnifeJadeProvider() {
     }
 }

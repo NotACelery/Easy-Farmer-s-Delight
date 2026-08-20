@@ -1,42 +1,55 @@
-# Build status — 1.1.0
+# Build status — 1.2.0 integration candidate
 
 ## Baseline
 
 - Minecraft: **1.21.1**
-- NeoForge minimum/baseline: **21.1.235**
+- NeoForge baseline: **21.1.235**
 - Java: **21**
 - Required runtime mods: **Easy Villagers 1.1.42+**, **Farmer's Delight 1.2.9+**
 - Optional integrations: **Jade**, **JEI**, **EMI**, **Argentum**, **Ars Nouveau**
-- Release state: **stable / ready for public distribution**
+- Git recovery point before viewer-completion pass: `dcc44eef3e7327c0d35bb2dbe9d347f7ad2a517e`
+- Release state: **integration candidate; viewer/build regression still required**
 
-## Implemented
+## Gameplay/core confirmed in-game
 
-- Paddy Farmer block, recipe and full Rice lifecycle
-- Rich Farmer block and state-preserving upgrade recipe
-- Rich Paddy Farmer block and state-preserving upgrade recipe
-- Creative Mode tab
-- Dedicated Farmer output menus, including the protected Rich-Farmer Knife slot
-- NeoForge item-handler capability for hopper/mod automation
-- Farmer villager insertion/removal and age handling
-- Farmer-compatible facing/orientation
-- Visible villager/crop renderer and crop-specific RenderType/tint handling
-- Paddy water basin and Rich-only second glass shell
-- Correct block-breaking particle textures
-- Rich Soil acceleration using Farmer's Delight `richSoilBoostChance`
-- Rich Soil acceleration across the complete Rich Paddy Rice lifecycle
-- Persistent Tomato + independent Rope 1 / Rope 2 lifecycle
-- Red/Brown Mushroom Colony lifecycle
-- Lossless harvest gating when output inventory lacks room for the complete harvest
-- Optional Argentum crop compatibility
-- Optional Ars Nouveau Magebloom compatibility
-- Native Rich Farmer / Rich Paddy Knife-aware harvesting and legacy `EruruuKnife` migration
-- Automated Cutter with Cutting recipes, Axe actions, villager power, Fortune and sided automation
-- Recipe Book display recipes for state-preserving Farmer upgrades
-- Optional Jade, JEI and EMI integrations
-- Mod-list logo and resource-pack icon
+- Paddy/Rich Paddy final waterline/support geometry
+- Paddy/Rich Paddy dismantle interactions
+- realistic Sugar Cane virtual growth cadence
+- Melon/Pumpkin 1/3 + 2/3 renderer layout and attached stems
+- Harvest Tool / Cutting Tool rotating icon tooltips
+- Cutter standby with missing/wrong required tool
+- no failed Cutter 0→100→0 loop
+- Jade `Waiting for...` and `Wrong tool...` diagnostics
+- Villager Noise Switch basic behavior
+- Melon Silk Touch behavior
 
-## Validation
+## Implemented in the current 1.2.0 source
 
-The 1.0.0 baseline remains the validated gameplay foundation. Version 1.1.0 adds the Knife/Cutter feature set migrated from the Eruruu sandbox; source-level core and client compilation checks are included in the migration pass, with final in-game regression validation required before publishing the release.
+- generalized Harvest Tool slot: Knife + Hoe + Axe
+- crop-specific tool routing
+- mature deterministic harvest cadence for normal crops, Tomato sections and Mushroom Colonies
+- Sugar Cane mode for Paddy/Rich Paddy
+- Melon/Pumpkin virtual stem + fruit lifecycle
+- client-local persistent Villager Noise Switch
+- expanded Jade machine diagnostics
+- shared viewer-neutral Farmer Harvest / Block Guide model
+- 7 Farmer Harvest documentation entries
+- 10 Block Guide pages
+- JEI Block Guide category + catalysts
+- EMI Block Guide category + per-block Recipes-tab discovery
+- wrapped EMI guide text
+- Cutter Farmer's Delight Cutting integration retained
+- nine locale variants kept in key parity
 
-An accelerated `tick rate 2000` comparison observed Rich Paddy producing roughly **30% more Rice harvests** than Paddy during the tested interval. This is an observation, not a fixed multiplier; growth remains RNG/config driven.
+## Required before publication
+
+1. run `build-dev.bat` from the committed baseline + this patch;
+2. launch with JEI only;
+3. launch with EMI only;
+4. launch with JEI + EMI;
+5. launch with neither viewer;
+6. validate all ten Block Guide pages and seven Farmer Harvest entries;
+7. run remaining gameplay/Jade persistence and edge-case regression from `VALIDATION.md`;
+8. only after those checks promote 1.2.0 to stable/public.
+
+Deprecated API warnings from NeoForge 1.21.1 are not release failures by themselves.

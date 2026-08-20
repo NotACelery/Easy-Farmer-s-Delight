@@ -93,7 +93,7 @@
   "easyfarmersdelightcompat.viewer.guide.paddy_sugar_cane.line1": "Install one Sand block first, then plant one Sugar Cane.",
   "easyfarmersdelightcompat.viewer.guide.paddy_sugar_cane.line2": "Sugar Cane grows virtually from height 1 to 3 and needs no tool.",
   "easyfarmersdelightcompat.viewer.guide.paddy_sugar_cane.line3": "At height 3, the upper two Cane are harvested and the base remains.",
-  "easyfarmersdelightcompat.viewer.guide.paddy_sugar_cane.line4": "Sneak-use with an empty hand dismantles Sugar Cane mode.",
+  "easyfarmersdelightcompat.viewer.guide.paddy_sugar_cane.line4": "Sneak-use dismantles Sugar Cane mode and returns the installed setup.",
   "easyfarmersdelightcompat.viewer.guide.paddy_sugar_cane.line5": "Dismantling returns the Sand and the currently represented Sugar Cane.",
   "easyfarmersdelightcompat.viewer.guide.paddy_sugar_cane.line6": "Rich Soil does not accelerate Sugar Cane.",
   "easyfarmersdelightcompat.viewer.guide.harvest_tools.title": "Rich Farmer — Harvest Tools",

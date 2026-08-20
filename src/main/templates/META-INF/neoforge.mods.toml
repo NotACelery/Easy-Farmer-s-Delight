@@ -14,7 +14,7 @@ logoFile="easy-farmers-delight-compat-icon.png"
 logoBlur=false
 description='''
 An independent, unofficial compatibility addon for Easy Villagers and Farmer's Delight.
-Adds Paddy, Rich and Rich Paddy Farmers plus the Cutter, Knife-aware harvesting, Farmer's Delight crop automation, Rich Soil behavior and optional compatibility integrations without redistributing either dependency.
+Adds Paddy/Rich Farmers with Rice, Sugar Cane, Tomato, Mushroom and Melon/Pumpkin automation; Harvest Tools, the automated Cutter, a client-local Villager Noise Switch, and optional Jade/JEI/EMI guidance without redistributing either dependency.
 '''
 
 [[dependencies.${mod_id}]]
