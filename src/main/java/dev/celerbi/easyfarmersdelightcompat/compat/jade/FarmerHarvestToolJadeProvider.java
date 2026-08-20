@@ -13,17 +13,16 @@ import snownee.jade.api.IServerDataProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
 
-/** Existing Jade equipment line, generalized from Knife to the Rich Farmer Harvest Tool slot. */
-public enum FarmerKnifeJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
+/** Jade line for the generalized Rich Farmer / Rich Paddy Harvest Tool slot. */
+public enum FarmerHarvestToolJadeProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
+    /** Keep the 1.1.0 UID so users' per-provider Jade preferences are preserved. */
     private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(
             EasyFarmersDelightCompat.MOD_ID,
-            // Preserve the 1.1.0 provider UID so existing Jade per-provider
-            // preferences do not reset merely because the slot now accepts more tools.
             "farmer_knife"
     );
-    private static final String KEY = "EfdcFarmerKnife";
+    private static final String KEY = "EfdcFarmerHarvestTool";
 
     @Override
     public void appendServerData(CompoundTag data, BlockAccessor accessor) {

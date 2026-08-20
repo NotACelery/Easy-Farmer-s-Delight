@@ -3,6 +3,7 @@ package dev.celerbi.easyfarmersdelightcompat.registry;
 import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CutterBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.blockentity.VillagerNoiseSwitchBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -30,6 +31,14 @@ public final class ModBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CutterBlockEntity>> CUTTER = BLOCK_ENTITIES.register(
             "cutter",
             () -> BlockEntityType.Builder.of(CutterBlockEntity::new, ModBlocks.CUTTER.get()).build(null)
+    );
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<VillagerNoiseSwitchBlockEntity>> VILLAGER_NOISE_SWITCH = BLOCK_ENTITIES.register(
+            "villager_noise_switch",
+            () -> BlockEntityType.Builder.of(
+                    VillagerNoiseSwitchBlockEntity::new,
+                    ModBlocks.VILLAGER_NOISE_SWITCH.get()
+            ).build(null)
     );
 
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {

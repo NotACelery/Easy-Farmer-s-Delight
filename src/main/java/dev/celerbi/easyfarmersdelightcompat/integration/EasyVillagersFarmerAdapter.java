@@ -4,6 +4,7 @@ import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -38,6 +39,8 @@ public final class EasyVillagersFarmerAdapter {
     private static final String VILLAGER_ITEM = "de.maxhenkel.easyvillagers.items.VillagerItem";
     private static final String OUTPUT_CONTAINER = "de.maxhenkel.easyvillagers.gui.OutputContainer";
     private static final String MAIN_CLASS = "de.maxhenkel.easyvillagers.Main";
+    private static final int DEFAULT_FARM_SPEED = 10;
+    private static boolean farmSpeedFallbackWarned;
 
     private final CompatFarmerBlockEntity owner;
     private BlockEntity delegate;
@@ -372,15 +375,41 @@ public final class EasyVillagersFarmerAdapter {
         try {
             Class<?> main = Class.forName(MAIN_CLASS);
             Object serverConfig = main.getField("SERVER_CONFIG").get(null);
+            if (serverConfig == null) {
+                warnFarmSpeedFallback(null);
+                return DEFAULT_FARM_SPEED;
+            }
             Object farmSpeed = serverConfig.getClass().getField("farmSpeed").get(serverConfig);
+            if (farmSpeed instanceof IntSupplier intSupplier) {
+                return Math.max(1, intSupplier.getAsInt());
+            }
+            if (farmSpeed instanceof Supplier<?> supplier) {
+                Object value = supplier.get();
+                if (value instanceof Number number) {
+                    return Math.max(1, number.intValue());
+                }
+            }
             Object value = farmSpeed.getClass().getMethod("get").invoke(farmSpeed);
             if (value instanceof Number number) {
                 return Math.max(1, number.intValue());
             }
-        } catch (ReflectiveOperationException e) {
-            fail(e);
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            // farmSpeed is a tuning value, not a reason to disable the entire
+            // Easy Villagers delegate. Falling back to 1 made every virtual crop
+            // run ten times faster than Easy Villagers' default when reflection
+            // failed, which looked exactly like a 200-tick-rate world.
+            warnFarmSpeedFallback(e);
+            return DEFAULT_FARM_SPEED;
         }
-        return 1;
+        warnFarmSpeedFallback(null);
+        return DEFAULT_FARM_SPEED;
+    }
+
+    private static void warnFarmSpeedFallback(Exception e) {
+        if (farmSpeedFallbackWarned) return;
+        farmSpeedFallbackWarned = true;
+        System.err.println("[Easy Farmer's Delight Compat] Could not read Easy Villagers farmer.farm_speed; using default 10 without disabling the Farmer adapter.");
+        if (e != null) e.printStackTrace();
     }
 
     public CompoundTag snapshot(CompoundTag fallback, HolderLookup.Provider registries) {

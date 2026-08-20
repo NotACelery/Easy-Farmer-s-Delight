@@ -23,7 +23,7 @@ public final class CutterMenu extends AbstractContainerMenu {
     public CutterMenu(int id,Inventory inv,CutterBlockEntity cutter){this(id,inv,cutter.getBlockPos(),cutter);}
     private CutterMenu(int id,Inventory inv,BlockPos pos,ItemStackHandler tool,ItemStackHandler input,ItemStackHandler output,ContainerData data){
         super(ModMenus.CUTTER,id);blockPos=pos;this.data=data;addDataSlots(data);
-        addSlot(new SlotItemHandler(tool,0,142,20){@Override public boolean mayPlace(ItemStack s){return FarmerToolSupport.isProcessingTool(s);}@Override public int getMaxStackSize(){return 1;}});
+        addSlot(new SlotItemHandler(tool,0,142,20){@Override public boolean mayPlace(ItemStack s){return FarmerToolSupport.isCuttingTool(s);}@Override public int getMaxStackSize(){return 1;}});
         for(int i=0;i<4;i++)addSlot(new SlotItemHandler(input,i,52+i*18,20));
         for(int i=0;i<4;i++)addSlot(new SlotItemHandler(output,i,52+i*18,51){@Override public boolean mayPlace(ItemStack s){return false;}});
         for(int r=0;r<3;r++)for(int c=0;c<9;c++)addSlot(new Slot(inv,c+r*9+9,8+c*18,83+r*18));
@@ -35,7 +35,7 @@ public final class CutterMenu extends AbstractContainerMenu {
     @Override public ItemStack quickMoveStack(Player player,int index){
         if(index<0||index>=slots.size())return ItemStack.EMPTY;Slot slot=slots.get(index);if(!slot.hasItem())return ItemStack.EMPTY;ItemStack stack=slot.getItem(),original=stack.copy();
         if(index<PLAYER_START){if(!moveItemStackTo(stack,PLAYER_START,PLAYER_END,true))return ItemStack.EMPTY;}
-        else if(FarmerToolSupport.isProcessingTool(stack)){if(slots.get(TOOL_SLOT).hasItem()||!moveItemStackTo(stack,TOOL_SLOT,TOOL_SLOT+1,false))return ItemStack.EMPTY;}
+        else if(FarmerToolSupport.isCuttingTool(stack)){if(slots.get(TOOL_SLOT).hasItem()||!moveItemStackTo(stack,TOOL_SLOT,TOOL_SLOT+1,false))return ItemStack.EMPTY;}
         else if(!moveItemStackTo(stack,INPUT_START,INPUT_END,false))return ItemStack.EMPTY;
         if(stack.isEmpty())slot.setByPlayer(ItemStack.EMPTY);else slot.setChanged();return original;
     }

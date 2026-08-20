@@ -57,7 +57,7 @@ public final class CutterBlock extends Block implements EntityBlock {
     }
     @Override protected ItemInteractionResult useItemOn(ItemStack held,BlockState state,Level level,BlockPos pos,Player player,InteractionHand hand,BlockHitResult hit){
         if(!(level.getBlockEntity(pos) instanceof CutterBlockEntity cutter))return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        if(!player.isShiftKeyDown() && FarmerToolSupport.isProcessingTool(held) && cutter.toolHandler().getStackInSlot(0).isEmpty()){
+        if(!player.isShiftKeyDown() && FarmerToolSupport.isCuttingTool(held) && cutter.toolHandler().getStackInSlot(0).isEmpty()){
             if(!level.isClientSide){
                 ItemStack one=held.copyWithCount(1);
                 if(cutter.toolHandler().insertItem(0,one,false).isEmpty()){

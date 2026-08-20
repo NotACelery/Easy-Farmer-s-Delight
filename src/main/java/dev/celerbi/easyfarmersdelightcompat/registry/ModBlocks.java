@@ -4,7 +4,9 @@ import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
 import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
 import dev.celerbi.easyfarmersdelightcompat.block.FarmerVariant;
 import dev.celerbi.easyfarmersdelightcompat.block.CutterBlock;
+import dev.celerbi.easyfarmersdelightcompat.block.VillagerNoiseSwitchBlock;
 import dev.celerbi.easyfarmersdelightcompat.item.CutterItem;
+import dev.celerbi.easyfarmersdelightcompat.item.VillagerNoiseSwitchItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
@@ -43,9 +45,20 @@ public final class ModBlocks {
             farmerProperties()
     );
 
+    public static final DeferredBlock<VillagerNoiseSwitchBlock> VILLAGER_NOISE_SWITCH = BLOCKS.registerBlock(
+            "villager_noise_switch",
+            VillagerNoiseSwitchBlock::new,
+            farmerProperties()
+    );
+
     public static final DeferredItem<CutterItem> CUTTER_ITEM = ITEMS.register(
             "cutter",
             () -> new CutterItem(CUTTER.get(), new Item.Properties())
+    );
+
+    public static final DeferredItem<VillagerNoiseSwitchItem> VILLAGER_NOISE_SWITCH_ITEM = ITEMS.register(
+            "villager_noise_switch",
+            () -> new VillagerNoiseSwitchItem(VILLAGER_NOISE_SWITCH.get(), new Item.Properties().stacksTo(1))
     );
 
     public static final DeferredItem<BlockItem> PADDY_FARMER_ITEM = ITEMS.registerSimpleBlockItem(

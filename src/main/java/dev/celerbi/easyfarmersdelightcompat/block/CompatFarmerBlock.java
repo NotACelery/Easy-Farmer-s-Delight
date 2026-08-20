@@ -21,6 +21,7 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -127,15 +128,66 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
         var registries = level.registryAccess();
 
-        // Rich variants have one protected Knife equipment slot. Direct right-click
-        // equips exactly one Knife without opening the menu; sneaking keeps removal
-        // interactions authoritative.
-        if (!player.isShiftKeyDown() && variant.isRich() && FarmerToolSupport.isKnife(heldItem)
-                && farmer.getKnife().isEmpty()) {
+        // Sneak-use is a removal action before any held-item interaction. In 1.21
+        // useItemOn can consume the interaction before useWithoutItem is reached, so
+        // Paddy teardown/removal must also live here instead of relying on an empty
+        // hand. This makes Shift + Right Click deterministic with any held item.
+        if (player.isShiftKeyDown() && variant.isAquatic()) {
+            if (farmer.hasPaddySand()) {
+                if (!level.isClientSide) {
+                    for (ItemStack returned : farmer.dismantleSugarCaneMode()) {
+                        if (!returned.isEmpty()) {
+                            ItemHandlerHelper.giveItemToPlayer(player, returned);
+                        }
+                    }
+                    level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+                }
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            }
+
+            if (farmer.easyVillagers().getCrop(registries) != null) {
+                if (!level.isClientSide) {
+                    ItemStack removed = farmer.removeSelectedCrop(registries);
+                    if (!removed.isEmpty()) {
+                        ItemHandlerHelper.giveItemToPlayer(player, removed);
+                    }
+                    level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
+                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            }
+        }
+
+        // Rich variants expose one protected Harvest Tool slot. Knives, Hoes and
+        // Axes can be equipped directly; crop-specific logic decides which tool is
+        // actually used for each harvest.
+        if (!player.isShiftKeyDown() && variant.isRich() && FarmerToolSupport.isHarvestTool(heldItem)
+                && farmer.getHarvestTool().isEmpty()) {
             if (!level.isClientSide) {
-                farmer.setKnife(heldItem.copyWithCount(1));
+                farmer.setHarvestTool(heldItem.copyWithCount(1));
                 consumeOne(heldItem, player);
                 level.playSound(null, pos, SoundEvents.UI_STONECUTTER_TAKE_RESULT, SoundSource.BLOCKS, 0.7F, 1.0F);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+
+        if (!player.isShiftKeyDown() && variant.isAquatic()
+                && !farmer.hasPaddySand()
+                && farmer.easyVillagers().getCrop(registries) == null
+                && isSand(heldItem)) {
+            if (!level.isClientSide && farmer.installPaddySand()) {
+                consumeOne(heldItem, player);
+                level.playSound(null, pos, SoundEvents.SAND_PLACE, SoundSource.BLOCKS, 0.8F, 1.0F);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+
+        if (!player.isShiftKeyDown() && variant.isAquatic()
+                && farmer.hasPaddySand()
+                && farmer.sugarCaneHeight() == 0
+                && isSugarCane(heldItem)) {
+            if (!level.isClientSide && farmer.plantSugarCane()) {
+                consumeOne(heldItem, player);
+                level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
@@ -175,8 +227,8 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
         if (farmer.easyVillagers().getCrop(registries) == null) {
             boolean validCrop = variant.isAquatic()
-                    ? isRice(heldItem)
-                    : (variant.isRich() && (isTomatoSeeds(heldItem) || isMushroom(heldItem)))
+                    ? (!farmer.hasPaddySand() && isRice(heldItem))
+                    : (variant.isRich() && (isTomatoSeeds(heldItem) || isMushroom(heldItem) || isStemSeed(heldItem)))
                             || farmer.easyVillagers().isValidSeed(heldItem, registries);
 
             if (validCrop) {
@@ -190,8 +242,11 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
                         selected = true;
                     } else if (variant.isRich() && isMushroom(heldItem)) {
                         selected = farmer.selectMushroom(heldItem, registries);
+                    } else if (variant.isRich() && isStemSeed(heldItem)) {
+                        selected = farmer.selectStem(heldItem, registries);
                     } else {
                         selected = farmer.easyVillagers().setCropFromSeed(heldItem, registries);
+                        if (selected) farmer.onNormalCropSelected();
                     }
                     if (selected) {
                         consumeOne(heldItem, player);
@@ -238,6 +293,16 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
         }
 
         var registries = level.registryAccess();
+        if (player.isShiftKeyDown() && variant.isAquatic() && farmer.hasPaddySand()) {
+            if (!level.isClientSide) {
+                for (ItemStack returned : farmer.dismantleSugarCaneMode()) {
+                    if (!returned.isEmpty()) ItemHandlerHelper.giveItemToPlayer(player, returned);
+                }
+                level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+
         if (player.isShiftKeyDown() && !variant.isAquatic() && variant.isRich()
                 && farmer.hasTomatoCrop(registries) && farmer.ropeCount() > 0) {
             if (!level.isClientSide) {
@@ -300,6 +365,18 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
     private static boolean isRope(ItemStack stack) {
         return ROPE_ITEM_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+    }
+
+    private static boolean isStemSeed(ItemStack stack) {
+        return stack.is(Items.MELON_SEEDS) || stack.is(Items.PUMPKIN_SEEDS);
+    }
+
+    private static boolean isSand(ItemStack stack) {
+        return stack.is(Items.SAND);
+    }
+
+    private static boolean isSugarCane(ItemStack stack) {
+        return stack.is(Items.SUGAR_CANE);
     }
 
     private static boolean isMushroom(ItemStack stack) {
