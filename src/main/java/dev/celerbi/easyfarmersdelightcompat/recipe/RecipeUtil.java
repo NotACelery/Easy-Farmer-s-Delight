@@ -41,14 +41,22 @@ final class RecipeUtil {
      * meaningful block-entity payload is rewritten to our type and locked to one.
      */
     static ItemStack upgradeFarmer(ItemStack source, Block target) {
+        // Start from the target's canonical item instead of cloning the complete
+        // source component patch. Easy Villagers can attach transient/cache
+        // components to its Farmer item; copying those made clean upgrade outputs
+        // compare as different stacks even though no machine state was present.
         ItemStack result = new ItemStack(target);
-        result.applyComponents(source.getComponentsPatch());
-        removeEasyVillagersClientCache(result);
-
-        // Do not inherit stale stack limits or an empty BE payload from the source.
-        result.remove(DataComponents.BLOCK_ENTITY_DATA);
-        result.remove(DataComponents.MAX_STACK_SIZE);
         result.setCount(1);
+
+        // Preserve player-facing metadata that is safe to carry across an upgrade.
+        var customName = source.get(DataComponents.CUSTOM_NAME);
+        if (customName != null) {
+            result.set(DataComponents.CUSTOM_NAME, customName);
+        }
+        var lore = source.get(DataComponents.LORE);
+        if (lore != null) {
+            result.set(DataComponents.LORE, lore);
+        }
 
         CustomData sourceData = source.get(DataComponents.BLOCK_ENTITY_DATA);
         if (hasMeaningfulBlockEntityData(sourceData)) {
@@ -56,6 +64,9 @@ final class RecipeUtil {
             result.set(DataComponents.MAX_STACK_SIZE, 1);
         }
 
+        // Defensive: never let Easy Villagers' render/network cache survive onto
+        // an Easy FD Farmer even if another component-copy path is introduced later.
+        removeEasyVillagersClientCache(result);
         return result;
     }
 

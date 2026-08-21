@@ -58,7 +58,7 @@ public final class ModBlocks {
 
     public static final DeferredItem<VillagerNoiseSwitchItem> VILLAGER_NOISE_SWITCH_ITEM = ITEMS.register(
             "villager_noise_switch",
-            () -> new VillagerNoiseSwitchItem(VILLAGER_NOISE_SWITCH.get(), new Item.Properties().stacksTo(1))
+            () -> new VillagerNoiseSwitchItem(VILLAGER_NOISE_SWITCH.get(), new Item.Properties())
     );
 
     public static final DeferredItem<CompatFarmerItem> PADDY_FARMER_ITEM = ITEMS.register(

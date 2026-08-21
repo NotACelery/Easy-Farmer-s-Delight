@@ -7,6 +7,7 @@ import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -188,6 +189,7 @@ public final class VillagerNoiseSwitchBlock extends Block implements EntityBlock
             CompoundTag data = noiseSwitch.saveCustomOnly(params.getLevel().registryAccess());
             if (!data.isEmpty()) {
                 BlockItem.setBlockEntityData(dropped, ModBlockEntities.VILLAGER_NOISE_SWITCH.get(), data);
+                dropped.set(DataComponents.MAX_STACK_SIZE, 1);
             }
         }
         return List.of(dropped);

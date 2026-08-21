@@ -194,6 +194,8 @@ Compatible modded wood can work too when the mod provides a normal Axe stripping
 
 If the Cutter needs a different tool, it simply waits instead of wasting the input or damaging the wrong tool.
 
+Empty Cutters of the same work-surface variant can stack. A Cutter carrying a Villager or other persistent machine contents becomes an individual item when broken, and its inventory icon previews the stored state so it can be distinguished safely before placement.
+
 ---
 
 # Villager Noise Switch
@@ -223,6 +225,8 @@ R I R
 Your preference is remembered when you change worlds or servers.
 
 The Lever and Redstone inside the model are decorative; the block does not act as a real Redstone switch.
+
+Empty Noise Switches stack normally. A switch carrying a Villager becomes an individual stateful item when broken and shows that Villager in its inventory preview; removing the Villager before breaking it restores normal stacking.
 
 ---
 

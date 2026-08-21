@@ -42,6 +42,9 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 /**
@@ -52,6 +55,23 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
  */
 public final class CompatFarmerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+
+    /**
+     * Match Easy Villagers' VillagerBlockBase exactly: the machine is a hollow
+     * one-block enclosure with a 1/16-thick shell, not a logical full cube.
+     *
+     * This matters for vanilla light/face sampling. Keeping the default full-cube
+     * shape made an adjacent opaque block poison the light used by inner model
+     * faces even though the visual model itself was transparent/no-occlusion.
+     */
+    private static final VoxelShape FARMER_SHAPE = Shapes.or(
+            Block.box(0D, 0D, 0D, 16D, 1D, 16D),
+            Block.box(0D, 15D, 0D, 16D, 16D, 16D),
+            Block.box(0D, 0D, 0D, 1D, 16D, 16D),
+            Block.box(15D, 0D, 0D, 16D, 16D, 16D),
+            Block.box(0D, 0D, 0D, 16D, 16D, 1D),
+            Block.box(0D, 0D, 15D, 16D, 16D, 16D)
+    );
     private static final ResourceLocation RICE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
     private static final ResourceLocation TOMATO_SEEDS_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomato_seeds");
     private static final ResourceLocation ROPE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rope");
@@ -88,6 +108,11 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
     public FarmerVariant variant() {
         return variant;
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return FARMER_SHAPE;
     }
 
     @Override

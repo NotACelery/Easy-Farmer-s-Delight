@@ -20,18 +20,18 @@ import net.minecraft.world.item.crafting.Ingredient;
 /**
  * Component-safe EMI transfer for the stateful Farmer upgrade recipes.
  *
- * <p>EMI 1.1.24's generic crafting transfer eventually looks up each concrete
- * requested stack with ItemStack.areItemsAndComponentsEqual. That is too strict
- * for an Ingredient such as easy_villagers:farmer: the recipe accepts the Farmer
- * by item, while the player's real stack may carry a villager/crop/machine
- * payload. This handler deliberately selects sources with Ingredient.test and
- * moves the exact source stack using normal inventory clicks.</p>
+ * <p>EMI's generic transfer resolves concrete ItemStacks with component equality,
+ * while our central Farmer ingredient intentionally matches by Ingredient so a
+ * real Farmer carrying machine data can still be upgraded. This handler moves the
+ * exact inventory stack and, for Shift/max fills, fills every recipe slot with as
+ * many mutually-stackable copies as the grid can physically hold.</p>
  */
 public final class FarmerUpgradeEmiRecipeHandler implements EmiRecipeHandler<CraftingMenu> {
     private static final int CRAFT_START = 1;
     private static final int CRAFT_END_EXCLUSIVE = 10;
     private static final int INVENTORY_START = 10;
     private static final int INVENTORY_END_EXCLUSIVE = 46;
+    private static final int MAX_GRID_BATCH = 64;
 
     @Override
     public EmiPlayerInventory getInventory(AbstractContainerScreen<CraftingMenu> screen) {
@@ -64,12 +64,7 @@ public final class FarmerUpgradeEmiRecipeHandler implements EmiRecipeHandler<Cra
             return false;
         }
 
-        List<ItemStack> virtualInventory = snapshotPlayerInventory(menu);
-        if (!virtuallyClearGrid(menu, virtualInventory)) {
-            return false;
-        }
-
-        return virtuallyConsumeIngredients(upgrade.minecraftIngredients(), virtualInventory);
+        return calculateTransferAmount(menu, upgrade.minecraftIngredients(), context.getAmount()) > 0;
     }
 
     @Override
@@ -86,10 +81,9 @@ public final class FarmerUpgradeEmiRecipeHandler implements EmiRecipeHandler<Cra
             return false;
         }
 
-        // Re-run the complete simulation immediately before mutating slots. This
-        // avoids a partial transfer if the inventory changed while the recipe UI
-        // was open.
-        if (!canCraft(recipe, context)) {
+        List<Ingredient> ingredients = upgrade.minecraftIngredients();
+        int amount = calculateTransferAmount(menu, ingredients, context.getAmount());
+        if (amount <= 0) {
             return false;
         }
 
@@ -97,27 +91,72 @@ public final class FarmerUpgradeEmiRecipeHandler implements EmiRecipeHandler<Cra
             return false;
         }
 
-        List<Ingredient> ingredients = upgrade.minecraftIngredients();
         for (int recipeSlot = 0; recipeSlot < ingredients.size(); recipeSlot++) {
             Ingredient ingredient = ingredients.get(recipeSlot);
             if (ingredient.isEmpty()) {
                 continue;
             }
 
-            int sourceSlot = findSourceSlot(menu, ingredient);
-            if (sourceSlot < 0) {
-                return false;
-            }
-
             int targetSlot = CRAFT_START + recipeSlot;
-            if (!moveOne(menu, gameMode, player, sourceSlot, targetSlot, ingredient)) {
+            if (!moveAmount(menu, gameMode, player, targetSlot, ingredient, amount)) {
                 return false;
             }
         }
 
-        // The handler intentionally only fills the grid. EMI's optional
-        // immediate-craft destinations are allowed to degrade to a normal fill.
+        // CURSOR/INVENTORY destinations intentionally degrade to FILL. The normal
+        // crafting menu remains authoritative for consuming inputs/remainders.
         return true;
+    }
+
+    /**
+     * Calculates how many complete recipe layers can coexist in the 3x3 grid.
+     * Each target slot is locked to one exact ItemStack identity after its first
+     * ingredient is selected. This is what lets clean Farmers batch while keeping
+     * stateful Farmers (different villager/data components, max stack 1) isolated.
+     */
+    private static int calculateTransferAmount(CraftingMenu menu, List<Ingredient> ingredients, int requestedAmount) {
+        List<ItemStack> virtualInventory = snapshotPlayerInventory(menu);
+        if (!virtuallyClearGrid(menu, virtualInventory)) {
+            return 0;
+        }
+
+        int requested = Math.max(1, Math.min(requestedAmount, MAX_GRID_BATCH));
+        ItemStack[] targetTemplates = new ItemStack[ingredients.size()];
+        int completed = 0;
+
+        for (int craft = 0; craft < requested; craft++) {
+            boolean complete = true;
+            for (int recipeSlot = 0; recipeSlot < ingredients.size(); recipeSlot++) {
+                Ingredient ingredient = ingredients.get(recipeSlot);
+                if (ingredient.isEmpty()) {
+                    continue;
+                }
+
+                ItemStack template = targetTemplates[recipeSlot];
+                if (template == null || template.isEmpty()) {
+                    template = bestVirtualTemplate(virtualInventory, ingredient);
+                    if (template.isEmpty()) {
+                        complete = false;
+                        break;
+                    }
+                    targetTemplates[recipeSlot] = template.copyWithCount(1);
+                }
+
+                int targetSlot = CRAFT_START + recipeSlot;
+                int stackLimit = Math.min(template.getMaxStackSize(), menu.getSlot(targetSlot).getMaxStackSize(template));
+                if (craft + 1 > stackLimit || !consumeExactVirtual(virtualInventory, ingredient, template)) {
+                    complete = false;
+                    break;
+                }
+            }
+
+            if (!complete) {
+                break;
+            }
+            completed++;
+        }
+
+        return completed;
     }
 
     private static List<ItemStack> snapshotPlayerInventory(CraftingMenu menu) {
@@ -128,10 +167,7 @@ public final class FarmerUpgradeEmiRecipeHandler implements EmiRecipeHandler<Cra
         return virtual;
     }
 
-    /**
-     * Simulates QUICK_MOVE of every existing crafting-grid stack into the player
-     * inventory. No real slots are touched here.
-     */
+    /** Simulates QUICK_MOVE of every current grid stack back into inventory. */
     private static boolean virtuallyClearGrid(CraftingMenu menu, List<ItemStack> virtualInventory) {
         for (int slotId = CRAFT_START; slotId < CRAFT_END_EXCLUSIVE; slotId++) {
             ItemStack gridStack = menu.getSlot(slotId).getItem();
@@ -178,25 +214,43 @@ public final class FarmerUpgradeEmiRecipeHandler implements EmiRecipeHandler<Cra
         return remaining.isEmpty();
     }
 
-    private static boolean virtuallyConsumeIngredients(List<Ingredient> ingredients, List<ItemStack> inventory) {
-        for (Ingredient ingredient : ingredients) {
-            if (ingredient.isEmpty()) {
+    private static ItemStack bestVirtualTemplate(List<ItemStack> inventory, Ingredient ingredient) {
+        ItemStack best = ItemStack.EMPTY;
+        int bestAvailable = 0;
+
+        for (ItemStack candidate : inventory) {
+            if (candidate.isEmpty() || !ingredient.test(candidate)) {
                 continue;
             }
-
-            boolean found = false;
-            for (ItemStack stack : inventory) {
-                if (!stack.isEmpty() && ingredient.test(stack)) {
-                    stack.shrink(1);
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                return false;
+            int available = exactCount(inventory, candidate);
+            if (available > bestAvailable) {
+                bestAvailable = available;
+                best = candidate;
             }
         }
-        return true;
+        return best.isEmpty() ? ItemStack.EMPTY : best.copyWithCount(1);
+    }
+
+    private static int exactCount(List<ItemStack> inventory, ItemStack template) {
+        int count = 0;
+        for (ItemStack stack : inventory) {
+            if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, template)) {
+                count += stack.getCount();
+            }
+        }
+        return count;
+    }
+
+    private static boolean consumeExactVirtual(List<ItemStack> inventory, Ingredient ingredient, ItemStack template) {
+        for (ItemStack stack : inventory) {
+            if (!stack.isEmpty()
+                    && ingredient.test(stack)
+                    && ItemStack.isSameItemSameComponents(stack, template)) {
+                stack.shrink(1);
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean clearGrid(CraftingMenu menu, MultiPlayerGameMode gameMode, Player player) {
@@ -213,44 +267,94 @@ public final class FarmerUpgradeEmiRecipeHandler implements EmiRecipeHandler<Cra
         return menu.getCarried().isEmpty();
     }
 
-    private static int findSourceSlot(CraftingMenu menu, Ingredient ingredient) {
+    private static ItemStack bestRealTemplate(CraftingMenu menu, Ingredient ingredient) {
+        ItemStack best = ItemStack.EMPTY;
+        int bestAvailable = 0;
+
+        for (int slotId = INVENTORY_START; slotId < INVENTORY_END_EXCLUSIVE; slotId++) {
+            ItemStack candidate = menu.getSlot(slotId).getItem();
+            if (candidate.isEmpty() || !ingredient.test(candidate)) {
+                continue;
+            }
+
+            int available = 0;
+            for (int other = INVENTORY_START; other < INVENTORY_END_EXCLUSIVE; other++) {
+                ItemStack stack = menu.getSlot(other).getItem();
+                if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, candidate)) {
+                    available += stack.getCount();
+                }
+            }
+            if (available > bestAvailable) {
+                bestAvailable = available;
+                best = candidate;
+            }
+        }
+        return best.isEmpty() ? ItemStack.EMPTY : best.copyWithCount(1);
+    }
+
+    private static int findExactSourceSlot(CraftingMenu menu, Ingredient ingredient, ItemStack template) {
         for (int slotId = INVENTORY_START; slotId < INVENTORY_END_EXCLUSIVE; slotId++) {
             ItemStack stack = menu.getSlot(slotId).getItem();
-            if (!stack.isEmpty() && ingredient.test(stack)) {
+            if (!stack.isEmpty()
+                    && ingredient.test(stack)
+                    && ItemStack.isSameItemSameComponents(stack, template)) {
                 return slotId;
             }
         }
         return -1;
     }
 
-    /** Moves one real item from source to target without reconstructing it. */
-    private static boolean moveOne(
+    /** Moves {@code amount} exact, mutually-stackable items into one recipe slot. */
+    private static boolean moveAmount(
             CraftingMenu menu,
             MultiPlayerGameMode gameMode,
             Player player,
-            int sourceSlot,
             int targetSlot,
-            Ingredient expected
+            Ingredient expected,
+            int amount
     ) {
         if (!menu.getCarried().isEmpty() || !menu.getSlot(targetSlot).getItem().isEmpty()) {
             return false;
         }
 
-        gameMode.handleInventoryMouseClick(menu.containerId, sourceSlot, 0, ClickType.PICKUP, player);
-        if (menu.getCarried().isEmpty()) {
+        ItemStack template = bestRealTemplate(menu, expected);
+        if (template.isEmpty()) {
             return false;
         }
 
-        // Right-click places exactly one item, which is important for repeated
-        // ingredients such as Glass Panes and Iron Blocks.
-        gameMode.handleInventoryMouseClick(menu.containerId, targetSlot, 1, ClickType.PICKUP, player);
+        int stackLimit = Math.min(template.getMaxStackSize(), menu.getSlot(targetSlot).getMaxStackSize(template));
+        if (amount > stackLimit) {
+            return false;
+        }
 
-        // Return the rest of a larger source stack to its original slot.
-        if (!menu.getCarried().isEmpty()) {
+        int remaining = amount;
+        while (remaining > 0) {
+            int sourceSlot = findExactSourceSlot(menu, expected, template);
+            if (sourceSlot < 0) {
+                return false;
+            }
+
             gameMode.handleInventoryMouseClick(menu.containerId, sourceSlot, 0, ClickType.PICKUP, player);
+            if (menu.getCarried().isEmpty()) {
+                return false;
+            }
+
+            int placeNow = Math.min(remaining, menu.getCarried().getCount());
+            for (int i = 0; i < placeNow; i++) {
+                gameMode.handleInventoryMouseClick(menu.containerId, targetSlot, 1, ClickType.PICKUP, player);
+            }
+            remaining -= placeNow;
+
+            // Return unused items from this source stack to the exact source slot.
+            if (!menu.getCarried().isEmpty()) {
+                gameMode.handleInventoryMouseClick(menu.containerId, sourceSlot, 0, ClickType.PICKUP, player);
+            }
+            if (!menu.getCarried().isEmpty()) {
+                return false;
+            }
         }
 
         ItemStack placed = menu.getSlot(targetSlot).getItem();
-        return menu.getCarried().isEmpty() && !placed.isEmpty() && expected.test(placed);
+        return !placed.isEmpty() && placed.getCount() == amount && expected.test(placed);
     }
 }

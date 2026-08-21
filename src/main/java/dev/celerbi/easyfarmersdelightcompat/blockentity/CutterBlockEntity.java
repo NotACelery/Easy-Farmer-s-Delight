@@ -46,6 +46,7 @@ public final class CutterBlockEntity extends BlockEntity {
     private Block logVariant=Blocks.OAK_LOG;
     private int progress;
     private boolean loadingState;
+    private boolean itemPreview;
     private boolean workPlanDirty = true;
     private boolean workPlanAvailable;
 
@@ -157,6 +158,9 @@ public final class CutterBlockEntity extends BlockEntity {
     public ItemStack getStoredVillager(){return villager;}
     public void updateVillagerFromAdapter(ItemStack stack){if(stack!=null&&!stack.isEmpty()){villager=stack.copyWithCount(1);setChanged();}}
     public CutterVillagerAdapter villagerAdapter(){return villagerAdapter;}
+    /** Transient client-only flag used by the inventory renderer. */
+    public boolean isItemPreview(){return itemPreview;}
+    public void setItemPreview(boolean itemPreview){this.itemPreview=itemPreview;}
     public Block logVariant(){return logVariant;}
     public void setLogVariant(Block log){Block normalized=log==null?Blocks.OAK_LOG:log;if(logVariant!=normalized){logVariant=normalized;setChangedAndSync();}}
     public boolean hasStoredContents(){return !villager.isEmpty()||progress!=0||!handlerEmpty(tool)||!handlerEmpty(input)||!handlerEmpty(output);}

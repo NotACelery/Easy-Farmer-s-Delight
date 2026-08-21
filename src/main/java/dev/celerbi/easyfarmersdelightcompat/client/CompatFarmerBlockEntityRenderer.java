@@ -1,13 +1,11 @@
 package dev.celerbi.easyfarmersdelightcompat.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import java.util.Optional;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -18,14 +16,12 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.VillagerRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AttachedStemBlock;
 import net.minecraft.world.level.block.Block;
@@ -35,7 +31,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import org.joml.Matrix4f;
 
 /**
  * Renders the contents of our farmer blocks using the same spatial rules as
@@ -50,8 +45,6 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
     private static final ResourceLocation TOMATO_ON_ROPE_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomatoes_on_rope");
     private static final ResourceLocation LEGACY_HANGING_TOMATO_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "hanging_tomatoes");
     private static final ResourceLocation RICH_SOIL_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rich_soil");
-    private static final ResourceLocation WATER_TEXTURE = ResourceLocation.withDefaultNamespace("block/water_still");
-    private static final int DEFAULT_WATER_COLOR = 0x3F76E4;
 
     private static final float FARM_SCALE = 0.45F;
     private static final float PADDY_VILLAGER_SCALE = 0.90F;
@@ -115,7 +108,6 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
 
         if (farmer.variant().isAquatic()) {
             renderPaddyPlatform(farmer, direction, poseStack, buffer, interiorLight, combinedOverlay);
-            renderPaddyWater(farmer, poseStack, buffer, interiorLight);
         }
         renderVillager(farmer, registries, direction, poseStack, buffer, interiorLight);
         renderCrop(farmer, registries, direction, poseStack, buffer, interiorLight, combinedOverlay);
@@ -301,81 +293,37 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
         poseStack.popPose();
     }
 
-    /**
-     * The Paddy shell uses the normal cutout layer, matching Easy Villagers. Water
-     * is rendered separately so one translucent element cannot force the whole
-     * machine (glass/frame included) onto the translucent chunk layer. This also
-     * avoids the black enclosure artifact when opaque blocks touch the Farmer.
-     */
-    private void renderPaddyWater(
-            CompatFarmerBlockEntity farmer,
-            PoseStack poseStack,
-            MultiBufferSource buffer,
-            int packedLight
-    ) {
-        Level level = farmer.getLevel();
-        if (level == null) return;
-
-        TextureAtlasSprite sprite = minecraft.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(WATER_TEXTURE);
-        VertexConsumer consumer = buffer.getBuffer(RenderType.translucent());
-        int color = farmer.isItemPreview()
-                ? DEFAULT_WATER_COLOR
-                : BiomeColors.getAverageWaterColor(level, farmer.getBlockPos());
-        int red = (color >> 16) & 0xFF;
-        int green = (color >> 8) & 0xFF;
-        int blue = color & 0xFF;
-        int alpha = 190;
-
-        float min = 2.0F / 16.0F;
-        float max = 14.0F / 16.0F;
-        float y = PADDY_WATERLINE_Y;
-        float u0 = sprite.getU(2.0F);
-        float u1 = sprite.getU(14.0F);
-        float v0 = sprite.getV(2.0F);
-        float v1 = sprite.getV(14.0F);
-        Matrix4f matrix = poseStack.last().pose();
-
-        waterVertex(consumer, matrix, max, y, min, red, green, blue, alpha, u1, v0, packedLight);
-        waterVertex(consumer, matrix, min, y, min, red, green, blue, alpha, u0, v0, packedLight);
-        waterVertex(consumer, matrix, min, y, max, red, green, blue, alpha, u0, v1, packedLight);
-        waterVertex(consumer, matrix, max, y, max, red, green, blue, alpha, u1, v1, packedLight);
-    }
-
-    private static void waterVertex(
-            VertexConsumer consumer,
-            Matrix4f matrix,
-            float x,
-            float y,
-            float z,
-            int red,
-            int green,
-            int blue,
-            int alpha,
-            float u,
-            float v,
-            int packedLight
-    ) {
-        consumer.addVertex(matrix, x, y, z)
-                .setColor(red, green, blue, alpha)
-                .setUv(u, v)
-                .setLight(packedLight)
-                .setNormal(0.0F, 1.0F, 0.0F);
-    }
 
     /**
-     * Block-entity contents should use the brightest light that can actually enter
-     * the one-block enclosure. Sampling the six neighbours prevents a single solid
-     * roof/wall from forcing all dynamic contents to packed-light zero while still
-     * allowing a genuinely sealed dark enclosure to look dark.
+     * Resolve light for the virtual contents of the enclosure, not for the opaque
+     * terrain block that may happen to touch one of its faces.
+     *
+     * Easy Villagers' Farmer is logically hollow. Our crops/villager are BER
+     * geometry, however, so vanilla gives them a single packed-light sample from
+     * the block entity position. A roof block or a grass block beside the Farmer
+     * can make that sample much darker than the light that visibly enters through
+     * the remaining glass faces. Sample a small exterior halo instead: immediate
+     * neighbours plus the air layer around the top edge. We deliberately do not
+     * sample straight through pos.above(2), so a genuinely enclosed/dark machine
+     * is still allowed to be dark.
      */
     private static int resolveInteriorLight(Level level, BlockPos pos, int fallback) {
         int block = LightTexture.block(fallback);
         int sky = LightTexture.sky(fallback);
+
         for (Direction direction : Direction.values()) {
             int sample = LevelRenderer.getLightColor(level, pos.relative(direction));
             block = Math.max(block, LightTexture.block(sample));
             sky = Math.max(sky, LightTexture.sky(sample));
         }
+
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockPos upperEdge = pos.relative(direction).above();
+            int sample = LevelRenderer.getLightColor(level, upperEdge);
+            block = Math.max(block, LightTexture.block(sample));
+            sky = Math.max(sky, LightTexture.sky(sample));
+        }
+
         return LightTexture.pack(block, sky);
     }
 

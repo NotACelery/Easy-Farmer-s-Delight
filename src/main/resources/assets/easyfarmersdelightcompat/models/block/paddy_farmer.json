@@ -6,7 +6,8 @@
     "particle": "minecraft:block/iron_block",
     "glass": "minecraft:block/glass",
     "iron": "minecraft:block/iron_block",
-    "soil": "minecraft:block/dirt"
+    "soil": "minecraft:block/dirt",
+    "frame": "easy_villagers:block/farm"
   },
   "elements": [
     {
@@ -270,22 +271,22 @@
       "name": "corner_nw",
       "faces": {
         "north": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "south": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "west": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "east": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "up": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "down": {
-          "texture": "#glass"
+          "texture": "#frame"
         }
       }
     },
@@ -304,22 +305,22 @@
       "name": "corner_sw",
       "faces": {
         "north": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "south": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "west": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "east": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "up": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "down": {
-          "texture": "#glass"
+          "texture": "#frame"
         }
       }
     },
@@ -338,22 +339,22 @@
       "name": "corner_ne",
       "faces": {
         "north": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "south": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "west": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "east": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "up": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "down": {
-          "texture": "#glass"
+          "texture": "#frame"
         }
       }
     },
@@ -372,22 +373,22 @@
       "name": "corner_se",
       "faces": {
         "north": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "south": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "west": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "east": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "up": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "down": {
-          "texture": "#glass"
+          "texture": "#frame"
         }
       }
     },
@@ -406,22 +407,22 @@
       "name": "roof_north",
       "faces": {
         "north": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "south": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "west": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "east": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "up": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "down": {
-          "texture": "#glass"
+          "texture": "#frame"
         }
       }
     },
@@ -440,22 +441,22 @@
       "name": "roof_south",
       "faces": {
         "north": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "south": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "west": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "east": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "up": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "down": {
-          "texture": "#glass"
+          "texture": "#frame"
         }
       }
     },
@@ -474,22 +475,22 @@
       "name": "roof_west",
       "faces": {
         "north": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "south": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "west": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "east": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "up": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "down": {
-          "texture": "#glass"
+          "texture": "#frame"
         }
       }
     },
@@ -508,22 +509,22 @@
       "name": "roof_east",
       "faces": {
         "north": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "south": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "west": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "east": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "up": {
-          "texture": "#glass"
+          "texture": "#frame"
         },
         "down": {
-          "texture": "#glass"
+          "texture": "#frame"
         }
       }
     },

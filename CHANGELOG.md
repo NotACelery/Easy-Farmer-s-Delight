@@ -22,6 +22,13 @@
 - Dynamic Paddy contents sample the brightest light available from the enclosure and its six neighbours, preventing a single adjacent wall or roof from turning the water/interior visually black.
 - Paddy item icons use the same custom Farmer renderer, keeping the water/platform visible in inventory without forcing the placed block shell onto the translucent layer.
 
+### Stateful machine-item consistency
+
+- Empty Villager Noise Switch items now use their normal stack size; only switches carrying a stored Villager are forced to stack size 1 when mined.
+- Removing the stored Villager before breaking a Noise Switch returns a clean, stackable item again.
+- Villager Noise Switch inventory rendering now reconstructs its saved BlockEntity state so the stored Villager is visible without duplicating the Lever/Redstone presentation.
+- Cutter inventory rendering now reconstructs saved machine state while preserving the established empty Cutter silhouette and stored log/Bamboo variant.
+
 ## 1.2.0 — 2026-08-19
 
 ### Viewer cleanup — Farmer guides split by machine
