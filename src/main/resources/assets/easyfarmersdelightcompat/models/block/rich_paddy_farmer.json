@@ -1,13 +1,12 @@
 {
   "parent": "block/block",
   "ambientocclusion": false,
-  "render_type": "translucent",
+  "render_type": "cutout",
   "textures": {
     "particle": "minecraft:block/iron_block",
     "glass": "minecraft:block/glass",
     "iron": "minecraft:block/iron_block",
-    "soil": "farmersdelight:block/rich_soil",
-    "water": "minecraft:block/water_still"
+    "soil": "farmersdelight:block/rich_soil"
   },
   "elements": [
     {
@@ -805,42 +804,6 @@
         },
         "down": {
           "texture": "#iron"
-        }
-      }
-    },
-    {
-      "from": [
-        2,
-        1,
-        2
-      ],
-      "to": [
-        14,
-        1.25,
-        14
-      ],
-      "shade": false,
-      "name": "water",
-      "faces": {
-        "up": {
-          "texture": "#water",
-          "tintindex": 0
-        },
-        "north": {
-          "texture": "#water",
-          "tintindex": 0
-        },
-        "south": {
-          "texture": "#water",
-          "tintindex": 0
-        },
-        "west": {
-          "texture": "#water",
-          "tintindex": 0
-        },
-        "east": {
-          "texture": "#water",
-          "tintindex": 0
         }
       }
     }

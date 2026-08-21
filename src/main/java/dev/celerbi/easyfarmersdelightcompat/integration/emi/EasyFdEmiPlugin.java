@@ -8,7 +8,14 @@ import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.stack.EmiStack;
+import java.util.List;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 
 @EmiEntrypoint
 public final class EasyFdEmiPlugin implements EmiPlugin {
@@ -55,6 +62,7 @@ public final class EasyFdEmiPlugin implements EmiPlugin {
 
         registry.addWorkstation(CUTTER_AXE, EmiStack.of(ModBlocks.CUTTER_ITEM.get()));
 
+        registerFarmerUpgradeTransfers(registry);
         registerCutting(registry);
 
         for (var info : RecipeViewerData.FARMER_TOOL_GUIDES) {
@@ -72,6 +80,73 @@ public final class EasyFdEmiPlugin implements EmiPlugin {
         for (var info : RecipeViewerData.BLOCK_GUIDES) {
             registry.addRecipe(new BlockGuideEmiRecipe(info));
         }
+    }
+
+    private static void registerFarmerUpgradeTransfers(EmiRegistry registry) {
+        ResourceLocation paddyId = modId("paddy_farmer");
+        ResourceLocation richId = modId("rich_farmer");
+        ResourceLocation richPaddyId = modId("rich_paddy_farmer");
+
+        // Remove EMI's generic wrappers for the real recipes. Their generic
+        // transfer path compares concrete ItemStack components and can stop at a
+        // stateful Easy Villagers Farmer. Synthetic viewer recipes below keep the
+        // same 3x3 layout while using our Ingredient-aware transfer handler.
+        registry.removeRecipes(paddyId);
+        registry.removeRecipes(richId);
+        registry.removeRecipes(richPaddyId);
+
+        Item easyFarmer = item("easy_villagers", "farmer");
+        Item richSoil = item("farmersdelight", "rich_soil");
+
+        registry.addRecipe(new FarmerUpgradeEmiRecipe(
+                paddyId,
+                syntheticId("paddy_farmer"),
+                List.of(
+                        Ingredient.of(Items.GLASS_PANE), Ingredient.of(Items.GLASS_PANE), Ingredient.of(Items.GLASS_PANE),
+                        Ingredient.of(Items.GLASS_PANE), Ingredient.of(easyFarmer), Ingredient.of(Items.GLASS_PANE),
+                        Ingredient.of(Items.IRON_INGOT), Ingredient.of(Items.WATER_BUCKET), Ingredient.of(Items.IRON_INGOT)
+                ),
+                new ItemStack(ModBlocks.PADDY_FARMER_ITEM.get()),
+                true
+        ));
+
+        registry.addRecipe(new FarmerUpgradeEmiRecipe(
+                richId,
+                syntheticId("rich_farmer"),
+                List.of(
+                        Ingredient.of(Items.GLASS_PANE), Ingredient.of(Items.GLASS_PANE), Ingredient.of(Items.GLASS_PANE),
+                        Ingredient.of(Items.GLASS_PANE), Ingredient.of(easyFarmer), Ingredient.of(Items.GLASS_PANE),
+                        Ingredient.of(Items.IRON_BLOCK), Ingredient.of(richSoil), Ingredient.of(Items.IRON_BLOCK)
+                ),
+                new ItemStack(ModBlocks.RICH_FARMER_ITEM.get()),
+                false
+        ));
+
+        registry.addRecipe(new FarmerUpgradeEmiRecipe(
+                richPaddyId,
+                syntheticId("rich_paddy_farmer"),
+                List.of(
+                        Ingredient.of(Items.GLASS_PANE), Ingredient.of(Items.GLASS_PANE), Ingredient.of(Items.GLASS_PANE),
+                        Ingredient.of(Items.GLASS_PANE), Ingredient.of(ModBlocks.PADDY_FARMER_ITEM.get()), Ingredient.of(Items.GLASS_PANE),
+                        Ingredient.of(Items.IRON_BLOCK), Ingredient.of(richSoil), Ingredient.of(Items.IRON_BLOCK)
+                ),
+                new ItemStack(ModBlocks.RICH_PADDY_FARMER_ITEM.get()),
+                false
+        ));
+
+        registry.addRecipeHandler(MenuType.CRAFTING, new FarmerUpgradeEmiRecipeHandler());
+    }
+
+    private static ResourceLocation modId(String path) {
+        return ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID, path);
+    }
+
+    private static ResourceLocation syntheticId(String path) {
+        return ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID, "/emi/farmer_upgrade/" + path);
+    }
+
+    private static Item item(String namespace, String path) {
+        return BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(namespace, path));
     }
 
     private static void registerCutting(EmiRegistry registry) {

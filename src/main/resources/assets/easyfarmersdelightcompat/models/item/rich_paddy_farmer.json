@@ -1,5 +1,6 @@
 {
-  "parent": "easyfarmersdelightcompat:block/rich_paddy_farmer",
+  "parent": "minecraft:builtin/entity",
+  "gui_light": "side",
   "display": {
     "gui": {
       "rotation": [

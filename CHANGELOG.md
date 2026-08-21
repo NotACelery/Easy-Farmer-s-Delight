@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.2.1 - 2026-08-21
+
+### Crafting / recipe transfer hotfix
+
+- Replaced the parallel Farmer display recipes with the real shaped Paddy, Rich Farmer and Rich Paddy recipes, so JEI/EMI recipe transfer uses the exact gameplay 3x3 pattern.
+- Split Rich Farmer and Rich Paddy into their own authoritative shaped recipes while preserving the source Farmer block-entity data during upgrades.
+- Verified the remaining addon crafting entries keep one authoritative transfer-friendly recipe: Cutter remains a real shaped recipe and Villager Noise Switch remains vanilla shaped crafting.
+- Empty Paddy, Rich Farmer and Rich Paddy items now remain clean items and stack normally, including after being placed and mined again.
+- Farmers carrying a Villager, crop, output inventory, Harvest Tool or other saved state serialize that state and are forced to stack size 1 so stored contents cannot be duplicated.
+- Added one-time normalization for 1.2.0 Farmer items: empty legacy block-entity payloads are stripped, while legacy stateful items are locked to one.
+- Easy Villagers' transient Farmer block-entity cache component is no longer copied into upgraded Easy FD Farmer items, preventing apparently empty machines from becoming non-stackable because of client-side representation data.
+- Farmer inventory icons are now state-aware: a mined Farmer that contains a Villager/crop renders those stored contents instead of always looking empty.
+- EMI 1.1.24 now uses a dedicated transfer path for Paddy/Rich Farmer/Rich Paddy upgrades instead of its generic component-strict crafting filler. The handler selects ingredients with Minecraft `Ingredient.test()` and moves the exact inventory stack through normal slot clicks, so Easy Villagers Farmers carrying synchronized block-entity components no longer make recipe transfer stop at the center slot.
+- The EMI-only upgrade views use synthetic 3x3 crafting entries while the real gameplay recipes remain authoritative; JEI's normal crafting transfer is left untouched.
+
+### Paddy rendering hotfix
+
+- Paddy Farmer and Rich Paddy Farmer no longer force their entire frame/glass model onto the translucent render layer just to display water.
+- The structural shell now uses the same cutout-style rendering approach as Easy Villagers/terrestrial Farmers, while the water surface is rendered separately with biome tint.
+- Dynamic Paddy contents sample the brightest light available from the enclosure and its six neighbours, preventing a single adjacent wall or roof from turning the water/interior visually black.
+- Paddy item icons use the same custom Farmer renderer, keeping the water/platform visible in inventory without forcing the placed block shell onto the translucent layer.
+
 ## 1.2.0 — 2026-08-19
 
 ### Viewer cleanup — Farmer guides split by machine
@@ -64,6 +86,7 @@
 - Added JEI Block Guide categories/catalysts and EMI contextual Block Guide categories while preserving Cutter integration with Farmer's Delight Cutting.
 - Added wrapped EMI guide text and concise tooltips for required/optional tools and durability.
 - Updated Sugar Cane guide wording to match the final sneak-use dismantle interaction.
+- The viewer layer is source-complete but remains an integration candidate until JEI-only, EMI-only, combined and no-viewer launch tests pass.
 
 ### Reliability / compatibility
 

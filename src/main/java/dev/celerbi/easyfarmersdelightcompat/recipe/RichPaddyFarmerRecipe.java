@@ -16,45 +16,35 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 
-/**
- * G G G
- * G F G
- * I W I
- *
- * G = Glass Pane, F = Easy Villagers Farmer, I = Iron Ingot, W = Water Bucket.
- *
- * This is a real shaped recipe (rather than a parallel viewer-only recipe), so
- * JEI/EMI recipe transfer sees the exact 3x3 inputs used by gameplay. assemble()
- * still preserves the source Farmer's data when upgrading it.
- */
-public final class PaddyFarmerRecipe extends ShapedRecipe {
-    private static final ResourceLocation EASY_FARMER = ResourceLocation.fromNamespaceAndPath("easy_villagers", "farmer");
+/** Paddy Farmer -> Rich Paddy Farmer. */
+public final class RichPaddyFarmerRecipe extends ShapedRecipe {
+    private static final ResourceLocation RICH_SOIL = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rich_soil");
 
-    public PaddyFarmerRecipe(CraftingBookCategory category) {
-        super("", category, pattern(), new ItemStack(ModBlocks.PADDY_FARMER_ITEM.get()), false);
+    public RichPaddyFarmerRecipe(CraftingBookCategory category) {
+        super("", category, pattern(), new ItemStack(ModBlocks.RICH_PADDY_FARMER_ITEM.get()), false);
     }
 
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
-        return RecipeUtil.upgradeFarmer(input.getItem(4), ModBlocks.PADDY_FARMER.get());
+        return RecipeUtil.upgradeFarmer(input.getItem(4), ModBlocks.RICH_PADDY_FARMER.get());
     }
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return ModRecipeSerializers.PADDY_FARMER.get();
+        return ModRecipeSerializers.RICH_PADDY_FARMER.get();
     }
 
     private static ShapedRecipePattern pattern() {
         return ShapedRecipePattern.of(
                 Map.of(
                         'G', Ingredient.of(Items.GLASS_PANE),
-                        'F', Ingredient.of(item(EASY_FARMER)),
-                        'I', Ingredient.of(Items.IRON_INGOT),
-                        'W', Ingredient.of(Items.WATER_BUCKET)
+                        'F', Ingredient.of(ModBlocks.PADDY_FARMER_ITEM.get()),
+                        'I', Ingredient.of(Items.IRON_BLOCK),
+                        'R', Ingredient.of(item(RICH_SOIL))
                 ),
                 "GGG",
                 "GFG",
-                "IWI"
+                "IRI"
         );
     }
 

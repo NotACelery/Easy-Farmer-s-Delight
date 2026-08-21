@@ -6,8 +6,8 @@ import dev.celerbi.easyfarmersdelightcompat.block.FarmerVariant;
 import dev.celerbi.easyfarmersdelightcompat.block.CutterBlock;
 import dev.celerbi.easyfarmersdelightcompat.block.VillagerNoiseSwitchBlock;
 import dev.celerbi.easyfarmersdelightcompat.item.CutterItem;
+import dev.celerbi.easyfarmersdelightcompat.item.CompatFarmerItem;
 import dev.celerbi.easyfarmersdelightcompat.item.VillagerNoiseSwitchItem;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -61,17 +61,17 @@ public final class ModBlocks {
             () -> new VillagerNoiseSwitchItem(VILLAGER_NOISE_SWITCH.get(), new Item.Properties().stacksTo(1))
     );
 
-    public static final DeferredItem<BlockItem> PADDY_FARMER_ITEM = ITEMS.registerSimpleBlockItem(
-            PADDY_FARMER,
-            new Item.Properties().stacksTo(1)
+    public static final DeferredItem<CompatFarmerItem> PADDY_FARMER_ITEM = ITEMS.register(
+            "paddy_farmer",
+            () -> new CompatFarmerItem(PADDY_FARMER.get(), new Item.Properties())
     );
-    public static final DeferredItem<BlockItem> RICH_FARMER_ITEM = ITEMS.registerSimpleBlockItem(
-            RICH_FARMER,
-            new Item.Properties().stacksTo(1)
+    public static final DeferredItem<CompatFarmerItem> RICH_FARMER_ITEM = ITEMS.register(
+            "rich_farmer",
+            () -> new CompatFarmerItem(RICH_FARMER.get(), new Item.Properties())
     );
-    public static final DeferredItem<BlockItem> RICH_PADDY_FARMER_ITEM = ITEMS.registerSimpleBlockItem(
-            RICH_PADDY_FARMER,
-            new Item.Properties().stacksTo(1)
+    public static final DeferredItem<CompatFarmerItem> RICH_PADDY_FARMER_ITEM = ITEMS.register(
+            "rich_paddy_farmer",
+            () -> new CompatFarmerItem(RICH_PADDY_FARMER.get(), new Item.Properties())
     );
 
 

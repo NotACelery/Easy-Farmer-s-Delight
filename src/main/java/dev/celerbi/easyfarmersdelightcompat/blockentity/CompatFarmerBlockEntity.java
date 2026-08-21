@@ -105,6 +105,7 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     private int sugarCaneHeight;
     private int sugarCaneAge;
     private ItemStack harvestTool = ItemStack.EMPTY;
+    private boolean itemPreview;
 
     public CompatFarmerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.COMPAT_FARMER.get(), pos, state);
@@ -124,6 +125,16 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     public CompoundTag passthroughDataCopy() {
         return passthroughData.copy();
     }
+
+    /** Transient client flag used only by the inventory renderer. */
+    public boolean isItemPreview() {
+        return itemPreview;
+    }
+
+    public void setItemPreview(boolean itemPreview) {
+        this.itemPreview = itemPreview;
+    }
+
 
     public IItemHandler getItemHandler() {
         if (level == null) {
@@ -417,6 +428,43 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     public void setRopeCount(int value) {
         ropeCount = Math.max(0, Math.min(2, value));
         setChanged();
+    }
+
+    /**
+     * Returns whether this machine owns state that must be preserved in its item.
+     * A completely empty Farmer intentionally serializes nothing when broken so
+     * empty machine items remain safe to stack normally.
+     */
+    public boolean hasStoredContents(HolderLookup.Provider registries) {
+        if (easyVillagers.hasVillager(registries) || easyVillagers.getCrop(registries) != null) {
+            return true;
+        }
+
+        Container output = easyVillagers.getOutputInventory(registries);
+        if (output != null) {
+            for (int slot = 0; slot < output.getContainerSize(); slot++) {
+                if (!output.getItem(slot).isEmpty()) {
+                    return true;
+                }
+            }
+        }
+
+        if (!harvestTool.isEmpty() || paddySand || sugarCaneHeight > 0 || sugarCaneAge > 0
+                || ropeCount > 0 || paddyGrowth > 0 || baseProgress > 0
+                || ropeOneProgress > 0 || ropeTwoProgress > 0 || fruitReady) {
+            return true;
+        }
+
+        // Preserve unknown Easy Villagers/future compatibility data rather than
+        // silently discarding it just to make the item stackable. Known empty
+        // Farmer keys are removed before this final check.
+        CompoundTag unknown = passthroughData.copy();
+        stripMetadata(unknown);
+        stripAddonKeys(unknown);
+        unknown.remove("Villager");
+        unknown.remove("Crop");
+        unknown.remove("Items");
+        return !unknown.isEmpty();
     }
 
     public static void serverTick(ServerLevel level, BlockPos pos, BlockState state, CompatFarmerBlockEntity farmer) {

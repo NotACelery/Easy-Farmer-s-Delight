@@ -16,6 +16,20 @@ set "JAVA_EXE="
  echo.
 
 rem ------------------------------------------------------------
+rem 0. Limpiar residuos de versiones anteriores si el source fue
+rem    extraido encima de una carpeta existente.
+rem ------------------------------------------------------------
+if exist "cleanup-obsolete-recipes.bat" (
+    call "cleanup-obsolete-recipes.bat"
+    if errorlevel 1 (
+        echo.
+        echo ERROR: Fallo la limpieza de residuos de Easy FD.
+        goto :failure
+    )
+)
+echo.
+
+rem ------------------------------------------------------------
 rem 1. Buscar Java: PATH, JAVA_HOME y runtimes administrados por Prism.
 rem ------------------------------------------------------------
 where java.exe >nul 2>nul

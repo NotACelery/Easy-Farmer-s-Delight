@@ -7,6 +7,7 @@ import dev.celerbi.easyfarmersdelightcompat.menu.PaddyFarmerMenu;
 import dev.celerbi.easyfarmersdelightcompat.menu.RichFarmerMenu;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -394,8 +395,12 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
     protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         ItemStack stack = new ItemStack(this);
         BlockEntity blockEntity = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
-        if (blockEntity instanceof CompatFarmerBlockEntity compatFarmer) {
+        if (blockEntity instanceof CompatFarmerBlockEntity compatFarmer
+                && compatFarmer.hasStoredContents(params.getLevel().registryAccess())) {
             compatFarmer.saveToItem(stack, params.getLevel().registryAccess());
+            // Stateful machines must never share one ItemStack because placing
+            // multiple copies would duplicate their stored villager/inventory.
+            stack.set(DataComponents.MAX_STACK_SIZE, 1);
         }
         return List.of(stack);
     }
