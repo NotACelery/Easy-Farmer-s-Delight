@@ -41,51 +41,52 @@ public final class CompatFarmerItem extends BlockItem {
             return;
         }
 
-        // Easy Villagers may attach a client/network cache to Farmer stacks. It
-        // is not machine persistence and must never make our otherwise-empty
-        // Farmer stacks compare as different items.
-        removeEasyVillagersClientCache(stack);
-
-        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        if (!(getBlock() instanceof CompatFarmerBlock farmerBlock)) {
+        ItemStack normalized = normalizeLoadedStack(stack, level);
+        if (normalized == stack) {
             return;
         }
-
-        if (data == null || data.isEmpty()) {
-            // Legacy 1.2.0/1.2.1 stacks can carry an arbitrary component patch
-            // inherited from the old upgrade recipe even after BLOCK_ENTITY_DATA
-            // and MAX_STACK_SIZE are removed. Rebuild truly empty Farmers from
-            // their current canonical item definition instead of trying to guess
-            // every historical residual component one by one.
-            canonicalizeEmptyStack(stack, entity, slot);
-            return;
-        }
-
-        CompatFarmerBlockEntity probe = new CompatFarmerBlockEntity(BlockPos.ZERO, farmerBlock.defaultBlockState());
-        probe.setLevel(level);
-        data.loadInto(probe, level.registryAccess());
-        if (probe.hasStoredContents(level.registryAccess())) {
-            stack.set(DataComponents.MAX_STACK_SIZE, 1);
-        } else {
-            canonicalizeEmptyStack(stack, entity, slot);
+        if (entity instanceof Player player) {
+            player.getInventory().setItem(slot, normalized);
+            player.getInventory().setChanged();
         }
     }
 
-
     /**
-     * Replaces an empty legacy Farmer with a fresh canonical stack. Only explicit
-     * player-facing metadata is preserved; machine/cache/default components from
-     * older builds are intentionally discarded. This is what makes old empty
-     * Farmers compare identically to newly crafted ones after an update.
+     * Normalizes a Farmer stack loaded from any addon generation.
+     *
+     * <p>Stateful Farmers are never rebuilt: their machine payload is probed using
+     * the real block entity and they remain max-stack 1. Only semantically empty
+     * stacks are recreated from the current canonical item definition, which strips
+     * arbitrary legacy component patches while retaining explicit name/lore metadata.</p>
      */
-    private static void canonicalizeEmptyStack(ItemStack stack, Entity entity, int slot) {
-        if (!(entity instanceof Player player)) {
-            // inventoryTick is normally invoked from a Player inventory. Keep a
-            // conservative fallback for any custom carrier that invokes it too.
-            stack.remove(DataComponents.BLOCK_ENTITY_DATA);
-            stack.remove(DataComponents.MAX_STACK_SIZE);
-            removeEasyVillagersClientCache(stack);
-            return;
+    public static ItemStack normalizeLoadedStack(ItemStack stack, Level level) {
+        if (stack.isEmpty() || !(stack.getItem() instanceof CompatFarmerItem farmerItem)) {
+            return stack;
+        }
+        if (!(farmerItem.getBlock() instanceof CompatFarmerBlock farmerBlock)) {
+            return stack;
+        }
+
+        removeEasyVillagersClientCache(stack);
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data != null && !data.isEmpty()) {
+            try {
+                CompatFarmerBlockEntity probe = new CompatFarmerBlockEntity(
+                        BlockPos.ZERO,
+                        farmerBlock.defaultBlockState()
+                );
+                probe.setLevel(level);
+                data.loadInto(probe, level.registryAccess());
+                if (probe.hasStoredContents(level.registryAccess())) {
+                    stack.set(DataComponents.MAX_STACK_SIZE, 1);
+                    return stack;
+                }
+            } catch (RuntimeException malformedLegacyData) {
+                // Migration must always prefer preserving an unknown historical stack
+                // over accidentally rebuilding it and discarding machine state.
+                stack.set(DataComponents.MAX_STACK_SIZE, 1);
+                return stack;
+            }
         }
 
         ItemStack canonical = new ItemStack(stack.getItem(), stack.getCount());
@@ -98,14 +99,7 @@ public final class CompatFarmerItem extends BlockItem {
             canonical.set(DataComponents.LORE, lore);
         }
 
-        // Newly crafted/current empty Farmers already are canonical. Do not
-        // replace their ItemStack object every inventory tick.
-        if (ItemStack.isSameItemSameComponents(stack, canonical)) {
-            return;
-        }
-
-        player.getInventory().setItem(slot, canonical);
-        player.getInventory().setChanged();
+        return ItemStack.isSameItemSameComponents(stack, canonical) ? stack : canonical;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

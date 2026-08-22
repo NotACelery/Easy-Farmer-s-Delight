@@ -1,11 +1,13 @@
 package dev.celerbi.easyfarmersdelightcompat;
 
+import dev.celerbi.easyfarmersdelightcompat.event.LegacyFarmerMigrationEvents;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModRecipeSerializers;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(EasyFarmersDelightCompat.MOD_ID)
 public final class EasyFarmersDelightCompat {
@@ -16,5 +18,6 @@ public final class EasyFarmersDelightCompat {
         ModBlockEntities.register(modEventBus);
         modEventBus.addListener(ModBlockEntities::onRegisterCapabilities);
         ModRecipeSerializers.register(modEventBus);
+        NeoForge.EVENT_BUS.addListener(LegacyFarmerMigrationEvents::onPlayerLoggedIn);
     }
 }
