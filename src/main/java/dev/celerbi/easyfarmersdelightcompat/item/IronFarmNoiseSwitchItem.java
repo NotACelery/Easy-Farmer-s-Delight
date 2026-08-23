@@ -1,15 +1,14 @@
 package dev.celerbi.easyfarmersdelightcompat.item;
 
-import dev.celerbi.easyfarmersdelightcompat.client.VillagerNoiseSwitchItemRenderer;
+import dev.celerbi.easyfarmersdelightcompat.client.IronFarmNoiseSwitchItemRenderer;
 import java.util.function.Consumer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
-/** Item form uses a custom renderer so the emerald pedestal, lever and dust are visible in inventory. */
-public final class VillagerNoiseSwitchItem extends BlockItem {
-    public VillagerNoiseSwitchItem(Block block, Properties properties) {
+public final class IronFarmNoiseSwitchItem extends BlockItem {
+    public IronFarmNoiseSwitchItem(Block block, Properties properties) {
         super(block, properties);
     }
 
@@ -20,7 +19,7 @@ public final class VillagerNoiseSwitchItem extends BlockItem {
 
             @Override
             public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                if (renderer == null) renderer = new VillagerNoiseSwitchItemRenderer();
+                if (renderer == null) renderer = new IronFarmNoiseSwitchItemRenderer();
                 return renderer;
             }
         });

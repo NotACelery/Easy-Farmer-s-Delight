@@ -5,6 +5,9 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -74,12 +77,57 @@ final class RecipeUtil {
         if (data == null || data.isEmpty()) {
             return false;
         }
-        var tag = data.copyTag();
+
+        CompoundTag tag = data.copyTag();
         tag.remove("id");
         tag.remove("x");
         tag.remove("y");
         tag.remove("z");
+
+        // Easy Villagers can leave structurally present but semantically empty
+        // Farmer payload behind (most notably an empty Items list). Treating that
+        // as real machine state makes a freshly crafted Easy FD Farmer receive a
+        // MAX_STACK_SIZE=1 component before it ever reaches the inventory.
+        stripEmptyContainers(tag);
+
+        // Old/current Easy FD payloads may also contain only schema/default fields.
+        // Those describe an empty machine and must not poison upgrade stacking.
+        tag.remove("EfdcSchema");
+        removeZeroInt(tag, "EfdcPaddyGrowth");
+        removeZeroInt(tag, "EfdcBaseProgress");
+        removeZeroInt(tag, "EfdcRopeOneProgress");
+        removeZeroInt(tag, "EfdcRopeTwoProgress");
+        removeZeroInt(tag, "EfdcRopeCount");
+        removeZeroInt(tag, "EfdcSugarCaneHeight");
+        removeZeroInt(tag, "EfdcSugarCaneAge");
+        removeFalseBoolean(tag, "EfdcFruitReady");
+        removeFalseBoolean(tag, "EfdcPaddySand");
+        stripEmptyContainers(tag);
+
         return !tag.isEmpty();
+    }
+
+    private static void stripEmptyContainers(CompoundTag tag) {
+        for (String key : java.util.Set.copyOf(tag.getAllKeys())) {
+            Tag value = tag.get(key);
+            if (value instanceof CompoundTag compound && compound.isEmpty()) {
+                tag.remove(key);
+            } else if (value instanceof ListTag list && list.isEmpty()) {
+                tag.remove(key);
+            }
+        }
+    }
+
+    private static void removeZeroInt(CompoundTag tag, String key) {
+        if (tag.contains(key, Tag.TAG_ANY_NUMERIC) && tag.getInt(key) == 0) {
+            tag.remove(key);
+        }
+    }
+
+    private static void removeFalseBoolean(CompoundTag tag, String key) {
+        if (tag.contains(key, Tag.TAG_ANY_NUMERIC) && !tag.getBoolean(key)) {
+            tag.remove(key);
+        }
     }
 
     /**

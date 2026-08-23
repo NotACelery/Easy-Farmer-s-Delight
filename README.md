@@ -1,5 +1,7 @@
 # Easy Farmer's Delight Compat
 
+Current release: **1.3.0** (NeoForge 1.21.1)
+
 <p align="center">
   <img src="easy-farmers-delight-compat-cover.webp" alt="Easy Farmer's Delight Compat" width="320">
 </p>
@@ -20,6 +22,7 @@ The main additions are:
 - **Harvest Tools** — Rich Farmers can hold a Knife, Hoe, or Axe when a crop needs one.
 - **Cutter** — automatically processes Farmer's Delight Cutting Board recipes and common Axe actions.
 - **Villager Noise Switch** — lets you mute Villager voices on your client.
+- **Iron Farm Noise Switch** — silences only the synthetic Zombie/Iron Golem sounds produced by Easy Villagers Iron Farms.
 - Optional **Jade**, **JEI**, and **EMI** support with useful in-game explanations.
 
 ---
@@ -209,13 +212,13 @@ The **Villager Noise Switch** lets you mute Villager voices for **your own Minec
 ```text
 G G G
 G L G
-R I R
+R E R
 ```
 
 - `G` = Glass Pane
 - `L` = Lever
 - `R` = Redstone Block
-- `I` = Iron Block
+- `E` = Emerald Block
 
 ### How to use it
 
@@ -226,7 +229,39 @@ Your preference is remembered when you change worlds or servers.
 
 The Lever and Redstone inside the model are decorative; the block does not act as a real Redstone switch.
 
-Empty Noise Switches stack normally. A switch carrying a Villager becomes an individual stateful item when broken and shows that Villager in its inventory preview; removing the Villager before breaking it restores normal stacking.
+Villager Noise Switches are always limited to a stack size of one, matching the Iron Farm Noise Switch. If a Villager is stored inside, the inventory preview shows that persisted Villager state.
+
+---
+
+
+# Iron Farm Noise Switch
+
+The **Iron Farm Noise Switch** is a second client-local sound switch dedicated to the noisy simulated Zombie and Iron Golem inside Easy Villagers Iron Farms.
+
+### Crafting
+
+```text
+G G G
+G L G
+R I R
+```
+
+- `G` = Glass Pane
+- `L` = Lever
+- `R` = Redstone Block
+- `I` = Iron Block
+
+The crafted switch is not active yet. Place it and build a miniature Iron Golem inside it:
+
+1. Right-click with an **Iron Block** four times. Each click consumes one block and assembles the base, body, left arm and right arm in that order.
+2. At 4/4, right-click with a **Carved Pumpkin**. The pumpkin is consumed and the structure becomes a permanent Iron Golem.
+3. Once complete, right-click the switch to toggle Iron Farm noise for your client.
+
+The completed Golem cannot be removed. The Iron Farm Noise Switch is therefore always limited to a stack size of one, and its assembly state is preserved when mined.
+
+The mute is intentionally surgical: it only cancels `Zombie Ambient`, `Iron Golem Hurt`, and `Iron Golem Death` sounds when they originate from the exact position of an `easy_villagers:iron_farm` block. Real Zombies and real Iron Golems remain fully audible.
+
+Like the Villager Noise Switch, the Lever and Redstone state is personal to each client and emits no real Redstone signal.
 
 ---
 
@@ -243,7 +278,8 @@ The mod adds its own simple guide pages showing:
 - how Mushroom Colonies are harvested;
 - how Melons and Pumpkins work;
 - how to use the Cutter;
-- how to use the Villager Noise Switch.
+- how to use the Villager Noise Switch;
+- how to assemble and use the Iron Farm Noise Switch.
 
 In EMI, open the **Recipes** for one of the mod's blocks and you will find a **Block Guide** tab beside the normal crafting information.
 
@@ -265,7 +301,8 @@ Depending on the block, Jade can show things such as:
 - Tomato and Rope growth;
 - Melon/Pumpkin growth stage;
 - Cutter progress and wrong-tool warnings;
-- whether Villager sounds are currently enabled or muted.
+- whether Villager sounds are currently enabled or muted;
+- Iron Farm Noise Switch assembly progress and its local mute state.
 
 ---
 

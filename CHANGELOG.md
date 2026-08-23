@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.3.0 — 2026-08-22
+
+- Villager Noise Switch is now always non-stackable, matching its Iron Farm sibling.
+- Iron Farm Noise Switch inventory/JEI/EMI previews always render the pedestal and Lever, and completed item state previews render the stored Iron Golem.
+- Iron Farm Noise Switch Block Guide is condensed into a visual `empty switch + 4× Iron Block + Carved Pumpkin -> completed switch` transformation, leaving room to explain the actual client-side sound-muting behavior.
+
+- Added the Iron Farm Noise Switch for Easy Villagers Iron Farms.
+- The switch uses the former Iron-based Noise Switch recipe, then requires four additional Iron Blocks inserted one at a time plus a final Carved Pumpkin.
+- Its renderer mirrors vanilla Iron Golem construction order: base, body, left arm, right arm, then permanent miniature Iron Golem after the pumpkin is consumed.
+- Completed Iron Farm Noise Switches are permanently assembled, always non-stackable, and preserve assembly/Golem state when mined.
+- Added a second persistent client-only preference so each player can independently toggle Iron Farm noise without changing server/world state.
+- Sound filtering is restricted to Zombie Ambient and Iron Golem Hurt/Death events whose exact source position is an `easy_villagers:iron_farm`; real mobs are unaffected.
+- Added Jade assembly/status information and a shared JEI/EMI Block Guide page.
+- Villager Noise Switch recipe, model accents and internal pedestal now use an Emerald Block; the Iron Block identity is reserved for the Iron Farm Noise Switch.
+- Fixed empty Farmer upgrades being treated as stateful when their source only carried structurally empty block-entity data, so clean Paddy/Rich Farmer items are stackable immediately from crafting and recipe transfer.
+- NeoForge Paddy/Rich Paddy sneak-removal is now server-authoritative: Shift + Right Click is captured even if the client-side Easy Villagers delegate is one sync behind, preventing intermittent failures to extract planted Rice.
+
 ## 1.2.1 - 2026-08-21
 
 ### Crafting / recipe transfer hotfix

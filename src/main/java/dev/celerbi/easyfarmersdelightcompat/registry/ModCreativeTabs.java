@@ -31,6 +31,7 @@ public final class ModCreativeTabs {
                         output.accept(ModBlocks.RICH_PADDY_FARMER_ITEM.get());
                         output.accept(ModBlocks.CUTTER_ITEM.get());
                         output.accept(ModBlocks.VILLAGER_NOISE_SWITCH_ITEM.get());
+                        output.accept(ModBlocks.IRON_FARM_NOISE_SWITCH_ITEM.get());
                     })
                     .build()
     );

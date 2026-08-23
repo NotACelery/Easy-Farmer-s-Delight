@@ -154,32 +154,41 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
         var registries = level.registryAccess();
 
-        // Sneak-use is a removal action before any held-item interaction. In 1.21
-        // useItemOn can consume the interaction before useWithoutItem is reached, so
-        // Paddy teardown/removal must also live here instead of relying on an empty
-        // hand. This makes Shift + Right Click deterministic with any held item.
+        // Paddy sneak-use is always captured client-side, but its state decision is
+        // server-authoritative. The reflected Easy Villagers delegate can briefly be
+        // one sync behind on the client; asking the client whether Rice exists made
+        // Shift + Right Click intermittently fall through to the output menu.
         if (player.isShiftKeyDown() && variant.isAquatic()) {
+            if (level.isClientSide) {
+                return ItemInteractionResult.sidedSuccess(true);
+            }
             if (farmer.hasPaddySand()) {
-                if (!level.isClientSide) {
-                    for (ItemStack returned : farmer.dismantleSugarCaneMode()) {
-                        if (!returned.isEmpty()) {
-                            ItemHandlerHelper.giveItemToPlayer(player, returned);
-                        }
+                for (ItemStack returned : farmer.dismantleSugarCaneMode()) {
+                    if (!returned.isEmpty()) {
+                        ItemHandlerHelper.giveItemToPlayer(player, returned);
                     }
-                    level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
                 }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+                return ItemInteractionResult.sidedSuccess(false);
             }
 
             if (farmer.easyVillagers().getCrop(registries) != null) {
-                if (!level.isClientSide) {
-                    ItemStack removed = farmer.removeSelectedCrop(registries);
-                    if (!removed.isEmpty()) {
-                        ItemHandlerHelper.giveItemToPlayer(player, removed);
-                    }
-                    level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
+                ItemStack removed = farmer.removeSelectedCrop(registries);
+                if (!removed.isEmpty()) {
+                    ItemHandlerHelper.giveItemToPlayer(player, removed);
                 }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
+                return ItemInteractionResult.sidedSuccess(false);
+            }
+
+            if (farmer.easyVillagers().hasVillager(registries)) {
+                ItemStack villager = farmer.easyVillagers().removeVillager(registries);
+                if (!villager.isEmpty()) {
+                    ItemHandlerHelper.giveItemToPlayer(player, villager);
+                }
+                farmer.setChanged();
+                level.playSound(null, pos, SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                return ItemInteractionResult.sidedSuccess(false);
             }
         }
 
@@ -319,14 +328,34 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
         }
 
         var registries = level.registryAccess();
-        if (player.isShiftKeyDown() && variant.isAquatic() && farmer.hasPaddySand()) {
-            if (!level.isClientSide) {
+        if (player.isShiftKeyDown() && variant.isAquatic()) {
+            if (level.isClientSide) {
+                return InteractionResult.sidedSuccess(true);
+            }
+            if (farmer.hasPaddySand()) {
                 for (ItemStack returned : farmer.dismantleSugarCaneMode()) {
                     if (!returned.isEmpty()) ItemHandlerHelper.giveItemToPlayer(player, returned);
                 }
                 level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+                return InteractionResult.sidedSuccess(false);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            if (farmer.easyVillagers().getCrop(registries) != null) {
+                ItemStack removed = farmer.removeSelectedCrop(registries);
+                if (!removed.isEmpty()) {
+                    ItemHandlerHelper.giveItemToPlayer(player, removed);
+                }
+                level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
+                return InteractionResult.sidedSuccess(false);
+            }
+            if (farmer.easyVillagers().hasVillager(registries)) {
+                ItemStack villager = farmer.easyVillagers().removeVillager(registries);
+                if (!villager.isEmpty()) {
+                    ItemHandlerHelper.giveItemToPlayer(player, villager);
+                }
+                farmer.setChanged();
+                level.playSound(null, pos, SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                return InteractionResult.sidedSuccess(false);
+            }
         }
 
         if (player.isShiftKeyDown() && !variant.isAquatic() && variant.isRich()
