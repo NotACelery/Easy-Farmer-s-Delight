@@ -38,16 +38,9 @@ final class RecipeUtil {
         return !stack.isEmpty() && stack.is(expected.asItem());
     }
 
-    /**
-     * Creates one of our Farmer items while preserving real machine state.
-     * Empty source Farmers deliberately produce a clean stackable result; a
-     * meaningful block-entity payload is rewritten to our type and locked to one.
-     */
+    /** Upgrades a Farmer while preserving meaningful machine state only. */
     static ItemStack upgradeFarmer(ItemStack source, Block target) {
-        // Start from the target's canonical item instead of cloning the complete
-        // source component patch. Easy Villagers can attach transient/cache
-        // components to its Farmer item; copying those made clean upgrade outputs
-        // compare as different stacks even though no machine state was present.
+        // Start from the canonical target so transient Easy Villagers components are not copied.
         ItemStack result = new ItemStack(target);
         result.setCount(1);
 
@@ -67,8 +60,7 @@ final class RecipeUtil {
             result.set(DataComponents.MAX_STACK_SIZE, 1);
         }
 
-        // Defensive: never let Easy Villagers' render/network cache survive onto
-        // an Easy FD Farmer even if another component-copy path is introduced later.
+        // Never carry Easy Villagers' render/network cache into the upgraded item.
         removeEasyVillagersClientCache(result);
         return result;
     }
@@ -84,14 +76,10 @@ final class RecipeUtil {
         tag.remove("y");
         tag.remove("z");
 
-        // Easy Villagers can leave structurally present but semantically empty
-        // Farmer payload behind (most notably an empty Items list). Treating that
-        // as real machine state makes a freshly crafted Easy FD Farmer receive a
-        // MAX_STACK_SIZE=1 component before it ever reaches the inventory.
+        // Ignore structurally present but semantically empty Farmer payloads.
         stripEmptyContainers(tag);
 
-        // Old/current Easy FD payloads may also contain only schema/default fields.
-        // Those describe an empty machine and must not poison upgrade stacking.
+        // Schema/default-only Easy FD payloads are also empty.
         tag.remove("EfdcSchema");
         removeZeroInt(tag, "EfdcPaddyGrowth");
         removeZeroInt(tag, "EfdcBaseProgress");
@@ -130,12 +118,7 @@ final class RecipeUtil {
         }
     }
 
-    /**
-     * Easy Villagers attaches a network-only block-entity cache component while
-     * rendering/inspecting Farmer items. It is not the persisted machine payload
-     * and copying it to our item makes otherwise-empty Farmers compare as different
-     * stacks. The real state is preserved through vanilla BLOCK_ENTITY_DATA below.
-     */
+    /** Removes Easy Villagers' network-only item cache; persisted state lives in BLOCK_ENTITY_DATA. */
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static void removeEasyVillagersClientCache(ItemStack stack) {
         DataComponentType type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(EASY_VILLAGERS_BLOCK_ENTITY_COMPONENT);

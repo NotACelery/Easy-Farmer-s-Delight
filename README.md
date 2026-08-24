@@ -1,6 +1,6 @@
 # Easy Farmer's Delight Compat
 
-Current release: **1.3.0** (NeoForge 1.21.1)
+Current release: **1.3.1** (NeoForge 1.21.1)
 
 <p align="center">
   <img src="easy-farmers-delight-compat-cover.webp" alt="Easy Farmer's Delight Compat" width="320">
