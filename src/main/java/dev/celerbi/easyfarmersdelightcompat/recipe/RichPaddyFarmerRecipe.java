@@ -16,9 +16,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 
-/** Paddy Farmer -> Rich Paddy Farmer. */
 public final class RichPaddyFarmerRecipe extends ShapedRecipe {
-    private static final ResourceLocation RICH_SOIL = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rich_soil");
+    private static final ResourceLocation RICH_SOIL = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "rich_soil");
 
     public RichPaddyFarmerRecipe(CraftingBookCategory category) {
         super("", category, pattern(), new ItemStack(ModBlocks.RICH_PADDY_FARMER_ITEM.get()), false);

@@ -18,7 +18,6 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** Renders the complete persisted Noise Switch state in inventory. */
 public final class VillagerNoiseSwitchItemRenderer extends BlockEntityWithoutLevelRenderer {
     private final Minecraft minecraft;
     private final BlockRenderDispatcher blockRenderer;

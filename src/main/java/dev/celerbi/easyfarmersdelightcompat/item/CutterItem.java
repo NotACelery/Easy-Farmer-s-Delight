@@ -15,10 +15,29 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 public final class CutterItem extends BlockItem {
-    public CutterItem(Block block,Properties properties){super(block,properties);}
-    @Override public void appendHoverText(ItemStack stack,Item.TooltipContext context,List<Component> tooltip,TooltipFlag flag){
-        super.appendHoverText(stack,context,tooltip,flag); Block variant=CutterLogVariant.fromStack(stack);
-        tooltip.add(Component.translatable("tooltip.easyfarmersdelightcompat.cutter.variant",Component.translatable(CutterLogVariant.translationKey(variant))).withStyle(ChatFormatting.GRAY));
+    public CutterItem(Block block, Properties properties) {
+        super(block, properties);
     }
-    @Override public void initializeClient(Consumer<IClientItemExtensions> consumer){consumer.accept(new IClientItemExtensions(){private BlockEntityWithoutLevelRenderer renderer;@Override public BlockEntityWithoutLevelRenderer getCustomRenderer(){if(renderer==null)renderer=new CutterItemRenderer();return renderer;}});}
+
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip,
+            TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
+        Block variant = CutterLogVariant.fromStack(stack);
+        tooltip.add(Component.translatable("tooltip.easyfarmersdelightcompat.cutter.variant", Component
+                .translatable(CutterLogVariant.translationKey(variant))).withStyle(ChatFormatting.GRAY));
+    }
+
+    @Override
+    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+        consumer.accept(new IClientItemExtensions() {
+            private BlockEntityWithoutLevelRenderer renderer;
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                if (renderer == null)
+                    renderer = new CutterItemRenderer();
+                return renderer;
+            }
+        });
+    }
 }

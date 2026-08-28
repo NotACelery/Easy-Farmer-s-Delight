@@ -18,22 +18,26 @@ public final class ModRecipeSerializers {
             EasyFarmersDelightCompat.MOD_ID
     );
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<PaddyFarmerRecipe>> PADDY_FARMER = SERIALIZERS.register(
+    public static final DeferredHolder<RecipeSerializer<?>,
+            RecipeSerializer<PaddyFarmerRecipe>> PADDY_FARMER = SERIALIZERS.register(
             "paddy_farmer",
             () -> new SimpleCraftingRecipeSerializer<>(PaddyFarmerRecipe::new)
     );
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RichFarmerRecipe>> RICH_FARMER = SERIALIZERS.register(
+    public static final DeferredHolder<RecipeSerializer<?>,
+            RecipeSerializer<RichFarmerRecipe>> RICH_FARMER = SERIALIZERS.register(
             "rich_farmer",
             () -> new SimpleCraftingRecipeSerializer<>(RichFarmerRecipe::new)
     );
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<RichPaddyFarmerRecipe>> RICH_PADDY_FARMER = SERIALIZERS.register(
+    public static final DeferredHolder<RecipeSerializer<?>,
+            RecipeSerializer<RichPaddyFarmerRecipe>> RICH_PADDY_FARMER = SERIALIZERS.register(
             "rich_paddy_farmer",
             () -> new SimpleCraftingRecipeSerializer<>(RichPaddyFarmerRecipe::new)
     );
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<CutterRecipe>> CUTTER = SERIALIZERS.register(
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<CutterRecipe>> CUTTER = SERIALIZERS
+            .register(
             "cutter", () -> new SimpleCraftingRecipeSerializer<>(CutterRecipe::new));
 
     private ModRecipeSerializers() {

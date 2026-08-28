@@ -16,10 +16,11 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 
-/** Easy Villagers Farmer -> Rich Farmer. */
 public final class RichFarmerRecipe extends ShapedRecipe {
-    private static final ResourceLocation EASY_FARMER = ResourceLocation.fromNamespaceAndPath("easy_villagers", "farmer");
-    private static final ResourceLocation RICH_SOIL = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rich_soil");
+    private static final ResourceLocation EASY_FARMER = ResourceLocation.fromNamespaceAndPath("easy_villagers",
+            "farmer");
+    private static final ResourceLocation RICH_SOIL = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "rich_soil");
 
     public RichFarmerRecipe(CraftingBookCategory category) {
         super("", category, pattern(), new ItemStack(ModBlocks.RICH_FARMER_ITEM.get()), false);

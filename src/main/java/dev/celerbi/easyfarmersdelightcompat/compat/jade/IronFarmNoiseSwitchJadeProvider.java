@@ -66,5 +66,7 @@ public enum IronFarmNoiseSwitchJadeProvider implements IBlockComponentProvider, 
     }
 
     @Override
-    public ResourceLocation getUid() { return UID; }
+    public ResourceLocation getUid() {
+        return UID;
+    }
 }

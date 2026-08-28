@@ -19,14 +19,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
-/**
- * Farmer BlockItem with state-aware stacking and inventory rendering.
- *
- * <p>The canonical empty item has no persistent machine payload and therefore
- * uses the normal item stack limit. As soon as real machine state is present the
- * stack is locked to one. This same normalizer also repairs legacy/test stacks
- * that still carry an old MAX_STACK_SIZE=1 override after being emptied.</p>
- */
 public final class CompatFarmerItem extends BlockItem {
     private static final ResourceLocation EASY_VILLAGERS_BLOCK_ENTITY_COMPONENT =
             ResourceLocation.fromNamespaceAndPath("easy_villagers", "block_entity");
@@ -51,14 +43,6 @@ public final class CompatFarmerItem extends BlockItem {
         }
     }
 
-    /**
-     * Normalizes a Farmer stack loaded from any addon generation.
-     *
-     * <p>Stateful Farmers are never rebuilt: their machine payload is probed using
-     * the real block entity and they remain max-stack 1. Only semantically empty
-     * stacks are recreated from the current canonical item definition, which strips
-     * arbitrary legacy component patches while retaining explicit name/lore metadata.</p>
-     */
     public static ItemStack normalizeLoadedStack(ItemStack stack, Level level) {
         if (stack.isEmpty() || !(stack.getItem() instanceof CompatFarmerItem farmerItem)) {
             return stack;
@@ -82,8 +66,7 @@ public final class CompatFarmerItem extends BlockItem {
                     return stack;
                 }
             } catch (RuntimeException malformedLegacyData) {
-                // Migration must always prefer preserving an unknown historical stack
-                // over accidentally rebuilding it and discarding machine state.
+
                 stack.set(DataComponents.MAX_STACK_SIZE, 1);
                 return stack;
             }

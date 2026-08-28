@@ -38,13 +38,11 @@ final class RecipeUtil {
         return !stack.isEmpty() && stack.is(expected.asItem());
     }
 
-    /** Upgrades a Farmer while preserving meaningful machine state only. */
     static ItemStack upgradeFarmer(ItemStack source, Block target) {
-        // Start from the canonical target so transient Easy Villagers components are not copied.
+
         ItemStack result = new ItemStack(target);
         result.setCount(1);
 
-        // Preserve player-facing metadata that is safe to carry across an upgrade.
         var customName = source.get(DataComponents.CUSTOM_NAME);
         if (customName != null) {
             result.set(DataComponents.CUSTOM_NAME, customName);
@@ -60,7 +58,6 @@ final class RecipeUtil {
             result.set(DataComponents.MAX_STACK_SIZE, 1);
         }
 
-        // Never carry Easy Villagers' render/network cache into the upgraded item.
         removeEasyVillagersClientCache(result);
         return result;
     }
@@ -76,10 +73,8 @@ final class RecipeUtil {
         tag.remove("y");
         tag.remove("z");
 
-        // Ignore structurally present but semantically empty Farmer payloads.
         stripEmptyContainers(tag);
 
-        // Schema/default-only Easy FD payloads are also empty.
         tag.remove("EfdcSchema");
         removeZeroInt(tag, "EfdcPaddyGrowth");
         removeZeroInt(tag, "EfdcBaseProgress");
@@ -118,7 +113,6 @@ final class RecipeUtil {
         }
     }
 
-    /** Removes Easy Villagers' network-only item cache; persisted state lives in BLOCK_ENTITY_DATA. */
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static void removeEasyVillagersClientCache(ItemStack stack) {
         DataComponentType type = BuiltInRegistries.DATA_COMPONENT_TYPE.get(EASY_VILLAGERS_BLOCK_ENTITY_COMPONENT);

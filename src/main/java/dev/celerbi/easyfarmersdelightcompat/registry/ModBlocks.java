@@ -40,7 +40,6 @@ public final class ModBlocks {
             farmerProperties()
     );
 
-
     public static final DeferredBlock<CutterBlock> CUTTER = BLOCKS.registerBlock(
             "cutter",
             CutterBlock::new,
@@ -86,7 +85,6 @@ public final class ModBlocks {
             "rich_paddy_farmer",
             () -> new CompatFarmerItem(RICH_PADDY_FARMER.get(), new Item.Properties())
     );
-
 
     private static BlockBehaviour.Properties farmerProperties() {
         return BlockBehaviour.Properties.of()

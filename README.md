@@ -335,11 +335,11 @@ Install the mod on both the **client and server** when playing multiplayer.
 
 ---
 
-# Version 1.2.0
+# Release history
 
-Version 1.2.0 greatly expands the farming side of the mod with Sugar Cane, Melons, Pumpkins, Harvest Tools, the Villager Noise Switch, improved Cutter behavior, better Jade information, and dedicated JEI/EMI guides.
+The current 1.3.x line adds the Villager Noise Switch and Iron Farm Noise Switch family on top of the expanded Farmer/Cutter systems introduced during 1.2.x.
 
-See [CHANGELOG.md](CHANGELOG.md) for the full release history.
+See [CHANGELOG.md](CHANGELOG.md) for the complete user-facing release history.
 
 ---
 
@@ -360,6 +360,8 @@ bash build-dev.sh
 ```
 
 The built JAR is created in `build/libs/`.
+
+For architecture, persistence rules, compatibility boundaries, machine lifecycles, viewer design and regression checks, see [DEVELOPMENT.md](DEVELOPMENT.md). That document is the technical source of truth that replaces large explanatory comment blocks in the Java source.
 
 ## License
 

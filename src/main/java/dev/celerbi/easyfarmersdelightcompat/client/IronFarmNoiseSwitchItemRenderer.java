@@ -47,10 +47,6 @@ public final class IronFarmNoiseSwitchItemRenderer extends BlockEntityWithoutLev
             }
         }
 
-        // The shell model does not contain the pedestal/lever/dust. Always run the
-        // BER so even an empty inventory/JEI icon looks like the placed switch.
-        // When BlockEntityData is present in-world, the same renderer also previews
-        // the permanently assembled Iron Golem.
         BlockEntityRenderer<IronFarmNoiseSwitchBlockEntity> renderer =
                 minecraft.getBlockEntityRenderDispatcher().getRenderer(preview);
         if (renderer != null) {

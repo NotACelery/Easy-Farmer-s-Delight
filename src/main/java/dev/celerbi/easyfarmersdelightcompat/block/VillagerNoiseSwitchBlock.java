@@ -39,13 +39,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
-/**
- * Physical control surface for a global, client-only Villager mute preference.
- *
- * The block intentionally has no POWERED property and never emits redstone. Lever
- * and dust state are renderer-only, so observers and other players cannot see or
- * exploit another client's preference.
- */
 public final class VillagerNoiseSwitchBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
@@ -85,11 +78,13 @@ public final class VillagerNoiseSwitchBlock extends Block implements EntityBlock
     }
 
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        if (level.isClientSide || type != ModBlockEntities.VILLAGER_NOISE_SWITCH.get()) return null;
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state,
+            BlockEntityType<T> type) {
+        if (level.isClientSide || type != ModBlockEntities.VILLAGER_NOISE_SWITCH.get())
+            return null;
         return (tickerLevel, pos, tickerState, blockEntity) -> {
             if (tickerLevel instanceof net.minecraft.server.level.ServerLevel serverLevel
-                    && blockEntity instanceof VillagerNoiseSwitchBlockEntity noiseSwitch) {
+                     && blockEntity instanceof VillagerNoiseSwitchBlockEntity noiseSwitch) {
                 VillagerNoiseSwitchBlockEntity.serverTick(serverLevel, pos, tickerState, noiseSwitch);
             }
         };
@@ -112,7 +107,8 @@ public final class VillagerNoiseSwitchBlock extends Block implements EntityBlock
         if (player.isShiftKeyDown() && noiseSwitch.hasVillager()) {
             if (!level.isClientSide) {
                 ItemStack removed = noiseSwitch.removeVillager();
-                if (!removed.isEmpty()) ItemHandlerHelper.giveItemToPlayer(player, removed);
+                if (!removed.isEmpty())
+                    ItemHandlerHelper.giveItemToPlayer(player, removed);
                 level.playSound(null, pos, SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
@@ -120,7 +116,8 @@ public final class VillagerNoiseSwitchBlock extends Block implements EntityBlock
 
         if (!noiseSwitch.hasVillager() && noiseSwitch.isVillagerItem(held)) {
             if (!level.isClientSide && noiseSwitch.insertVillager(held)) {
-                if (!player.getAbilities().instabuild) held.shrink(1);
+                if (!player.getAbilities().instabuild)
+                    held.shrink(1);
                 level.playSound(null, pos, SoundEvents.VILLAGER_YES, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
@@ -131,13 +128,16 @@ public final class VillagerNoiseSwitchBlock extends Block implements EntityBlock
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        if (!(level.getBlockEntity(pos) instanceof VillagerNoiseSwitchBlockEntity noiseSwitch)) return InteractionResult.PASS;
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
+            BlockHitResult hit) {
+        if (!(level.getBlockEntity(pos) instanceof VillagerNoiseSwitchBlockEntity noiseSwitch))
+            return InteractionResult.PASS;
 
         if (player.isShiftKeyDown() && noiseSwitch.hasVillager()) {
             if (!level.isClientSide) {
                 ItemStack removed = noiseSwitch.removeVillager();
-                if (!removed.isEmpty()) ItemHandlerHelper.giveItemToPlayer(player, removed);
+                if (!removed.isEmpty())
+                    ItemHandlerHelper.giveItemToPlayer(player, removed);
                 level.playSound(null, pos, SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
             return InteractionResult.sidedSuccess(level.isClientSide);
@@ -148,7 +148,8 @@ public final class VillagerNoiseSwitchBlock extends Block implements EntityBlock
     }
 
     private static void toggleClient(Level level, Player player, VillagerNoiseSwitchBlockEntity noiseSwitch) {
-        if (!level.isClientSide) return;
+        if (!level.isClientSide)
+            return;
         if (!noiseSwitch.hasVillager()) {
             player.displayClientMessage(
                     Component.translatable("message.easyfarmersdelightcompat.noise_switch.villager_required"),
@@ -174,10 +175,9 @@ public final class VillagerNoiseSwitchBlock extends Block implements EntityBlock
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        // NeoForge routes Creative Pick Block through IBlockExtension's contextual
-        // overload. Keep it clean: local mute state never belongs to an item and the
-        // stored Villager must not be cloned in Creative.
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos,
+            Player player) {
+
         return new ItemStack(ModBlocks.VILLAGER_NOISE_SWITCH_ITEM.get());
     }
 

@@ -15,7 +15,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** Stores only the physical Villager. Mute state is deliberately client-global and never stored here. */
 public final class VillagerNoiseSwitchBlockEntity extends BlockEntity {
     private static final String KEY_VILLAGER = "NoiseSwitchVillager";
 
@@ -26,14 +25,11 @@ public final class VillagerNoiseSwitchBlockEntity extends BlockEntity {
         super(ModBlockEntities.VILLAGER_NOISE_SWITCH.get(), pos, state);
     }
 
-    public static void serverTick(ServerLevel level, BlockPos pos, BlockState state, VillagerNoiseSwitchBlockEntity blockEntity) {
-        if (!blockEntity.hasVillager()) return;
+    public static void serverTick(ServerLevel level, BlockPos pos, BlockState state,
+            VillagerNoiseSwitchBlockEntity blockEntity) {
+        if (!blockEntity.hasVillager())
+            return;
 
-        // Match Easy Villagers' stored-villager aging semantics without spamming a
-        // block-entity update packet every second. Mark the chunk dirty as age moves,
-        // periodically flush the cached entity back into the VillagerItem for crash-
-        // safe persistence, and only sync clients when the baby/adult visual state
-        // can actually change.
         boolean becameAdult = blockEntity.villagerAdapter.advanceAge();
         blockEntity.setChanged();
         if (level.getGameTime() % 20L == 0L) {
@@ -58,7 +54,8 @@ public final class VillagerNoiseSwitchBlockEntity extends BlockEntity {
     }
 
     public boolean insertVillager(ItemStack stack) {
-        if (hasVillager() || !isVillagerItem(stack)) return false;
+        if (hasVillager() || !isVillagerItem(stack))
+            return false;
         villager = stack.copyWithCount(1);
         villagerAdapter.reset();
         setChangedAndSync();
@@ -66,7 +63,8 @@ public final class VillagerNoiseSwitchBlockEntity extends BlockEntity {
     }
 
     public ItemStack removeVillager() {
-        if (villager.isEmpty()) return ItemStack.EMPTY;
+        if (villager.isEmpty())
+            return ItemStack.EMPTY;
         villagerAdapter.flushToOwner();
         ItemStack result = villager.copyWithCount(1);
         villager = ItemStack.EMPTY;
@@ -90,7 +88,8 @@ public final class VillagerNoiseSwitchBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         villagerAdapter.flushToOwner();
-        if (!villager.isEmpty()) tag.put(KEY_VILLAGER, villager.save(registries));
+        if (!villager.isEmpty())
+            tag.put(KEY_VILLAGER, villager.save(registries));
     }
 
     @Override
@@ -104,7 +103,6 @@ public final class VillagerNoiseSwitchBlockEntity extends BlockEntity {
                 : ItemStack.EMPTY;
         villagerAdapter.reset();
     }
-
 
     @Override
     public void setRemoved() {

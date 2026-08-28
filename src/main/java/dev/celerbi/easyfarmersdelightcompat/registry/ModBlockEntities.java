@@ -19,7 +19,8 @@ public final class ModBlockEntities {
             EasyFarmersDelightCompat.MOD_ID
     );
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CompatFarmerBlockEntity>> COMPAT_FARMER = BLOCK_ENTITIES.register(
+    public static final DeferredHolder<BlockEntityType<?>,
+            BlockEntityType<CompatFarmerBlockEntity>> COMPAT_FARMER = BLOCK_ENTITIES.register(
             "compat_farmer",
             () -> BlockEntityType.Builder.of(
                     CompatFarmerBlockEntity::new,
@@ -29,12 +30,14 @@ public final class ModBlockEntities {
             ).build(null)
     );
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CutterBlockEntity>> CUTTER = BLOCK_ENTITIES.register(
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CutterBlockEntity>> CUTTER = BLOCK_ENTITIES
+            .register(
             "cutter",
             () -> BlockEntityType.Builder.of(CutterBlockEntity::new, ModBlocks.CUTTER.get()).build(null)
     );
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<VillagerNoiseSwitchBlockEntity>> VILLAGER_NOISE_SWITCH = BLOCK_ENTITIES.register(
+    public static final DeferredHolder<BlockEntityType<?>,
+            BlockEntityType<VillagerNoiseSwitchBlockEntity>> VILLAGER_NOISE_SWITCH = BLOCK_ENTITIES.register(
             "villager_noise_switch",
             () -> BlockEntityType.Builder.of(
                     VillagerNoiseSwitchBlockEntity::new,
@@ -42,7 +45,8 @@ public final class ModBlockEntities {
             ).build(null)
     );
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<IronFarmNoiseSwitchBlockEntity>> IRON_FARM_NOISE_SWITCH = BLOCK_ENTITIES.register(
+    public static final DeferredHolder<BlockEntityType<?>,
+            BlockEntityType<IronFarmNoiseSwitchBlockEntity>> IRON_FARM_NOISE_SWITCH = BLOCK_ENTITIES.register(
             "iron_farm_noise_switch",
             () -> BlockEntityType.Builder.of(
                     IronFarmNoiseSwitchBlockEntity::new,

@@ -45,7 +45,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.items.IItemHandler;
 
-/** Farmer state plus the opaque Easy Villagers payload we need to preserve. */
 public final class CompatFarmerBlockEntity extends BlockEntity {
     private static final String KEY_SCHEMA = "EfdcSchema";
     private static final String KEY_PADDY_GROWTH = "EfdcPaddyGrowth";
@@ -60,23 +59,32 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     private static final String KEY_SUGAR_CANE_HEIGHT = "EfdcSugarCaneHeight";
     private static final String KEY_SUGAR_CANE_AGE = "EfdcSugarCaneAge";
 
-    private static final ResourceLocation RICE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
-    private static final ResourceLocation RICE_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice");
-    private static final ResourceLocation RICE_PANICLES_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rice_panicles");
-    private static final ResourceLocation TOMATO_SEEDS_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomato_seeds");
-    private static final ResourceLocation BUDDING_TOMATO_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "budding_tomatoes");
-    private static final ResourceLocation TOMATO_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "tomatoes");
-    private static final ResourceLocation ROPE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "rope");
+    private static final ResourceLocation RICE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "rice");
+    private static final ResourceLocation RICE_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "rice");
+    private static final ResourceLocation RICE_PANICLES_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "rice_panicles");
+    private static final ResourceLocation TOMATO_SEEDS_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "tomato_seeds");
+    private static final ResourceLocation BUDDING_TOMATO_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "budding_tomatoes");
+    private static final ResourceLocation TOMATO_CROP_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "tomatoes");
+    private static final ResourceLocation ROPE_ITEM_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "rope");
     private static final ResourceLocation RED_MUSHROOM_ITEM_ID = ResourceLocation.withDefaultNamespace("red_mushroom");
-    private static final ResourceLocation BROWN_MUSHROOM_ITEM_ID = ResourceLocation.withDefaultNamespace("brown_mushroom");
-    private static final ResourceLocation RED_MUSHROOM_COLONY_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "red_mushroom_colony");
-    private static final ResourceLocation BROWN_MUSHROOM_COLONY_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight", "brown_mushroom_colony");
+    private static final ResourceLocation BROWN_MUSHROOM_ITEM_ID = ResourceLocation
+            .withDefaultNamespace("brown_mushroom");
+    private static final ResourceLocation RED_MUSHROOM_COLONY_ID = ResourceLocation
+            .fromNamespaceAndPath("farmersdelight", "red_mushroom_colony");
+    private static final ResourceLocation BROWN_MUSHROOM_COLONY_ID = ResourceLocation
+            .fromNamespaceAndPath("farmersdelight", "brown_mushroom_colony");
     private static final TagKey<Block> UNAFFECTED_BY_RICH_SOIL = TagKey.create(
             Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath("farmersdelight", "unaffected_by_rich_soil")
     );
 
-    /** Rice stages: 0..3 lower crop, 4..7 panicles; harvest returns to stage 3. */
     private static final int MAX_PADDY_GROWTH = 7;
     private static final int MAX_SUGAR_CANE_AGE = 15;
 
@@ -115,7 +123,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return passthroughData.copy();
     }
 
-    /** Transient client flag used only by the inventory renderer. */
     public boolean isItemPreview() {
         return itemPreview;
     }
@@ -123,7 +130,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     public void setItemPreview(boolean itemPreview) {
         this.itemPreview = itemPreview;
     }
-
 
     public IItemHandler getItemHandler() {
         if (level == null) {
@@ -158,13 +164,13 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
 
     public void setHarvestTool(ItemStack stack) {
         ItemStack normalized = variant().isRich() ? FarmerToolSupport.normalizeHarvestTool(stack) : ItemStack.EMPTY;
-        if (!ItemStack.isSameItemSameComponents(harvestTool, normalized) || harvestTool.getCount() != normalized.getCount()) {
+        if (!ItemStack.isSameItemSameComponents(harvestTool, normalized) || harvestTool.getCount() != normalized
+                .getCount()) {
             harvestTool = normalized;
             setChanged();
         }
     }
 
-    /** Normal crops only receive a Hoe in their loot context so Fortune on an Axe/Knife cannot leak into them. */
     private ItemStack normalCropHarvestTool() {
         return variant().isRich() && FarmerToolSupport.isHoe(harvestTool) ? harvestTool : ItemStack.EMPTY;
     }
@@ -181,12 +187,13 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return fruitReady;
     }
 
-    /** Reports only tools that are hard blockers for the current operation. */
     public ToolRequirement currentToolRequirement() {
-        if (!variant().isRich() || level == null) return ToolRequirement.NONE;
+        if (!variant().isRich() || level == null)
+            return ToolRequirement.NONE;
 
         BlockState crop = easyVillagers.getCrop(level.registryAccess());
-        if (crop == null) return ToolRequirement.NONE;
+        if (crop == null)
+            return ToolRequirement.NONE;
 
         if (isMushroomColonyState(crop) && getAge(crop) >= maxAge(crop)) {
             return ToolRequirement.KNIFE;
@@ -210,8 +217,10 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     }
 
     public boolean installPaddySand() {
-        if (!variant().isAquatic() || paddySand) return false;
-        if (level != null && easyVillagers.getCrop(level.registryAccess()) != null) return false;
+        if (!variant().isAquatic() || paddySand)
+            return false;
+        if (level != null && easyVillagers.getCrop(level.registryAccess()) != null)
+            return false;
         paddySand = true;
         sugarCaneHeight = 0;
         sugarCaneAge = 0;
@@ -221,19 +230,21 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     }
 
     public boolean plantSugarCane() {
-        if (!variant().isAquatic() || !paddySand || sugarCaneHeight != 0) return false;
+        if (!variant().isAquatic() || !paddySand || sugarCaneHeight != 0)
+            return false;
         sugarCaneHeight = 1;
         sugarCaneAge = 0;
         setChanged();
         return true;
     }
 
-    /** Returns the Sand and persistent base cane that must be returned to the player. */
     public List<ItemStack> dismantleSugarCaneMode() {
-        if (!variant().isAquatic() || !paddySand) return List.of();
+        if (!variant().isAquatic() || !paddySand)
+            return List.of();
         List<ItemStack> returned = new ArrayList<>(2);
         returned.add(new ItemStack(Items.SAND));
-        if (sugarCaneHeight > 0) returned.add(new ItemStack(Items.SUGAR_CANE, sugarCaneHeight));
+        if (sugarCaneHeight > 0)
+            returned.add(new ItemStack(Items.SUGAR_CANE, sugarCaneHeight));
         paddySand = false;
         sugarCaneHeight = 0;
         sugarCaneAge = 0;
@@ -328,9 +339,9 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return true;
     }
 
-    /** Selects vanilla Melon/Pumpkin stems explicitly; Easy Villagers does not tag their seeds as villager-plantable. */
     public boolean selectStem(ItemStack seedStack, HolderLookup.Provider registries) {
-        if (!variant().isRich() || variant().isAquatic() || seedStack == null || seedStack.isEmpty()) return false;
+        if (!variant().isRich() || variant().isAquatic() || seedStack == null || seedStack.isEmpty())
+            return false;
         Block stem;
         if (seedStack.is(Items.MELON_SEEDS)) {
             stem = Blocks.MELON_STEM;
@@ -349,7 +360,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return true;
     }
 
-    /** Clears transient state after a normal Easy Villagers seed has been selected. */
     public void onNormalCropSelected() {
         fruitReady = false;
         baseProgress = 0;
@@ -413,7 +423,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         setChanged();
     }
 
-    /** Empty Farmers stay stackable; any real machine state must be preserved. */
     public boolean hasStoredContents(HolderLookup.Provider registries) {
         if (easyVillagers.hasVillager(registries) || easyVillagers.getCrop(registries) != null) {
             return true;
@@ -429,12 +438,11 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         }
 
         if (!harvestTool.isEmpty() || paddySand || sugarCaneHeight > 0 || sugarCaneAge > 0
-                || ropeCount > 0 || paddyGrowth > 0 || baseProgress > 0
-                || ropeOneProgress > 0 || ropeTwoProgress > 0 || fruitReady) {
+                 || ropeCount > 0 || paddyGrowth > 0 || baseProgress > 0
+                 || ropeOneProgress > 0 || ropeTwoProgress > 0 || fruitReady) {
             return true;
         }
 
-        // Unknown payload still counts as machine state after known empty keys are stripped.
         CompoundTag unknown = passthroughData.copy();
         stripMetadata(unknown);
         stripAddonKeys(unknown);
@@ -447,18 +455,15 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     public static void serverTick(ServerLevel level, BlockPos pos, BlockState state, CompatFarmerBlockEntity farmer) {
         HolderLookup.Provider registries = level.registryAccess();
 
-        // Keep Easy Villagers' stored-villager aging behaviour for every variant.
         if (farmer.easyVillagers.hasVillager(registries)) {
             farmer.easyVillagers.advanceVillagerAge(registries);
             farmer.setChanged();
         }
 
-        // Stem Rich Soil uses Minecraft's random-tick cadence, not Easy Villagers' farmSpeed.
         if (farmer.variant().isRich() && !farmer.variant().isAquatic()) {
             farmer.tryVirtualStemRichSoilRandomTick(level, registries);
         }
 
-        // Ordinary work runs once per second; farmSpeed still gates crop growth.
         if (level.getGameTime() % 20L != 0L) {
             return;
         }
@@ -466,12 +471,13 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         int farmSpeed = farmer.easyVillagers.farmSpeed();
 
         if (farmer.variant().isAquatic() && farmer.paddySand) {
-            if (farmer.sugarCaneHeight <= 0) return;
+            if (farmer.sugarCaneHeight <= 0)
+                return;
 
             Villager villager = farmer.easyVillagers.getVillagerEntity(registries);
             boolean canHarvest = villager != null
-                    && !villager.isBaby()
-                    && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
+                     && !villager.isBaby()
+                     && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
 
             if (farmer.sugarCaneHeight >= 3 && canHarvest) {
                 if (farmer.harvestMatureSugarCane(registries)) {
@@ -483,7 +489,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
                 return;
             }
 
-            // Sugar Cane advances its vanilla 0..15 age before adding another section.
             if (farmer.sugarCaneHeight < 3 && level.random.nextInt(farmSpeed) == 0) {
                 if (farmer.sugarCaneAge >= MAX_SUGAR_CANE_AGE) {
                     farmer.sugarCaneHeight++;
@@ -503,33 +508,30 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
 
             Villager villager = farmer.easyVillagers.getVillagerEntity(registries);
             boolean canHarvest = villager != null
-                    && !villager.isBaby()
-                    && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
+                     && !villager.isBaby()
+                     && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
 
-            // Mature panicles harvest on the next work tick; growth alone uses farmSpeed RNG.
             if (farmer.paddyGrowth >= MAX_PADDY_GROWTH && canHarvest) {
                 if (farmer.harvestMatureRice(level, registries)) {
-                    // Harvest keeps the mature submerged rice; only panicles regrow.
+
                     farmer.paddyGrowth = 3;
                     farmer.syncRiceCropState(registries);
                     farmer.setChanged();
                     level.playSound(null, pos, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
                 }
-                // Do not reset mature rice until its whole harvest fits.
+
                 return;
             }
 
-            // Normal Paddy growth roll.
             if (farmer.paddyGrowth < MAX_PADDY_GROWTH
-                    && level.random.nextInt(farmSpeed) == 0) {
+                     && level.random.nextInt(farmSpeed) == 0) {
                 farmer.paddyGrowth++;
                 farmer.syncRiceCropState(registries);
                 farmer.setChanged();
             }
 
-            // Rich Paddy gets a separate virtual Rich Soil opportunity.
             if (farmer.variant().isRich()
-                    && level.random.nextInt(farmSpeed) == 0) {
+                     && level.random.nextInt(farmSpeed) == 0) {
                 farmer.tryRichPaddyBoost(level, registries);
             }
             return;
@@ -540,7 +542,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return;
         }
 
-        // Ready stem fruit retries harvest each work tick while waiting on Axe/output/adult state.
         if (isStemState(crop) && farmer.fruitReady) {
             if (farmer.harvestReadyStem(level, registries)) {
                 farmer.setChanged();
@@ -548,12 +549,10 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return;
         }
 
-        // Growth uses farmSpeed RNG; once mature, harvest is retried every work tick until it succeeds.
         boolean baseHandledThisCadence = false;
         if (!isStemState(crop) && isMatureAgeState(crop)) {
             ResourceLocation cropId = BuiltInRegistries.BLOCK.getKey(crop.getBlock());
 
-            // Budding tomatoes age 3 still needs one normal growth step into the persistent vine.
             boolean finalTomatoStage = TOMATO_CROP_ID.equals(cropId);
             if (!isTomatoState(crop) || finalTomatoStage) {
                 boolean changed;
@@ -570,14 +569,12 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
                     farmer.setChanged();
                 }
 
-                // Non-Tomato crops have no rope work left this tick.
                 if (!finalTomatoStage) {
                     return;
                 }
             }
         }
 
-        // Only non-mature base crops receive a growth roll.
         if (!baseHandledThisCadence && level.random.nextInt(farmSpeed) == 0) {
             boolean changed;
             if (isTomatoState(crop)) {
@@ -594,7 +591,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             }
         }
 
-        // Tomato rope sections grow independently; mature sections harvest without another RNG gate.
         BlockState afterBase = farmer.easyVillagers.getCrop(registries);
         if (afterBase != null && TOMATO_CROP_ID.equals(BuiltInRegistries.BLOCK.getKey(afterBase.getBlock()))) {
             boolean ropeOneHandled = farmer.ropeCount >= 1 && farmer.ropeOneProgress >= 3;
@@ -615,42 +611,45 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             }
         }
 
-        // Non-stem Rich Farmer crops keep the existing boost; stems use the random-tick path above.
         BlockState richAfterBase = farmer.easyVillagers.getCrop(registries);
         if (farmer.variant().isRich()
-                && !isStemState(richAfterBase)
-                && level.random.nextInt(farmSpeed) == 0) {
+                 && !isStemState(richAfterBase)
+                 && level.random.nextInt(farmSpeed) == 0) {
             farmer.tryRichSoilBoost(level, registries);
         }
     }
 
-    /** Simulates selection of one virtual Rich Soil block by Minecraft's random-tick clock. */
     private void tryVirtualStemRichSoilRandomTick(ServerLevel level, HolderLookup.Provider registries) {
-        if (fruitReady) return;
+        if (fruitReady)
+            return;
 
         BlockState crop = easyVillagers.getCrop(registries);
-        if (!isStemState(crop)) return;
+        if (!isStemState(crop))
+            return;
 
         int age = getAge(crop);
         int maxAge = maxAge(crop);
-        if (age >= maxAge) return;
+        if (age >= maxAge)
+            return;
 
         int randomTickSpeed = Math.max(0, level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING));
-        if (randomTickSpeed <= 0) return;
+        if (randomTickSpeed <= 0)
+            return;
 
         double selectedChance = 1.0D - Math.pow(4095.0D / 4096.0D, randomTickSpeed);
-        if (level.random.nextDouble() >= selectedChance) return;
+        if (level.random.nextDouble() >= selectedChance)
+            return;
 
         double boostChance = farmersDelight.richSoilBoostChance();
-        if (boostChance <= 0.0D || level.random.nextDouble() >= boostChance) return;
+        if (boostChance <= 0.0D || level.random.nextDouble() >= boostChance)
+            return;
 
-        int increment = 2 + level.random.nextInt(4); // vanilla StemBlock bonemeal: +2..+5
+        int increment = 2 + level.random.nextInt(4);
         easyVillagers.setCropState(withAge(crop, Math.min(maxAge, age + increment)), registries);
         fruitReady = false;
         setChanged();
     }
 
-    /** Applies the same random-tick and Rich Soil boost rolls to the stored crop state. */
     private void tryRichSoilBoost(ServerLevel level, HolderLookup.Provider registries) {
         BlockState crop = easyVillagers.getCrop(registries);
         if (crop == null || crop.is(UNAFFECTED_BY_RICH_SOIL)) {
@@ -739,8 +738,9 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         if (isStemState(crop)) {
             int currentAge = getAge(crop);
             int maxAge = maxAge(crop);
-            if (currentAge >= maxAge) return false;
-            // Rich Soil accelerates stem age only; fruit generation stays on the normal work roll.
+            if (currentAge >= maxAge)
+                return false;
+
             int increment = 2 + level.random.nextInt(4);
             easyVillagers.setCropState(withAge(crop, Math.min(maxAge, currentAge + increment)), registries);
             fruitReady = false;
@@ -766,12 +766,12 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return false;
         }
 
-        easyVillagers.setCropState(crop.setValue(integerProperty, Math.min(maxAge, currentAge + increment)), registries);
+        easyVillagers.setCropState(crop.setValue(integerProperty, Math.min(maxAge, currentAge + increment)),
+                registries);
         setChanged();
         return true;
     }
 
-    /** Uses each crop implementation's own protected bone-meal increment when available. */
     private static int getBoneMealAgeIncrease(Block block, Level level) {
         Class<?> type = block.getClass();
         while (type != null) {
@@ -789,7 +789,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return 0;
     }
 
-    /** Generic crop lifecycle; mature crops reset only after all generated loot fits. */
     private boolean ageNormalCropSafely(ServerLevel level, HolderLookup.Provider registries) {
         BlockState crop = easyVillagers.getCrop(registries);
         if (crop == null) {
@@ -811,7 +810,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         }
 
         Villager villager = easyVillagers.getVillagerEntity(registries);
-        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
+        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession
+                .FARMER) {
             return false;
         }
 
@@ -838,7 +838,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return true;
     }
 
-    /** Persistent Mushroom Colony lifecycle for Rich Farmers. */
     private boolean ageMushroomColony(ServerLevel level, HolderLookup.Provider registries) {
         BlockState crop = easyVillagers.getCrop(registries);
         if (!isMushroomColonyState(crop)) {
@@ -853,11 +852,11 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         }
 
         Villager villager = easyVillagers.getVillagerEntity(registries);
-        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
+        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession
+                .FARMER) {
             return false;
         }
 
-        // Mature colonies wait for a Knife; growth itself is never blocked.
         if (variant().isRich() && !FarmerToolSupport.isKnife(harvestTool)) {
             return false;
         }
@@ -872,7 +871,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return false;
         }
 
-        // Full knife harvest returns colonyAge mushrooms and resets the persistent colony.
         Item mushroom = BuiltInRegistries.ITEM.get(mushroomItemId);
         ItemStack harvest = new ItemStack(mushroom, maxAge);
         if (!canFitAll(output, List.of(harvest))) {
@@ -894,8 +892,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         ResourceLocation cropId = BuiltInRegistries.BLOCK.getKey(crop.getBlock());
         int age = getAge(crop);
 
-        // Farmer's Delight starts tomatoes as budding_tomatoes (age 0..3), then
-        // transitions into the persistent tomatoes vine at age 0.
         if (BUDDING_TOMATO_ID.equals(cropId)) {
             if (age < 3) {
                 easyVillagers.setCropState(withAge(crop, age + 1), registries);
@@ -919,7 +915,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         }
 
         Villager villager = easyVillagers.getVillagerEntity(registries);
-        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
+        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession
+                .FARMER) {
             return false;
         }
 
@@ -939,8 +936,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
 
         Villager villager = easyVillagers.getVillagerEntity(registries);
         boolean canHarvest = villager != null
-                && !villager.isBaby()
-                && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
+                 && !villager.isBaby()
+                 && villager.getVillagerData().getProfession() == VillagerProfession.FARMER;
 
         int progress = ropeIndex == 1 ? ropeOneProgress : ropeTwoProgress;
         if (progress < 3) {
@@ -975,17 +972,9 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return false;
         }
 
-        // Use Farmer's Delight's real mature Tomato loot table so a Hoe with
-        // Fortune affects Tomato yield exactly as the mod defines it. The base
-        // persistent vine is evaluated as rope-logged to suppress the seed drop
-        // that belongs to breaking the whole plant; our Farmer only harvests fruit.
-        // Keep this compatible with the declared Farmer's Delight 1.2.9 minimum.
-        // In 1.2.x, rope-grown tomatoes are represented by the normal `tomatoes`
-        // block with `ropelogged=true`; the separate `tomatoes_on_rope` block was
-        // only introduced later. The legacy property is still retained by newer FD
-        // builds specifically for migration, so this state works across both lines.
         Block tomato = BuiltInRegistries.BLOCK.get(TOMATO_CROP_ID);
-        if (tomato == Blocks.AIR) return false;
+        if (tomato == Blocks.AIR)
+            return false;
         BlockState harvestState = withBooleanProperty(withAge(tomato.defaultBlockState(), 3), "ropelogged", true);
 
         LootParams.Builder context = new LootParams.Builder(level)
@@ -1023,7 +1012,8 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
 
     private boolean ageStemCrop(ServerLevel level, HolderLookup.Provider registries) {
         BlockState stem = easyVillagers.getCrop(registries);
-        if (!isStemState(stem)) return false;
+        if (!isStemState(stem))
+            return false;
 
         int age = getAge(stem);
         int maxAge = maxAge(stem);
@@ -1033,10 +1023,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             return true;
         }
 
-        // Fruit generation is a separate normal-speed phase. Rich Soil only boosts
-        // the stem itself and never accelerates this transition. Harvesting is
-        // handled separately once fruitReady is true, so a missing Axe/output room
-        // blocks on the real requirement instead of demanding another RNG success.
         if (!fruitReady) {
             fruitReady = true;
             setChanged();
@@ -1047,10 +1033,12 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
 
     private boolean harvestReadyStem(ServerLevel level, HolderLookup.Provider registries) {
         BlockState stem = easyVillagers.getCrop(registries);
-        if (!fruitReady || !isStemState(stem)) return false;
+        if (!fruitReady || !isStemState(stem))
+            return false;
 
         Villager villager = easyVillagers.getVillagerEntity(registries);
-        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
+        if (villager == null || villager.isBaby() || villager.getVillagerData().getProfession() != VillagerProfession
+                .FARMER) {
             return false;
         }
         if (!FarmerToolSupport.isAxe(harvestTool)) {
@@ -1058,19 +1046,23 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         }
 
         Container output = easyVillagers.getOutputInventory(registries);
-        if (output == null) return false;
+        if (output == null)
+            return false;
 
         Block fruit = fruitBlockForStem(stem);
-        if (fruit == null || fruit == Blocks.AIR) return false;
+        if (fruit == null || fruit == Blocks.AIR)
+            return false;
         BlockState fruitState = fruit.defaultBlockState();
         LootParams.Builder context = new LootParams.Builder(level)
                 .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(worldPosition))
                 .withParameter(LootContextParams.BLOCK_STATE, fruitState)
                 .withParameter(LootContextParams.TOOL, stemHarvestTool());
         List<ItemStack> drops = fruitState.getDrops(context);
-        if (!canFitAll(output, drops)) return false;
+        if (!canFitAll(output, drops))
+            return false;
 
-        for (ItemStack drop : drops) insertIntoOutput(output, drop.copy());
+        for (ItemStack drop : drops)
+            insertIntoOutput(output, drop.copy());
         output.setChanged();
         fruitReady = false;
         damageHarvestTool(level);
@@ -1080,16 +1072,19 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
 
     private boolean harvestMatureSugarCane(HolderLookup.Provider registries) {
         Container output = easyVillagers.getOutputInventory(registries);
-        if (output == null) return false;
+        if (output == null)
+            return false;
         ItemStack harvest = new ItemStack(Items.SUGAR_CANE, 2);
-        if (!canFitAll(output, List.of(harvest))) return false;
+        if (!canFitAll(output, List.of(harvest)))
+            return false;
         insertIntoOutput(output, harvest);
         output.setChanged();
         return true;
     }
 
     private void damageHarvestTool(ServerLevel level) {
-        if (harvestTool.isEmpty() || !harvestTool.isDamageableItem()) return;
+        if (harvestTool.isEmpty() || !harvestTool.isDamageableItem())
+            return;
         harvestTool.hurtAndBreak(1, level, null, broken ->
                 level.playSound(null, worldPosition, SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F));
         setChanged();
@@ -1100,16 +1095,22 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     }
 
     private static Item seedItemForStem(BlockState state) {
-        if (state == null) return null;
-        if (state.is(Blocks.MELON_STEM)) return Items.MELON_SEEDS;
-        if (state.is(Blocks.PUMPKIN_STEM)) return Items.PUMPKIN_SEEDS;
+        if (state == null)
+            return null;
+        if (state.is(Blocks.MELON_STEM))
+            return Items.MELON_SEEDS;
+        if (state.is(Blocks.PUMPKIN_STEM))
+            return Items.PUMPKIN_SEEDS;
         return null;
     }
 
     private static Block fruitBlockForStem(BlockState state) {
-        if (state == null) return null;
-        if (state.is(Blocks.MELON_STEM)) return Blocks.MELON;
-        if (state.is(Blocks.PUMPKIN_STEM)) return Blocks.PUMPKIN;
+        if (state == null)
+            return null;
+        if (state.is(Blocks.MELON_STEM))
+            return Blocks.MELON;
+        if (state.is(Blocks.PUMPKIN_STEM))
+            return Blocks.PUMPKIN;
         return null;
     }
 
@@ -1214,7 +1215,6 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return state.setValue(integerProperty, safeAge);
     }
 
-    /** Checks the full harvest against output stacking rules without mutating inventory. */
     private static boolean canFitAll(Container output, List<ItemStack> stacks) {
         ItemStack[] simulated = new ItemStack[output.getContainerSize()];
         for (int slot = 0; slot < simulated.length; slot++) {

@@ -15,10 +15,6 @@ set "JAVA_EXE="
  echo Directorio: %CD%
  echo.
 
-rem ------------------------------------------------------------
-rem 0. Limpiar residuos de versiones anteriores si el source fue
-rem    extraido encima de una carpeta existente.
-rem ------------------------------------------------------------
 if exist "cleanup-obsolete-recipes.bat" (
     call "cleanup-obsolete-recipes.bat"
     if errorlevel 1 (
@@ -29,9 +25,6 @@ if exist "cleanup-obsolete-recipes.bat" (
 )
 echo.
 
-rem ------------------------------------------------------------
-rem 1. Buscar Java: PATH, JAVA_HOME y runtimes administrados por Prism.
-rem ------------------------------------------------------------
 where java.exe >nul 2>nul
 if not errorlevel 1 (
     for /f "delims=" %%J in ('where java.exe') do if not defined JAVA_EXE set "JAVA_EXE=%%J"
@@ -59,9 +52,6 @@ echo   %JAVA_EXE%
 if errorlevel 1 goto :java_broken
 echo.
 
-rem ------------------------------------------------------------
-rem 2. Descargar Gradle si aun no esta disponible localmente.
-rem ------------------------------------------------------------
 if not exist "%DIST_DIR%\bin\gradle.bat" (
     echo Gradle %GRADLE_VERSION% no esta descargado.
     if not exist "%DIST_ROOT%" mkdir "%DIST_ROOT%"
@@ -87,9 +77,6 @@ if not exist "%DIST_DIR%\bin\gradle.bat" (
 
 if not exist "%DIST_DIR%\bin\gradle.bat" goto :gradle_missing
 
-rem ------------------------------------------------------------
-rem 3. Compilar el mod con ModDevGradle.
-rem ------------------------------------------------------------
 echo.
 echo Compilando Easy Farmer's Delight Compat...
 echo La primera compilacion puede descargar dependencias de NeoForge.

@@ -22,12 +22,16 @@ public final class ModMenus {
 
     @SubscribeEvent
     public static void register(RegisterEvent event) {
-        if (!event.getRegistryKey().equals(Registries.MENU)) return;
+        if (!event.getRegistryKey().equals(Registries.MENU))
+            return;
         RICH_FARMER = IMenuTypeExtension.create(RichFarmerMenu::fromNetwork);
         PADDY_FARMER = IMenuTypeExtension.create(PaddyFarmerMenu::fromNetwork);
         CUTTER = IMenuTypeExtension.create(CutterMenu::fromNetwork);
-        event.register(Registries.MENU, ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID, "rich_farmer_output"), () -> RICH_FARMER);
-        event.register(Registries.MENU, ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID, "paddy_farmer_output"), () -> PADDY_FARMER);
-        event.register(Registries.MENU, ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID, "cutter"), () -> CUTTER);
+        event.register(Registries.MENU, ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID,
+                "rich_farmer_output"), () -> RICH_FARMER);
+        event.register(Registries.MENU, ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID,
+                "paddy_farmer_output"), () -> PADDY_FARMER);
+        event.register(Registries.MENU, ResourceLocation.fromNamespaceAndPath(EasyFarmersDelightCompat.MOD_ID,
+                "cutter"), () -> CUTTER);
     }
 }
