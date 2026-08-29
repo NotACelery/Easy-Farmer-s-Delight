@@ -350,13 +350,13 @@ For contributors who want to build the project themselves, Java 21 is required.
 Windows:
 
 ```text
-build-dev.bat
+build.bat
 ```
 
 Linux / WSL:
 
 ```text
-bash build-dev.sh
+bash build.sh
 ```
 
 The built JAR is created in `build/libs/`.

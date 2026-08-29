@@ -154,7 +154,7 @@
 - Extended Jade with Farmer Knife and Cutter status/output information.
 - Added Recipe Book display recipes for Paddy/Rich/Rich Paddy upgrades.
 - Creative Pick Block now returns clean Farmer items instead of cloning complete machine state.
-- `build-dev.bat` no longer contains a stale hardcoded development version.
+- The Windows build helper no longer contains a stale hardcoded development version.
 
 ## 1.0.0 — 2026-08-16
 

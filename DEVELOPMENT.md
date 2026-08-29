@@ -447,18 +447,18 @@ The project uses ModDevGradle with Java 21.
 
 `build.gradle` intentionally keeps Jade, JEI and EMI as compile-only/API-side dependencies rather than embedding them in the mod JAR.
 
-Development helpers:
+Build helpers:
 
 Windows:
 
 ```text
-build-dev.bat
+build.bat
 ```
 
 Linux / WSL:
 
 ```text
-bash build-dev.sh
+bash build.sh
 ```
 
 The helper scripts use Gradle `9.2.1` and download it into `.gradle-dist` when it is not already available.

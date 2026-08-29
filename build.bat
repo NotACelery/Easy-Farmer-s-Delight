@@ -108,7 +108,7 @@ echo   1. En Prism: Ajustes ^> Java ^> abrir o copiar la ruta de Java.
 echo   2. Instalar Java 21, por ejemplo Eclipse Temurin 21.
 echo   3. Abrir CMD aqui y ejecutar:
 echo        set "JAVA_HOME=C:\ruta\a\java-21"
-echo        build-dev.bat
+echo        build.bat
 goto :failure
 
 :java_broken
