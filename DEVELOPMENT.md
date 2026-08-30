@@ -15,7 +15,7 @@ Current release line:
 - Java: `21`
 - Easy Villagers minimum: `1.1.42`
 - Farmer's Delight minimum: `1.2.9`
-- Mod version: `1.3.1`
+- Mod version: `1.3.2`
 
 Optional integrations:
 
