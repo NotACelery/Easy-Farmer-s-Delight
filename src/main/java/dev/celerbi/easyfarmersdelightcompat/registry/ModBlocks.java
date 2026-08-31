@@ -6,10 +6,13 @@ import dev.celerbi.easyfarmersdelightcompat.block.FarmerVariant;
 import dev.celerbi.easyfarmersdelightcompat.block.CutterBlock;
 import dev.celerbi.easyfarmersdelightcompat.block.VillagerNoiseSwitchBlock;
 import dev.celerbi.easyfarmersdelightcompat.block.IronFarmNoiseSwitchBlock;
+import dev.celerbi.easyfarmersdelightcompat.block.EasyMobFarmNoiseSwitchBlock;
+import dev.celerbi.easyfarmersdelightcompat.compat.easymobfarm.EasyMobFarmCompat;
 import dev.celerbi.easyfarmersdelightcompat.item.CutterItem;
 import dev.celerbi.easyfarmersdelightcompat.item.CompatFarmerItem;
 import dev.celerbi.easyfarmersdelightcompat.item.VillagerNoiseSwitchItem;
 import dev.celerbi.easyfarmersdelightcompat.item.IronFarmNoiseSwitchItem;
+import dev.celerbi.easyfarmersdelightcompat.item.EasyMobFarmNoiseSwitchItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -58,6 +61,13 @@ public final class ModBlocks {
             farmerProperties()
     );
 
+    public static final DeferredBlock<EasyMobFarmNoiseSwitchBlock> EASY_MOB_FARM_NOISE_SWITCH =
+            EasyMobFarmCompat.isLoaded() ? BLOCKS.registerBlock(
+                    "easy_mob_farm_noise_switch",
+                    EasyMobFarmNoiseSwitchBlock::new,
+                    farmerProperties()
+            ) : null;
+
     public static final DeferredItem<CutterItem> CUTTER_ITEM = ITEMS.register(
             "cutter",
             () -> new CutterItem(CUTTER.get(), new Item.Properties())
@@ -72,6 +82,13 @@ public final class ModBlocks {
             "iron_farm_noise_switch",
             () -> new IronFarmNoiseSwitchItem(IRON_FARM_NOISE_SWITCH.get(), new Item.Properties().stacksTo(1))
     );
+
+    public static final DeferredItem<EasyMobFarmNoiseSwitchItem> EASY_MOB_FARM_NOISE_SWITCH_ITEM =
+            EasyMobFarmCompat.isLoaded() ? ITEMS.register(
+                    "easy_mob_farm_noise_switch",
+                    () -> new EasyMobFarmNoiseSwitchItem(
+                            EASY_MOB_FARM_NOISE_SWITCH.get(), new Item.Properties().stacksTo(1))
+            ) : null;
 
     public static final DeferredItem<CompatFarmerItem> PADDY_FARMER_ITEM = ITEMS.register(
             "paddy_farmer",

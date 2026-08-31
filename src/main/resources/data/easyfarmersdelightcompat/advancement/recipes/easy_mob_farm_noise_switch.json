@@ -1,0 +1,24 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "easy_mob_farm"
+    }
+  ],
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "automatic_unlock": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "automatic_unlock"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "easyfarmersdelightcompat:easy_mob_farm_noise_switch"
+    ]
+  }
+}

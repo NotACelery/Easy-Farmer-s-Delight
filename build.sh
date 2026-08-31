@@ -2,6 +2,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+if [ -x "./cleanup-1.4.0-migration.sh" ]; then
+    ./cleanup-1.4.0-migration.sh
+fi
+
 GRADLE_VERSION="9.2.1"
 DIST_ROOT="$PWD/.gradle-dist"
 DIST_DIR="$DIST_ROOT/gradle-$GRADLE_VERSION"

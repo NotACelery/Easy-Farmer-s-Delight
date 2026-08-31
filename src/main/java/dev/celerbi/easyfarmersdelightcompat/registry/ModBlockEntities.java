@@ -5,6 +5,8 @@ import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CutterBlockEntity;
 import dev.celerbi.easyfarmersdelightcompat.blockentity.VillagerNoiseSwitchBlockEntity;
 import dev.celerbi.easyfarmersdelightcompat.blockentity.IronFarmNoiseSwitchBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.blockentity.EasyMobFarmNoiseSwitchBlockEntity;
+import dev.celerbi.easyfarmersdelightcompat.compat.easymobfarm.EasyMobFarmCompat;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
@@ -53,6 +55,16 @@ public final class ModBlockEntities {
                     ModBlocks.IRON_FARM_NOISE_SWITCH.get()
             ).build(null)
     );
+
+    public static final DeferredHolder<BlockEntityType<?>,
+            BlockEntityType<EasyMobFarmNoiseSwitchBlockEntity>> EASY_MOB_FARM_NOISE_SWITCH =
+            EasyMobFarmCompat.isLoaded() ? BLOCK_ENTITIES.register(
+                    "easy_mob_farm_noise_switch",
+                    () -> BlockEntityType.Builder.of(
+                            EasyMobFarmNoiseSwitchBlockEntity::new,
+                            ModBlocks.EASY_MOB_FARM_NOISE_SWITCH.get()
+                    ).build(null)
+            ) : null;
 
     public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(

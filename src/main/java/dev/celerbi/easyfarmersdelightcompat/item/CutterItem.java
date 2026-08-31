@@ -24,8 +24,10 @@ public final class CutterItem extends BlockItem {
             TooltipFlag flag) {
         super.appendHoverText(stack, context, tooltip, flag);
         Block variant = CutterLogVariant.fromStack(stack);
-        tooltip.add(Component.translatable("tooltip.easyfarmersdelightcompat.cutter.variant", Component
-                .translatable(CutterLogVariant.translationKey(variant))).withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable(
+                        "tooltip.easyfarmersdelightcompat.cutter.variant",
+                        variant.getName())
+                .withStyle(ChatFormatting.GRAY));
     }
 
     @Override

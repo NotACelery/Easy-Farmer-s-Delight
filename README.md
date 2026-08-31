@@ -1,6 +1,6 @@
 # Easy Farmer's Delight Compat
 
-Current release: **1.3.2** (NeoForge 1.21.1)
+Current development: **1.4.0-dev.2** (NeoForge 1.21.1)
 
 <p align="center">
   <img src="easy-farmers-delight-compat-cover.webp" alt="Easy Farmer's Delight Compat" width="320">
@@ -11,6 +11,7 @@ Current release: **1.3.2** (NeoForge 1.21.1)
 If you already know how the Easy Villagers Farmer works, the idea is simple: this mod gives you new Farmer variants for crops that need special handling, plus a Cutter for Farmer's Delight Cutting Board recipes.
 
 > This is an independent community project. It is not affiliated with or endorsed by the authors of Easy Villagers, Farmer's Delight, Jade, JEI, EMI, Ars Nouveau, or other supported mods.
+For third-party interoperability and licensing boundaries, see [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 ## What does the mod add?
 
@@ -21,8 +22,10 @@ The main additions are:
 - **Rich Paddy Farmer** — combines the Paddy Farmer with Rich Soil bonuses where they make sense.
 - **Harvest Tools** — Rich Farmers can hold a Knife, Hoe, or Axe when a crop needs one.
 - **Cutter** — automatically processes Farmer's Delight Cutting Board recipes and common Axe actions.
+  - Cutter work surfaces now accept any unstripped base log exposed through Minecraft's standard log tags, including compatible modded woods without project-specific code.
 - **Villager Noise Switch** — lets you mute Villager voices on your client.
 - **Iron Farm Noise Switch** — silences only the synthetic Zombie/Iron Golem sounds produced by Easy Villagers Iron Farms.
+- **Easy Mob Farm Noise Switch** — optional client-local silencer for the card-display mobs rendered inside Easy Mob Farm blocks.
 - Optional **Jade**, **JEI**, and **EMI** support with useful in-game explanations.
 
 ---
@@ -233,7 +236,6 @@ Villager Noise Switches are always limited to a stack size of one, matching the 
 
 ---
 
-
 # Iron Farm Noise Switch
 
 The **Iron Farm Noise Switch** is a second client-local sound switch dedicated to the noisy simulated Zombie and Iron Golem inside Easy Villagers Iron Farms.
@@ -265,6 +267,26 @@ Like the Villager Noise Switch, the Lever and Redstone state is personal to each
 
 ---
 
+# Easy Mob Farm Noise Switch
+
+This integration exists only while **Easy Mob Farm** (`easy_mob_farm`) is installed. If that mod is absent, the block and item are not registered and do not appear in the Creative inventory, recipes, Jade, JEI or EMI.
+
+### Crafting
+
+```text
+Glass Pane   Glass Pane        Glass Pane
+Glass Pane   Lever             Glass Pane
+Copper Block Mossy Cobblestone Redstone Block
+```
+
+### Assembly and use
+
+After placement, insert **6 Rotten Flesh one at a time**. The internal decorative Zombie is assembled in this order: right leg, left leg, torso, right arm, left arm and head. Until all six pieces are present, the Lever cannot toggle the silencer.
+
+Once complete, right-clicking toggles a persistent preference for your own client. Only the synthetic display entities created by Easy Mob Farm from captured-mob cards are muted; real mobs in the world are never changed. The Zombie inside this switch is only a rendered vanilla model and is never spawned as an entity.
+
+The enclosure uses the same hollow shape and corrected surrounding-light sampling as the other Noise Switches. Partial and completed assembly state is preserved when mined and shown by the inventory renderer.
+
 # JEI and EMI guides
 
 **JEI and EMI are optional**, but they are strongly recommended if you want to learn the mod while playing.
@@ -279,7 +301,8 @@ The mod adds its own simple guide pages showing:
 - how Melons and Pumpkins work;
 - how to use the Cutter;
 - how to use the Villager Noise Switch;
-- how to assemble and use the Iron Farm Noise Switch.
+- how to assemble and use the Iron Farm Noise Switch;
+- how to assemble and use the Easy Mob Farm Noise Switch when Easy Mob Farm is installed.
 
 In EMI, open the **Recipes** for one of the mod's blocks and you will find a **Block Guide** tab beside the normal crafting information.
 
@@ -302,7 +325,8 @@ Depending on the block, Jade can show things such as:
 - Melon/Pumpkin growth stage;
 - Cutter progress and wrong-tool warnings;
 - whether Villager sounds are currently enabled or muted;
-- Iron Farm Noise Switch assembly progress and its local mute state.
+- Iron Farm Noise Switch assembly progress and its local mute state;
+- Easy Mob Farm Noise Switch assembly progress and its local mute state when the integration is available.
 
 ---
 
@@ -337,7 +361,7 @@ Install the mod on both the **client and server** when playing multiplayer.
 
 # Release history
 
-The current 1.3.x line adds the Villager Noise Switch and Iron Farm Noise Switch family on top of the expanded Farmer/Cutter systems introduced during 1.2.x.
+The 1.4.x line adds the optional Easy Mob Farm Noise Switch on top of the Villager and Iron Farm Noise Switch family introduced during 1.3.x.
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete user-facing release history.
 
