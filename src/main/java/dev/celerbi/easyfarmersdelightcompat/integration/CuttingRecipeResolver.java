@@ -96,8 +96,8 @@ public final class CuttingRecipeResolver {
     }
 
     private static Object createInput(ItemStack input, ItemStack tool) throws ReflectiveOperationException {
-        Class<?> inputClass = Class.forName(INPUT_CLASS);
-        Constructor<?> ctor = inputClass.getConstructor(ItemStack.class, ItemStack.class);
+        Class<?> inputClass = ReflectionCache.type(INPUT_CLASS);
+        Constructor<?> ctor = ReflectionCache.constructor(inputClass, ItemStack.class, ItemStack.class);
         return ctor.newInstance(input.copyWithCount(1), tool.copyWithCount(1));
     }
 
@@ -112,10 +112,10 @@ public final class CuttingRecipeResolver {
     }
 
     private static Method findMethod(Class<?> type, String name, int count) {
-        for (Method method : type.getMethods()) {
-            if (method.getName().equals(name) && method.getParameterCount() == count)
-                return method;
+        try {
+            return ReflectionCache.publicMethodByArity(type, name, count);
+        } catch (NoSuchMethodException ignored) {
+            return null;
         }
-        return null;
     }
 }

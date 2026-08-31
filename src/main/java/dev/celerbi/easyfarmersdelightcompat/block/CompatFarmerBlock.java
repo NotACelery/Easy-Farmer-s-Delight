@@ -146,6 +146,36 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
         var registries = level.registryAccess();
 
+        if (player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic() && farmer.hasAttachedSetup()) {
+            if (!level.isClientSide) {
+                for (ItemStack returned : farmer.dismantleAttachedStep()) {
+                    if (!returned.isEmpty()) {
+                        ItemHandlerHelper.giveItemToPlayer(player, returned);
+                    }
+                }
+                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+
+        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+                && farmer.canInstallAttachedHost(heldItem)) {
+            if (!level.isClientSide && farmer.installAttachedHost(heldItem)) {
+                consumeOne(heldItem, player);
+                level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 0.8F, 1.0F);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+
+        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+                && farmer.canPlantAttachedCrop(heldItem)) {
+            if (!level.isClientSide && farmer.plantAttachedCrop(heldItem)) {
+                consumeOne(heldItem, player);
+                level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+
         if (player.isShiftKeyDown() && variant.isAquatic()) {
             if (level.isClientSide) {
                 return ItemInteractionResult.sidedSuccess(true);
@@ -243,7 +273,16 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             }
         }
 
-        if (farmer.easyVillagers().getCrop(registries) == null) {
+        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+                && farmer.canSelectRegrowingCrop(heldItem)) {
+            if (!level.isClientSide && farmer.selectRegrowingCrop(heldItem, registries)) {
+                consumeOne(heldItem, player);
+                level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+
+        if (farmer.easyVillagers().getCrop(registries) == null && !farmer.hasAttachedSetup()) {
             boolean validCrop = variant.isAquatic()
                     ? (!farmer.hasPaddySand() && isRice(heldItem))
                     : (variant.isRich() && (isTomatoSeeds(heldItem) || isMushroom(heldItem) || isStemSeed(heldItem)))
@@ -269,7 +308,6 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
                     }
                     if (selected) {
                         consumeOne(heldItem, player);
-                        farmer.setChanged();
                         level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
                     }
                 }
@@ -313,6 +351,18 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
         }
 
         var registries = level.registryAccess();
+        if (player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic() && farmer.hasAttachedSetup()) {
+            if (!level.isClientSide) {
+                for (ItemStack returned : farmer.dismantleAttachedStep()) {
+                    if (!returned.isEmpty()) {
+                        ItemHandlerHelper.giveItemToPlayer(player, returned);
+                    }
+                }
+                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+
         if (player.isShiftKeyDown() && variant.isAquatic()) {
             if (level.isClientSide) {
                 return InteractionResult.sidedSuccess(true);
