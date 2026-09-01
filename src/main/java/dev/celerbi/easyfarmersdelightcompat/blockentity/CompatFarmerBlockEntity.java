@@ -353,6 +353,30 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return false;
     }
 
+    public boolean shouldWarnIncompatibleAttachedCrop(ItemStack stack) {
+        if (!supportsAttachedCrops() || !AttachedCropDefinitions.isPlantingItem(stack)) {
+            return false;
+        }
+        if (canPlantAttachedCrop(stack)) {
+            return false;
+        }
+        return hasOpenAttachedFace();
+    }
+
+    private boolean hasOpenAttachedFace() {
+        for (int levelIndex = 0; levelIndex < ATTACHED_LEVEL_COUNT; levelIndex++) {
+            if (attachedHostIds[levelIndex] == null) {
+                continue;
+            }
+            for (int faceIndex = 0; faceIndex < ATTACHED_FACE_COUNT; faceIndex++) {
+                if (attachedCropIds[levelIndex][faceIndex] == null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public boolean plantAttachedCrop(ItemStack stack) {
         if (!canPlantAttachedCrop(stack)) {
             return false;
@@ -1254,6 +1278,7 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         }
 
         boolean changed = false;
+        boolean blockedByOutput = false;
         for (int levelIndex = 0; levelIndex < ATTACHED_LEVEL_COUNT; levelIndex++) {
             BlockState host = attachedHostState(levelIndex);
             for (int faceIndex = 0; faceIndex < ATTACHED_FACE_COUNT; faceIndex++) {
@@ -1275,12 +1300,9 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
                         .withParameter(LootContextParams.BLOCK_STATE, mature)
                         .withParameter(LootContextParams.TOOL, attachedLootTool(definition));
                 List<ItemStack> drops = mature.getDrops(context);
-                if (!canFitAll(output, drops)) {
-                    if (changed) {
-                        output.setChanged();
-                        setChanged();
-                    }
-                    return;
+                if (!canFitAllPure(output, drops)) {
+                    blockedByOutput = true;
+                    continue;
                 }
 
                 for (ItemStack drop : drops) {
@@ -1292,6 +1314,11 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
                 }
                 changed = true;
             }
+        }
+
+        if (blockedByOutput && harvestTransactionActive) {
+            harvestWaitingForOutputSpace = true;
+            blockedOutputRequirement = List.of();
         }
 
         if (changed) {

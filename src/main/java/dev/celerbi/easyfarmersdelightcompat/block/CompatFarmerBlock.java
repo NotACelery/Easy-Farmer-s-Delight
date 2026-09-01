@@ -176,6 +176,15 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
+        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+                && farmer.shouldWarnIncompatibleAttachedCrop(heldItem)) {
+            if (!level.isClientSide) {
+                player.displayClientMessage(Component.translatable(
+                        "message.easyfarmersdelightcompat.attached_crop.incompatible_host"), true);
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+        }
+
         if (player.isShiftKeyDown() && variant.isAquatic()) {
             if (level.isClientSide) {
                 return ItemInteractionResult.sidedSuccess(true);

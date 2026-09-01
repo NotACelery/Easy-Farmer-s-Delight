@@ -635,9 +635,9 @@ the age progression but never changes the berry roll.
 
 ### Phase 7 presentation in 1.4.0-dev.12
 
-The Rich Farmer screen keeps its original output and Harvest Tool slot indices. Attached host/crop state is rendered
-in a separate informational panel with one row per host level and N/S/E/W face positions, so virtual planting state
-is not confused with inventory storage.
+The Rich Farmer screen keeps its original output and Harvest Tool slot indices. An early dev-only attached-crop
+panel was removed in dev.16; attached hosts and crops are managed only through world interaction and the normal
+top-down Shift-right-click dismantle flow.
 
 Jade summarizes each installed host using the owning block's translated name plus occupied face count. It does not
 dump internal NBT or per-face debug data.
@@ -680,3 +680,42 @@ This checkpoint extends the 1.4.0 scheduler cleanup beyond the Rich/Paddy Farmer
 
 The remaining expensive Cutter recipe lookup still scans the RecipeManager. It is now only reached after a relevant wake or at operation resolution rather than while the Cutter is sleeping. A RecipeType-indexed resolver should only be introduced after cross-loader compilation confirms the exact 1.20.1 Forge and 1.21.1 NeoForge RecipeManager APIs.
 
+
+### Vanilla Sweet Berries in 1.4.0-dev.16
+
+Sweet Berries use the generic regrowing-crop data layer. A Rich Farmer accepts `minecraft:sweet_berries`, renders `minecraft:sweet_berry_bush`, harvests at age 3, and resets the bush to age 1. This remains Rich-Farmer-only and does not add a crop-specific Java branch.
+
+### Dedicated `/farm` QA command in 1.4.0-dev.22
+
+The experimental vanilla `/fill` extension from dev.18-dev.21 was retired because Brigadier resolves vanilla's
+free-form `<block>` branch before EFDC-specific trailing arguments. EFDC now registers an independent,
+unambiguous QA command instead:
+
+`/farm <from> <to> <farm> <villager:true|false> <crop-or-none> [extra]`
+
+`<farm>` accepts the short EFDC block path (`rich_farmer`, `paddy_farmer`, `rich_paddy_farmer`) and also
+accepts the fully-qualified registry id. The crop token accepts the planting item id used by gameplay and common
+crop-block aliases. The optional `extra` argument is context-sensitive: `sand` for Sugar Cane Paddy mode,
+`rope=0..2` for Tomatoes, and `logs=1..2` for attached crops. Attached crops default to one canonical compatible
+host log when `extra` is omitted, and every installed log is populated on all four N/S/E/W faces so mass-created
+Farmers are immediately useful for QA/stress testing.
+
+The command validates the full setup and loaded area before changing blocks, keeps the vanilla `/fill` command
+completely untouched, and derives crop/extra suggestions from live registries plus the data-driven attached and
+regrowing definitions.
+
+### Output-space wake fix in 1.4.0-dev.24
+
+Output inventory tracking now snapshots the four Farmer output slots and detects real capacity increases across
+all Container mutation paths, including normal GUI pickup/set operations, shift-click removal, direct stack
+mutation followed by `setChanged()`, and item-handler extraction. A Farmer sleeping because a mature harvest did
+not fit wakes only when the changed output can satisfy the cached blocked drop requirement. Inserts still do not
+wake an output-full Farmer. This keeps the event-driven scheduler intact while fixing mature attached/regrowing
+crops remaining stuck after the player manually empties a full output inventory.
+
+### 1.4.0-dev.25
+
+- Attached-crop harvesting no longer stops at the first mature face whose drops do not fit.
+- Each mature attached face is evaluated independently, so one full fruit type cannot block another fruit type that still has output capacity.
+- If one or more attached faces remain blocked, the Farmer stays event-driven and retries only after output capacity increases.
+- Mixed lower/upper logs and mixed attached crop types therefore harvest independently while sharing the same four output slots.

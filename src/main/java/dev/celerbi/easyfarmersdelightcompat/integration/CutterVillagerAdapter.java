@@ -1,5 +1,7 @@
 package dev.celerbi.easyfarmersdelightcompat.integration;
 
+import java.lang.reflect.Constructor;
+
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CutterBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
