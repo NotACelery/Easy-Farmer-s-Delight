@@ -1,351 +1,270 @@
-# Easy Farmer's Delight Compat
+# Easy Farmer's Delight
 
-Current release: **1.3.2** (NeoForge 1.21.1)
+Current release: **1.4.0** (Minecraft 1.21.1 / NeoForge 21.1.x / Java 21)
 
 <p align="center">
-  <img src="easy-farmers-delight-compat-cover.webp" alt="Easy Farmer's Delight Compat" width="320">
+  <img src="easy-farmers-delight-cover.webp" alt="Easy Farmer's Delight" width="320">
 </p>
 
-**Easy Farmer's Delight Compat** is an unofficial addon that brings **Farmer's Delight crops and mechanics into Easy Villagers-style automation** for Minecraft **1.21.1 / NeoForge**.
+**Easy Farmer's Delight** is an independent, unofficial expansion for **Easy Villagers** and **Farmer's Delight**.
+It extends villager-powered farming beyond normal field crops with Paddy farming, Rich Soil mechanics, attached-log
+fruit, regrowing bushes, dynamic Cutting Board automation and client-local sound controls.
 
-If you already know how the Easy Villagers Farmer works, the idea is simple: this mod gives you new Farmer variants for crops that need special handling, plus a Cutter for Farmer's Delight Cutting Board recipes.
+> This project is not affiliated with or endorsed by the authors of Easy Villagers, Farmer's Delight, Ars Nouveau,
+> Easy Mob Farm, Jade, JEI, EMI or other supported mods.
 
-> This is an independent community project. It is not affiliated with or endorsed by the authors of Easy Villagers, Farmer's Delight, Jade, JEI, EMI, Ars Nouveau, or other supported mods.
+> **World compatibility:** the public project name is **Easy Farmer's Delight**, but the technical mod/registry
+> namespace remains `easyfarmersdelightcompat`. Existing registered blocks/items, BlockEntity IDs, NBT keys, recipes
+> and saved worlds therefore retain their established identity.
 
-## What does the mod add?
+For the complete crop matrix and host rules, see **[SUPPORTED_CROPS.md](SUPPORTED_CROPS.md)**.
+For architecture and persistence details, see **[DEVELOPMENT.md](DEVELOPMENT.md)**.
+For third-party interoperability/resource boundaries, see **[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)**.
 
-The main additions are:
+## Main features
 
-- **Paddy Farmer** — made for Rice and Sugar Cane.
-- **Rich Farmer** — a stronger Farmer that uses Rich Soil and supports more Farmer's Delight crops.
-- **Rich Paddy Farmer** — combines the Paddy Farmer with Rich Soil bonuses where they make sense.
-- **Harvest Tools** — Rich Farmers can hold a Knife, Hoe, or Axe when a crop needs one.
-- **Cutter** — automatically processes Farmer's Delight Cutting Board recipes and common Axe actions.
-- **Villager Noise Switch** — lets you mute Villager voices on your client.
-- **Iron Farm Noise Switch** — silences only the synthetic Zombie/Iron Golem sounds produced by Easy Villagers Iron Farms.
-- Optional **Jade**, **JEI**, and **EMI** support with useful in-game explanations.
+- **Paddy Farmer** for Farmer's Delight Rice and Sand-based Sugar Cane.
+- **Rich Farmer** with Rich Soil, Harvest Tools, Tomatoes/Rope, Mushroom Colonies, Melon/Pumpkin, regrowing bushes
+  and attached-log crops.
+- **Rich Paddy Farmer** combining the Paddy lifecycle with Rich Soil acceleration for Rice.
+- **Rich Farmer Log Mode** with two independent host logs and up to 8 attached crop faces.
+- Built-in optional **Ars Nouveau** support for Magebloom, Sourceberry and all four Archfruits.
+- Optional **Argentum** seed integration through the normal villager seed tag.
+- **Cutter** automation for Farmer's Delight Cutting Board recipes plus Axe transformations.
+- Dynamic Cutter work surfaces for **any compatible unstripped base log from any mod** that follows Minecraft's
+  standard log tags; the selected block is rendered using its own source model/texture/animation.
+- **Villager Noise Switch**, **Iron Farm Noise Switch**, and optional **Easy Mob Farm Noise Switch**.
+- Optional **Jade**, **JEI**, and **EMI** integrations.
+- `/farm` operator command for reproducible configured Farmer grids.
+- Event-driven Farmer/Cutter standby designed to avoid repeated blocked-work polling.
 
----
+## Farmer variants
 
-# Farmer variants
+### Paddy Farmer
 
-## Paddy Farmer
+The Paddy Farmer handles crop lifecycles that need a flooded/specialized enclosure.
 
-The **Paddy Farmer** is the Farmer variant for crops that do not fit a normal farm field.
+**Rice** is inserted directly and follows the complete Farmer's Delight Rice lifecycle.
 
-### Crafting
+**Sugar Cane** requires an empty Paddy Farmer, then Sand, then Sugar Cane. It grows to three blocks high and
+harvests only the upper sections, leaving the base planted. Sugar Cane is deliberately **not** accelerated by Rich
+Soil, including in a Rich Paddy Farmer.
 
-Upgrade an Easy Villagers Farmer with:
+### Rich Farmer
 
-```text
-G G G
-G F G
-I W I
-```
+The Rich Farmer keeps the normal Easy Villagers crop route and adds specialized mechanics:
 
-- `G` = Glass Pane
-- `F` = Easy Villagers Farmer
-- `I` = Iron Ingot
-- `W` = Water Bucket
+- Rich Soil acceleration where allowed by Farmer's Delight.
+- Tomatoes with 0–2 independent Rope sections.
+- Red/Brown Mushroom Colonies.
+- Melon/Pumpkin virtual stem + fruit handling.
+- Sweet Berry Bush and Ars Nouveau Sourceberry regrowth.
+- Cocoa on Jungle Logs.
+- Ars Nouveau Bombegranate, Mendosteen, Frostaya and Bastion fruit on their matching Archwood host families.
+- Two independently selectable attached host logs, allowing mixed crops in one Farmer.
 
-The empty Bucket is returned after crafting.
+The base Easy Villagers Farmer itself is not modified to gain these special mechanics.
 
-### Rice
+### Rich Paddy Farmer
 
-Put Farmer's Delight **Rice** into the Paddy Farmer and it will handle the complete growing and harvesting cycle automatically.
+The Rich Paddy Farmer keeps Paddy Rice/Sugar Cane behavior and adds the Harvest Tool slot. Rich Soil speeds Rice,
+but **not Sugar Cane**.
 
-Rice keeps growing after each harvest instead of needing to be replanted manually.
+## Harvest Tools
 
-### Sugar Cane
+Rich Farmer and Rich Paddy Farmer expose a protected Harvest Tool slot.
 
-To use Sugar Cane:
-
-1. Start with an empty Paddy Farmer.
-2. Add **Sand**.
-3. Add **Sugar Cane**.
-
-The Sugar Cane grows up to its normal three-block height. When it is ready, the Farmer harvests the upper sections and leaves the bottom section growing.
-
-Sugar Cane does **not** receive a Rich Soil speed bonus, even inside a Rich Paddy Farmer.
-
----
-
-## Rich Farmer
-
-The **Rich Farmer** is an upgraded Farmer built around Farmer's Delight **Rich Soil**.
-
-It supports regular Easy Villagers farming while adding special handling for several Farmer's Delight crops.
-
-### Crafting
-
-Upgrade an Easy Villagers Farmer with:
-
-```text
-G G G
-G F G
-I R I
-```
-
-- `G` = Glass Pane
-- `F` = Easy Villagers Farmer
-- `I` = Iron Block
-- `R` = Rich Soil
-
-If you use a **Paddy Farmer** in the center instead, you receive a **Rich Paddy Farmer**.
-
-### Regular crops
-
-The Rich Farmer can continue handling normal Farmer crops while benefiting from Rich Soil where supported.
-
-You may also give it a **Hoe**. A Hoe is optional for these crops, but enchantments such as Fortune can help when the crop normally supports them.
-
-### Tomatoes and Rope
-
-Plant **Tomato Seeds** in the Rich Farmer just like a regular crop.
-
-Tomatoes stay planted after harvesting. You can also add up to **two Rope sections** so the tomato plant can grow higher and produce from each section independently.
-
-A Hoe is optional.
-
-### Mushroom Colonies
-
-A Rich Farmer can grow both:
-
-- Red Mushroom Colonies
-- Brown Mushroom Colonies
-
-Give it the matching Mushroom to start growing the colony.
-
-The colony can grow normally without a tool, but once it is mature the Farmer will wait for a **Knife** before harvesting it. The Knife is required for the harvest but is **not damaged** by this action.
-
-### Melons and Pumpkins
-
-The Rich Farmer can also automate:
-
-- Melon Seeds
-- Pumpkin Seeds
-
-The Farmer first grows the stem, then waits for the fruit to appear.
-
-When the Melon or Pumpkin is ready, an **Axe is required** to harvest it. Axe enchantments such as Fortune or Silk Touch work normally where Minecraft allows them, and the Axe only loses durability after a successful harvest.
-
----
-
-## Rich Paddy Farmer
-
-The **Rich Paddy Farmer** is created by upgrading a Paddy Farmer with the same Rich Soil recipe used for a Rich Farmer.
-
-It keeps the Paddy Farmer's support for **Rice and Sugar Cane**, while also gaining the Harvest Tool slot and Rich Soil bonuses where applicable.
-
-For Rice, a **Knife is optional**. Using one allows the Rich Paddy Farmer to take advantage of the Knife-sensitive Rice drops without damaging the Knife.
-
-Sugar Cane still grows at its normal Paddy Farmer speed.
-
----
-
-# Harvest Tools
-
-Rich Farmer and Rich Paddy Farmer have a dedicated **Harvest Tool** slot.
-
-You do not need to remember every rule. JEI and EMI show a short Harvest Tools guide in-game, but the simple version is:
-
-| Tool | What it is for |
+| Tool | Use |
 | --- | --- |
-| **Knife** | Optional for Rich Paddy Rice, required for Mushroom Colonies |
-| **Hoe** | Optional for regular crops and Tomatoes; useful for Fortune where supported |
-| **Axe** | Required for Melons and Pumpkins |
+| **Knife** | Required for mature Mushroom Colonies; optional for Rich Paddy Rice |
+| **Hoe** | Optional for compatible normal crops and Tomatoes; may carry Fortune into real crop loot |
+| **Axe** | Required for mature Melons/Pumpkins |
 
-The Farmer only uses a tool when the current crop actually needs it.
+A tool is only consumed/damaged when the relevant mechanic says it should be. Blocked output does not consume the
+crop or damage the tool.
 
----
+## Attached log crops
 
-# Cutter
+A Rich Farmer can install a **lower** and **upper** host log. Each one has four horizontal crop faces, giving up to
+8 independently growing attached crops.
 
-The **Cutter** is an automated Farmer's Delight Cutting Board.
+The host check is strict and data-driven:
 
-It stores a Villager, accepts multiple input items, and uses a **Knife or Axe** as its Cutting Tool.
+- Cocoa Beans require `minecraft:jungle_logs`.
+- Bombegranate Pod requires `ars_nouveau:blazing_logs`.
+- Mendosteen Pod requires `ars_nouveau:flourishing_logs`.
+- Frostaya Pod requires `ars_nouveau:cascading_logs`.
+- Bastion Pod requires `ars_nouveau:vexing_logs`.
 
-### Crafting
+Just like vanilla Cocoa, putting the right seed against the wrong log does not plant it. The same rule extends to
+modded attached crops. Lower and upper logs can be different, so one Rich Farmer can grow two attached-crop families
+at once.
+
+Sneak-use dismantles in this order: upper crops → upper log → lower crops → lower log.
+
+See [SUPPORTED_CROPS.md](SUPPORTED_CROPS.md) for the complete behavior, Rich Soil rules and datapack format.
+
+## Regrowing bushes
+
+Sweet Berry Bushes and Ars Nouveau Sourceberry are explicit data-driven regrowing crops. Mature bushes are picked
+and reset to their post-harvest age instead of being destroyed and replanted. Rich Soil can accelerate their growth
+but does not directly increase the harvest roll.
+
+## Ars Nouveau support
+
+Ars Nouveau is optional and is never classloaded as a hard dependency for crop support. When installed, Easy
+Farmer's Delight explicitly supports:
+
+- **Magebloom** through the normal seed/crop path.
+- **Sourceberry** through the regrowing-bush system.
+- **Bombegranate**, **Mendosteen**, **Frostaya**, and **Bastion Fruit** through attached-log definitions.
+- Ars Nouveau **Archwood logs as Cutter work surfaces** when they participate in the standard Minecraft log tags.
+- Source Ars models/textures/animations are rendered by Minecraft directly; they are not copied into this project.
+
+## Cutter
+
+The Cutter is a villager-powered automated Farmer's Delight Cutting Board.
+
+It has 4 input slots, a protected Cutting Tool slot, and 4 output slots. It processes real Farmer's Delight Cutting
+recipes and can also perform familiar Axe transformations such as log stripping, Copper scraping and wax removal.
+
+### Universal modded-log work surfaces
+
+The Cutter does not maintain a hardcoded wood whitelist. Its crafting/work-surface ingredient accepts any
+**unstripped base log/stem** exposed through Minecraft's standard log tags, plus the historical addon tag as a
+legacy datapack fallback.
+
+This means compatible logs from other mods can work automatically. The selected log registry ID is saved on the
+Cutter item/BlockEntity. The renderer asks Minecraft to draw that actual block, so animated/connected/source-specific
+visuals remain owned by and rendered from the original mod. Ars Nouveau Archwood and vanilla Crimson/Warped stems
+therefore keep their source appearance and animation.
+
+Stripped variants, `_wood` blocks and `_hyphae` blocks are intentionally excluded as Cutter base work surfaces.
+If a saved modded log no longer exists, Oak Log is the safe fallback.
+
+## Event-driven performance model
+
+Farmer and Cutter blocked-work paths are designed to sleep instead of polling expensive state every tick.
+
+- Mature harvest blocked by **output** waits for a real output-capacity increase.
+- Harvest blocked by a **tool** wakes when the Harvest Tool changes.
+- Harvest blocked by a **baby villager** wakes when the stored villager becomes adult or relevant state changes.
+- Attached crop faces are independent: one blocked fruit type cannot freeze a different mature fruit that still fits
+  in the shared output inventory.
+- Pending output drops are reused where possible instead of rerolling loot after every failed capacity check.
+- Cutter idle/full-output states similarly park until an input/tool/output/villager event can actually change work.
+
+A NeoForge stress test with **513 Rich Farmers** showed normal 100–120 FPS while the machines remained loaded but
+fully occluded, with the remaining slowdown tied primarily to rendering hundreds of visible villager/crop models.
+
+## Farmer item state and tooltips
+
+Machine items preserve meaningful stored state when mined. Empty Farmers can stack; stateful Farmers are kept
+individual so contents cannot be duplicated.
+
+Hovering an Easy Farmer's Delight Farmer item shows its planted crop. Mixed attached-crop Farmers show each distinct
+stored crop, making configured machines easy to organize before placement.
+
+## `/farm` operator command
+
+Coordinates use vanilla **X Y Z** order:
 
 ```text
-G G G
-G C G
-B L B
+/farm <from> <to> <farm> <villager:true|false> <crop-or-none> [extra]
 ```
 
-- `G` = Glass Pane
-- `C` = Farmer's Delight Cutting Board
-- `B` = Bricks
-- `L` = compatible Log
+Supported Farmer names:
 
-### How to use it
+- `paddy_farmer`
+- `rich_farmer`
+- `rich_paddy_farmer`
+- full legacy registry IDs are also accepted
 
-1. Place a Villager inside the Cutter.
-2. Put a **Knife or Axe** in the Cutting Tool slot.
-3. Add items to the input slots.
-4. The Cutter processes them automatically and stores the results in its output slots.
+Optional setup argument:
 
-The Cutter supports normal Farmer's Delight Cutting Board recipes.
+- `rope=0`, `rope=1`, `rope=2` — Tomato Rope count.
+- `sand` — Paddy/Rich Paddy Sugar Cane mode.
+- `logs=1`, `logs=2` — attached-log crops; omitted attached setup defaults to one canonical compatible log.
 
-With an Axe, it can also perform familiar Axe actions such as:
-
-- stripping compatible Logs and wood blocks;
-- removing wax from Copper;
-- scraping oxidized Copper.
-
-Compatible modded wood can work too when the mod provides a normal Axe stripping action.
-
-If the Cutter needs a different tool, it simply waits instead of wasting the input or damaging the wrong tool.
-
-Empty Cutters of the same work-surface variant can stack. A Cutter carrying a Villager or other persistent machine contents becomes an individual item when broken, and its inventory icon previews the stored state so it can be distinguished safely before placement.
-
----
-
-# Villager Noise Switch
-
-Too many Villagers making noise around your base?
-
-The **Villager Noise Switch** lets you mute Villager voices for **your own Minecraft client**.
-
-### Crafting
+Example:
 
 ```text
-G G G
-G L G
-R E R
+/farm -18 129 -21 17 129 -57 rich_farmer true farmersdelight:tomato_seeds rope=2
 ```
 
-- `G` = Glass Pane
-- `L` = Lever
-- `R` = Redstone Block
-- `E` = Emerald Block
+The full target region and Farmer/crop combination are validated before placement. Vanilla `/fill` is untouched.
 
-### How to use it
+## Noise Switch family
 
-1. Put an Easy Villagers Villager inside the block.
-2. Right-click the switch to toggle Villager sounds.
+### Villager Noise Switch
 
-Your preference is remembered when you change worlds or servers.
+Stores an Easy Villagers Villager and toggles a persistent **client-local** Villager voice preference. It does not
+create a real Redstone signal.
 
-The Lever and Redstone inside the model are decorative; the block does not act as a real Redstone switch.
+### Iron Farm Noise Switch
 
-Villager Noise Switches are always limited to a stack size of one, matching the Iron Farm Noise Switch. If a Villager is stored inside, the inventory preview shows that persisted Villager state.
+After placement, insert four Iron Blocks and then a Carved Pumpkin to assemble the permanent miniature Iron Golem.
+The switch mutes only the synthetic Zombie Ambient / Iron Golem Hurt / Iron Golem Death sounds emitted from the exact
+position of Easy Villagers Iron Farms. Real Zombies and Iron Golems remain audible.
 
----
+### Easy Mob Farm Noise Switch
 
+Registered only when **Easy Mob Farm** is installed. Insert six Rotten Flesh to assemble the decorative vanilla
+Zombie model. The completed switch mutes only Easy Mob Farm's captured-mob display entities for the local client;
+real world mobs are unchanged.
 
-# Iron Farm Noise Switch
+All Noise Switch assembly/state data is preserved when mined.
 
-The **Iron Farm Noise Switch** is a second client-local sound switch dedicated to the noisy simulated Zombie and Iron Golem inside Easy Villagers Iron Farms.
+## JEI, EMI and Jade
 
-### Crafting
+These integrations are optional.
 
-```text
-G G G
-G L G
-R I R
-```
+- JEI/EMI show Farmer harvesting/Harvest Tool guidance and contextual Block Guide pages.
+- Farmer upgrade transfer uses the real gameplay recipes/state-preserving behavior.
+- Cutter remains exposed as a Farmer's Delight Cutting workstation/catalyst where appropriate.
+- Jade reports crop/growth state, attached host occupancy, Harvest Tool blockers, Paddy/Sugar Cane state, Cutter
+  status and Noise Switch state/assembly progress.
+- Optional integrations are isolated so their absence does not classload unavailable APIs.
 
-- `G` = Glass Pane
-- `L` = Lever
-- `R` = Redstone Block
-- `I` = Iron Block
+## Visual/resource independence
 
-The crafted switch is not active yet. Place it and build a miniature Iron Golem inside it:
+Easy Farmer's Delight does not redistribute Easy Villagers models, textures or GUI images. Its machine enclosure
+resources are project/vanilla based, while dynamic contents deliberately ask Minecraft to render the original
+Villager/crop/log model from the owning game/mod.
 
-1. Right-click with an **Iron Block** four times. Each click consumes one block and assembles the base, body, left arm and right arm in that order.
-2. At 4/4, right-click with a **Carved Pumpkin**. The pumpkin is consumed and the structure becomes a permanent Iron Golem.
-3. Once complete, right-click the switch to toggle Iron Farm noise for your client.
+This is why modded logs and animated stems can keep their native appearance without Easy Farmer's Delight copying
+those assets.
 
-The completed Golem cannot be removed. The Iron Farm Noise Switch is therefore always limited to a stack size of one, and its assembly state is preserved when mined.
+## Bamboo scope
 
-The mute is intentionally surgical: it only cancels `Zombie Ambient`, `Iron Golem Hurt`, and `Iron Golem Death` sounds when they originate from the exact position of an `easy_villagers:iron_farm` block. Real Zombies and real Iron Golems remain fully audible.
+Bamboo is **not a supported Farmer crop** in 1.4.0. Its vertical structural growth is outside the crop families
+implemented by this release. Bamboo Block can still participate in Cutter Axe/log behavior if exposed through the
+standard game transformation/tag systems.
 
-Like the Villager Noise Switch, the Lever and Redstone state is personal to each client and emits no real Redstone signal.
-
----
-
-# JEI and EMI guides
-
-**JEI and EMI are optional**, but they are strongly recommended if you want to learn the mod while playing.
-
-The mod adds its own simple guide pages showing:
-
-- what each Farmer can grow;
-- how Rice and Sugar Cane work;
-- which Harvest Tool a crop needs;
-- how Tomatoes and Rope work;
-- how Mushroom Colonies are harvested;
-- how Melons and Pumpkins work;
-- how to use the Cutter;
-- how to use the Villager Noise Switch;
-- how to assemble and use the Iron Farm Noise Switch.
-
-In EMI, open the **Recipes** for one of the mod's blocks and you will find a **Block Guide** tab beside the normal crafting information.
-
-The guides are separated by Farmer type so you only see information that is useful for the machine you are checking.
-
----
-
-# Jade support
-
-**Jade is optional.** If installed, looking at the mod's blocks gives you useful information without opening their menus.
-
-Depending on the block, Jade can show things such as:
-
-- current crop and growth progress;
-- whether a crop is ready to harvest;
-- whether a Knife or Axe is missing;
-- the equipped Harvest Tool;
-- Sugar Cane height;
-- Tomato and Rope growth;
-- Melon/Pumpkin growth stage;
-- Cutter progress and wrong-tool warnings;
-- whether Villager sounds are currently enabled or muted;
-- Iron Farm Noise Switch assembly progress and its local mute state.
-
----
-
-# Optional mod compatibility
-
-The mod can recognize compatible crops, tools, and wood from other mods when they use the normal Minecraft/NeoForge compatibility systems.
-
-There is also optional support for mods such as **Ars Nouveau** and **Argentum** where applicable. They are **not required** to use Easy Farmer's Delight Compat.
-
----
-
-# Requirements
+## Requirements
 
 Required:
 
 - Minecraft **1.21.1**
-- NeoForge **21.1.235 or newer**
-- Easy Villagers **1.1.42 or newer**
-- Farmer's Delight **1.2.9 or newer**
+- NeoForge **21.1.235+**
+- Easy Villagers **1.1.42+**
+- Farmer's Delight **1.2.9+**
 
 Optional:
 
-- Jade
-- JEI
-- EMI
 - Ars Nouveau
 - Argentum
+- Easy Mob Farm
+- Jade
+- JEI 19.x
+- EMI 1.1.24+
 
-Install the mod on both the **client and server** when playing multiplayer.
+Install Easy Farmer's Delight on both client and server for multiplayer gameplay. Client-only viewer/HUD mods remain
+optional.
 
----
+## Building from source
 
-# Release history
-
-The current 1.3.x line adds the Villager Noise Switch and Iron Farm Noise Switch family on top of the expanded Farmer/Cutter systems introduced during 1.2.x.
-
-See [CHANGELOG.md](CHANGELOG.md) for the complete user-facing release history.
-
----
-
-# Building from source
-
-For contributors who want to build the project themselves, Java 21 is required.
+Java **21** is required.
 
 Windows:
 
@@ -359,9 +278,7 @@ Linux / WSL:
 bash build.sh
 ```
 
-The built JAR is created in `build/libs/`.
-
-For architecture, persistence rules, compatibility boundaries, machine lifecycles, viewer design and regression checks, see [DEVELOPMENT.md](DEVELOPMENT.md). That document is the technical source of truth that replaces large explanatory comment blocks in the Java source.
+The runtime JAR is written to `build/libs/` and uses **easy-farmers-delight** in its filename.
 
 ## License
 

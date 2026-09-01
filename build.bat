@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0"
-title Easy Farmer's Delight Compat - Compilacion dev
+title Easy Farmer's Delight - Build 1.4.0
 
 set "GRADLE_VERSION=9.2.1"
 set "DIST_ROOT=%CD%\.gradle-dist"
@@ -10,10 +10,19 @@ set "DIST_ZIP=%DIST_ROOT%\gradle-%GRADLE_VERSION%-bin.zip"
 set "JAVA_EXE="
 
  echo ============================================================
- echo     EASY FARMER'S DELIGHT COMPAT - DEV BUILD
+ echo     EASY FARMER'S DELIGHT - BUILD 1.4.0
  echo ============================================================
  echo Directorio: %CD%
  echo.
+
+if exist "cleanup-1.4.0-migration.bat" (
+    call "cleanup-1.4.0-migration.bat"
+    if errorlevel 1 (
+        echo.
+        echo ERROR: Fallo la limpieza de archivos obsoletos previos a 1.4.0.
+        goto :failure
+    )
+)
 
 if exist "cleanup-obsolete-recipes.bat" (
     call "cleanup-obsolete-recipes.bat"
@@ -78,7 +87,7 @@ if not exist "%DIST_DIR%\bin\gradle.bat" (
 if not exist "%DIST_DIR%\bin\gradle.bat" goto :gradle_missing
 
 echo.
-echo Compilando Easy Farmer's Delight Compat...
+echo Compilando Easy Farmer's Delight...
 echo La primera compilacion puede descargar dependencias de NeoForge.
 echo.
 call "%DIST_DIR%\bin\gradle.bat" --no-daemon clean build --stacktrace

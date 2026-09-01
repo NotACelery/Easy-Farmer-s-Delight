@@ -18,7 +18,8 @@ public final class ModMenus {
     public static MenuType<PaddyFarmerMenu> PADDY_FARMER;
     public static MenuType<CutterMenu> CUTTER;
 
-    private ModMenus() {}
+    private ModMenus() {
+    }
 
     @SubscribeEvent
     public static void register(RegisterEvent event) {

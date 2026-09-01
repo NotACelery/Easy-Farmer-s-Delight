@@ -2,6 +2,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+if [ -x "./cleanup-1.4.0-migration.sh" ]; then
+    ./cleanup-1.4.0-migration.sh
+fi
+
 GRADLE_VERSION="9.2.1"
 DIST_ROOT="$PWD/.gradle-dist"
 DIST_DIR="$DIST_ROOT/gradle-$GRADLE_VERSION"
@@ -19,6 +23,6 @@ if [ ! -x "$DIST_DIR/bin/gradle" ]; then
     unzip -q -o "$DIST_ZIP" -d "$DIST_ROOT"
 fi
 
-echo "Compilando Easy Farmer's Delight Compat (dev build)..."
+echo "Compilando Easy Farmer's Delight 1.4.0..."
 "$DIST_DIR/bin/gradle" --no-daemon clean build --stacktrace
 echo "LISTO: revisa build/libs/"

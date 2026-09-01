@@ -1,7 +1,6 @@
 {
-  "parent": "easy_villagers:block/farm",
+  "parent": "easyfarmersdelightcompat:block/machine_cage",
   "textures": {
-    "front": "minecraft:block/bricks",
-    "back": "minecraft:block/bricks"
+    "particle": "minecraft:block/bricks"
   }
 }

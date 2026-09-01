@@ -1,10 +1,10 @@
 package dev.celerbi.easyfarmersdelightcompat.registry;
 
 import dev.celerbi.easyfarmersdelightcompat.EasyFarmersDelightCompat;
+import dev.celerbi.easyfarmersdelightcompat.recipe.CutterRecipe;
 import dev.celerbi.easyfarmersdelightcompat.recipe.PaddyFarmerRecipe;
 import dev.celerbi.easyfarmersdelightcompat.recipe.RichFarmerRecipe;
 import dev.celerbi.easyfarmersdelightcompat.recipe.RichPaddyFarmerRecipe;
-import dev.celerbi.easyfarmersdelightcompat.recipe.CutterRecipe;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;

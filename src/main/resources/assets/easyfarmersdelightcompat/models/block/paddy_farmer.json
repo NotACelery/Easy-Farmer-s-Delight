@@ -7,7 +7,7 @@
     "glass": "minecraft:block/glass",
     "iron": "minecraft:block/iron_block",
     "soil": "minecraft:block/dirt",
-    "frame": "easy_villagers:block/farm"
+    "frame": "minecraft:block/iron_block"
   },
   "elements": [
     {

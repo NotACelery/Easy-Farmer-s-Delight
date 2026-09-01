@@ -1,6 +1,9 @@
 package dev.celerbi.easyfarmersdelightcompat;
 
+import dev.celerbi.easyfarmersdelightcompat.command.FarmCommand;
 import dev.celerbi.easyfarmersdelightcompat.event.LegacyFarmerMigrationEvents;
+import dev.celerbi.easyfarmersdelightcompat.integration.attached.AttachedCropReloadListener;
+import dev.celerbi.easyfarmersdelightcompat.integration.regrowing.RegrowingCropReloadListener;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModRecipeSerializers;
@@ -8,6 +11,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 @Mod(EasyFarmersDelightCompat.MOD_ID)
 public final class EasyFarmersDelightCompat {
@@ -19,5 +24,11 @@ public final class EasyFarmersDelightCompat {
         modEventBus.addListener(ModBlockEntities::onRegisterCapabilities);
         ModRecipeSerializers.register(modEventBus);
         NeoForge.EVENT_BUS.addListener(LegacyFarmerMigrationEvents::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
+                FarmCommand.register(event.getDispatcher()));
+        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) ->
+                event.addListener(AttachedCropReloadListener.INSTANCE));
+        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) ->
+                event.addListener(RegrowingCropReloadListener.INSTANCE));
     }
 }
