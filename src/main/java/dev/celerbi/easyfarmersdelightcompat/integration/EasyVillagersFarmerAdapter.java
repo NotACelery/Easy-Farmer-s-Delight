@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -270,7 +271,8 @@ public final class EasyVillagersFarmerAdapter {
             return false;
         }
         try {
-            Object result = ReflectionCache.publicMethod(farmer.getClass(), "isValidSeed", Item.class).invoke(farmer, stack.getItem());
+            Method isValidSeed = ReflectionCache.publicMethod(farmer.getClass(), "isValidSeed", Item.class);
+            Object result = isValidSeed.invoke(farmer, stack.getItem());
             return result instanceof Boolean valid && valid;
         } catch (ReflectiveOperationException e) {
             fail(e);
@@ -287,7 +289,8 @@ public final class EasyVillagersFarmerAdapter {
             return false;
         }
         try {
-            Object result = ReflectionCache.publicMethod(farmer.getClass(), "getSeedCrop", Item.class).invoke(farmer, stack.getItem());
+            Method getSeedCrop = ReflectionCache.publicMethod(farmer.getClass(), "getSeedCrop", Item.class);
+            Object result = getSeedCrop.invoke(farmer, stack.getItem());
             if (!(result instanceof BlockState crop)) {
                 return false;
             }
@@ -479,7 +482,7 @@ public final class EasyVillagersFarmerAdapter {
             return;
         farmSpeedFallbackWarned = true;
         System.err.println(
-                "[Easy Farmer's Delight Compat] Could not read Easy Villagers farmer.farm_speed; "
+                "[Easy Farmer's Delight] Could not read Easy Villagers farmer.farm_speed; "
                         + "using default 10 without disabling the Farmer adapter."
         );
         if (e != null)
@@ -516,7 +519,7 @@ public final class EasyVillagersFarmerAdapter {
         try {
             Block easyFarmer = BuiltInRegistries.BLOCK.get(EASY_FARMER_ID);
             Class<?> clazz = ReflectionCache.type(FARMER_TILEENTITY);
-            Constructor<?> constructor = ReflectionCache.constructor(clazz, net.minecraft.core.BlockPos.class, BlockState.class);
+            Constructor<?> constructor = ReflectionCache.constructor(clazz, BlockPos.class, BlockState.class);
             delegate = (BlockEntity) constructor.newInstance(owner.getBlockPos(), easyFarmer.defaultBlockState());
             Level level = owner.getLevel();
             if (level != null) {
@@ -731,7 +734,7 @@ public final class EasyVillagersFarmerAdapter {
     private void fail(Throwable e) {
         if (!failed) {
             System.err.println(
-                    "[Easy Farmer's Delight Compat] Easy Villagers Farmer adapter failed; "
+                    "[Easy Farmer's Delight] Easy Villagers Farmer adapter failed; "
                             + "Paddy Farmer integration is disabled for this block entity."
             );
             e.printStackTrace();

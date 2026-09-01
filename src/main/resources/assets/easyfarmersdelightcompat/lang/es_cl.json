@@ -2,7 +2,7 @@
   "block.easyfarmersdelightcompat.paddy_farmer": "Granjero de arrozal",
   "block.easyfarmersdelightcompat.rich_farmer": "Granjero fértil",
   "block.easyfarmersdelightcompat.rich_paddy_farmer": "Granjero de arrozal fértil",
-  "itemGroup.easyfarmersdelightcompat": "Easy Farmer's Delight Compat",
+  "itemGroup.easyfarmersdelightcompat": "Easy Farmer's Delight",
   "jade.easyfarmersdelightcompat.crop": "Cultivo: %s",
   "jade.easyfarmersdelightcompat.crop.none": "Cultivo: Ninguno",
   "jade.easyfarmersdelightcompat.growth": "Crecimiento: %s%%",
@@ -203,7 +203,7 @@
   "jade.easyfarmersdelightcompat.waiting.hoe": "Esperando azada",
   "jade.easyfarmersdelightcompat.wrong_tool.hoe": "Herramienta incorrecta: se requiere una azada",
   "message.easyfarmersdelightcompat.attached_crop.incompatible_host": "Esta semilla no puede plantarse en este tronco.",
-  "command.easyfarmersdelightcompat.farm.only_farmer": "Los argumentos de /farm sólo pueden usarse con bloques Farmer de EFDC.",
+  "command.easyfarmersdelightcompat.farm.only_farmer": "Los argumentos de /farm sólo pueden usarse con bloques Farmer de Easy Farmer's Delight.",
   "command.easyfarmersdelightcompat.farm.too_large": "Demasiados bloques para el comando /farm: %s (máximo %s).",
   "command.easyfarmersdelightcompat.farm.out_of_world": "El área del comando /farm sale de la altura de construcción.",
   "command.easyfarmersdelightcompat.farm.unloaded": "El área del comando /farm contiene una posición no cargada: %s.",
@@ -212,5 +212,7 @@
   "command.easyfarmersdelightcompat.farm.unsupported_crop": "El cultivo %s no es compatible con %s.",
   "command.easyfarmersdelightcompat.farm.no_default_host": "No se encontró un tronco compatible predeterminado para el cultivo acoplado %s.",
   "command.easyfarmersdelightcompat.farm.invalid_upgrade": "Mejora de Farmer inválida \"%s\". Se esperaba: %s.",
-  "command.easyfarmersdelightcompat.farm.success": "Se rellenaron %s Farmers — aldeano=%s, cultivo=%s, mejora=%s."
+  "command.easyfarmersdelightcompat.farm.success": "Se rellenaron %s Farmers — aldeano=%s, cultivo=%s, mejora=%s.",
+  "tooltip.easyfarmersdelightcompat.farmer.crop": "Cultivo: %s",
+  "tooltip.easyfarmersdelightcompat.farmer.crop.none": "Cultivo: Ninguno"
 }

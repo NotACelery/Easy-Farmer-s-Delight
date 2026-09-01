@@ -9,12 +9,12 @@ version = "${mod_version}"
 displayName = "${mod_name}"
 displayURL = "https://github.com/NotACelery/Easy-Farmer-s-Delight-Compat"
 authors = "Celerbi"
-credits = "Independent compatibility addon for Easy Villagers by henkelmax and Farmer's Delight by vectorwing. Optional integrations: Jade, JEI, EMI, Argentum, Ars Nouveau and Easy Mob Farm."
-logoFile = "easy-farmers-delight-compat-icon.png"
+credits = "Independent expansion for Easy Villagers by henkelmax and Farmer's Delight by vectorwing. Optional integrations: Jade, JEI, EMI, Argentum, Ars Nouveau and Easy Mob Farm."
+logoFile = "easy-farmers-delight-icon.png"
 logoBlur = false
 description = '''
-An independent, unofficial compatibility addon for Easy Villagers and Farmer's Delight.
-Adds Paddy/Rich Farmers with Rice, Sugar Cane, Tomato, Mushroom and Melon/Pumpkin automation; Harvest Tools, the automated Cutter, client-local Noise Switches, and optional Jade/JEI/EMI guidance without redistributing dependencies.
+An independent, unofficial expansion that extends Easy Villagers and Farmer's Delight with new automation mechanics.
+Adds Paddy/Rich Farmers, Rich Soil farming, Tomato/Rope and regrowing crops, Rich Farmer Log Mode with Cocoa and optional Ars Nouveau Archfruits, dynamic Cutter work surfaces for compatible modded logs, client-local Noise Switches, and optional Jade/JEI/EMI guidance without redistributing dependencies.
 '''
 
 [[dependencies.${mod_id}]]
@@ -34,7 +34,7 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "easy_villagers"
 type = "required"
-reason = "Easy Villagers is required because its Farmer is the base block used by this compatibility addon."
+reason = "Easy Villagers is required because its Farmer is the upstream foundation used by this expansion."
 versionRange = "[1.1.42,)"
 ordering = "AFTER"
 side = "BOTH"
@@ -42,7 +42,7 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "farmersdelight"
 type = "required"
-reason = "Farmer's Delight is required because this addon integrates its crops and Rich Soil mechanics."
+reason = "Farmer's Delight is required because this expansion integrates its crops and Rich Soil mechanics."
 versionRange = "[1.2.9,)"
 ordering = "AFTER"
 side = "BOTH"

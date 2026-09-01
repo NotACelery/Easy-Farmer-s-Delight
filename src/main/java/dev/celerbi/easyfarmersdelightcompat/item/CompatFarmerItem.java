@@ -3,17 +3,23 @@ package dev.celerbi.easyfarmersdelightcompat.item;
 import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
 import dev.celerbi.easyfarmersdelightcompat.client.CompatFarmerItemRenderer;
+import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -43,6 +49,49 @@ public final class CompatFarmerItem extends BlockItem {
         }
     }
 
+    @Override
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            List<Component> tooltip,
+            TooltipFlag flag
+    ) {
+        super.appendHoverText(stack, context, tooltip, flag);
+        HolderLookup.Provider registries = context.registries();
+        List<Component> crops = registries == null ? List.of() : storedCropNames(stack, registries);
+        if (crops.isEmpty()) {
+            tooltip.add(Component.translatable(
+                            "tooltip.easyfarmersdelightcompat.farmer.crop.none")
+                    .withStyle(ChatFormatting.GRAY));
+            return;
+        }
+        for (Component crop : crops) {
+            tooltip.add(Component.translatable(
+                            "tooltip.easyfarmersdelightcompat.farmer.crop", crop)
+                    .withStyle(ChatFormatting.GRAY));
+        }
+    }
+
+    private List<Component> storedCropNames(ItemStack stack, HolderLookup.Provider registries) {
+        if (!(getBlock() instanceof CompatFarmerBlock farmerBlock)) {
+            return List.of();
+        }
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data == null || data.isEmpty()) {
+            return List.of();
+        }
+        try {
+            CompatFarmerBlockEntity probe = new CompatFarmerBlockEntity(
+                    BlockPos.ZERO,
+                    farmerBlock.defaultBlockState()
+            );
+            data.loadInto(probe, registries);
+            return probe.plantedCropNames(registries);
+        } catch (RuntimeException malformedData) {
+            return List.of();
+        }
+    }
+
     public static ItemStack normalizeLoadedStack(ItemStack stack, Level level) {
         if (stack.isEmpty() || !(stack.getItem() instanceof CompatFarmerItem farmerItem)) {
             return stack;
@@ -66,7 +115,6 @@ public final class CompatFarmerItem extends BlockItem {
                     return stack;
                 }
             } catch (RuntimeException malformedLegacyData) {
-
                 stack.set(DataComponents.MAX_STACK_SIZE, 1);
                 return stack;
             }

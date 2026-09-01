@@ -3,8 +3,8 @@ package dev.celerbi.easyfarmersdelightcompat.blockentity;
 import dev.celerbi.easyfarmersdelightcompat.block.CompatFarmerBlock;
 import dev.celerbi.easyfarmersdelightcompat.block.FarmerVariant;
 import dev.celerbi.easyfarmersdelightcompat.integration.EasyVillagersFarmerAdapter;
-import dev.celerbi.easyfarmersdelightcompat.integration.FarmersDelightAdapter;
 import dev.celerbi.easyfarmersdelightcompat.integration.FarmerToolSupport;
+import dev.celerbi.easyfarmersdelightcompat.integration.FarmersDelightAdapter;
 import dev.celerbi.easyfarmersdelightcompat.integration.ReflectionCache;
 import dev.celerbi.easyfarmersdelightcompat.integration.ToolRequirement;
 import dev.celerbi.easyfarmersdelightcompat.integration.attached.AttachedCropDefinition;
@@ -14,26 +14,28 @@ import dev.celerbi.easyfarmersdelightcompat.integration.regrowing.RegrowingCropD
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -41,13 +43,14 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -94,7 +97,10 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
             .fromNamespaceAndPath("farmersdelight", "red_mushroom_colony");
     private static final ResourceLocation BROWN_MUSHROOM_COLONY_ID = ResourceLocation
             .fromNamespaceAndPath("farmersdelight", "brown_mushroom_colony");
-    private static final ResourceLocation COCOA_DEFINITION_ID = ResourceLocation.fromNamespaceAndPath("easyfarmersdelightcompat", "cocoa");
+    private static final ResourceLocation COCOA_DEFINITION_ID = ResourceLocation.fromNamespaceAndPath(
+            "easyfarmersdelightcompat",
+            "cocoa"
+    );
     private static final TagKey<Block> UNAFFECTED_BY_RICH_SOIL = TagKey.create(
             Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath("farmersdelight", "unaffected_by_rich_soil")
@@ -126,9 +132,12 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
     private int sugarCaneAge;
     private ItemStack harvestTool = ItemStack.EMPTY;
     private final ResourceLocation[] attachedHostIds = new ResourceLocation[ATTACHED_LEVEL_COUNT];
-    private final ResourceLocation[][] attachedDefinitionIds = new ResourceLocation[ATTACHED_LEVEL_COUNT][ATTACHED_FACE_COUNT];
-    private final ResourceLocation[][] attachedCropIds = new ResourceLocation[ATTACHED_LEVEL_COUNT][ATTACHED_FACE_COUNT];
-    private final ResourceLocation[][] attachedPlantingItemIds = new ResourceLocation[ATTACHED_LEVEL_COUNT][ATTACHED_FACE_COUNT];
+    private final ResourceLocation[][] attachedDefinitionIds =
+            new ResourceLocation[ATTACHED_LEVEL_COUNT][ATTACHED_FACE_COUNT];
+    private final ResourceLocation[][] attachedCropIds =
+            new ResourceLocation[ATTACHED_LEVEL_COUNT][ATTACHED_FACE_COUNT];
+    private final ResourceLocation[][] attachedPlantingItemIds =
+            new ResourceLocation[ATTACHED_LEVEL_COUNT][ATTACHED_FACE_COUNT];
     private final String[][] attachedAgeProperties = new String[ATTACHED_LEVEL_COUNT][ATTACHED_FACE_COUNT];
     private final String[][] attachedFacingProperties = new String[ATTACHED_LEVEL_COUNT][ATTACHED_FACE_COUNT];
     private final int[][] attachedCropAges = new int[ATTACHED_LEVEL_COUNT][ATTACHED_FACE_COUNT];
@@ -832,6 +841,98 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
         return removed;
     }
 
+    public List<Component> plantedCropNames(HolderLookup.Provider registries) {
+        List<Component> names = new ArrayList<>();
+        Set<ResourceLocation> seenItems = new LinkedHashSet<>();
+        Set<ResourceLocation> seenBlocks = new LinkedHashSet<>();
+
+        if (variant().isAquatic() && paddySand && sugarCaneHeight > 0) {
+            addPlantingItemName(names, seenItems, BuiltInRegistries.ITEM.getKey(Items.SUGAR_CANE));
+        }
+
+        if (supportsAttachedCrops()) {
+            for (int levelIndex = 0; levelIndex < ATTACHED_LEVEL_COUNT; levelIndex++) {
+                for (int faceIndex = 0; faceIndex < ATTACHED_FACE_COUNT; faceIndex++) {
+                    ResourceLocation plantingId = attachedPlantingItemIds[levelIndex][faceIndex];
+                    if (plantingId != null) {
+                        addPlantingItemName(names, seenItems, plantingId);
+                        continue;
+                    }
+
+                    ResourceLocation cropId = attachedCropIds[levelIndex][faceIndex];
+                    if (cropId != null && seenBlocks.add(cropId)) {
+                        Block cropBlock = BuiltInRegistries.BLOCK.get(cropId);
+                        if (cropBlock != null && cropBlock != Blocks.AIR) {
+                            names.add(cropBlock.getName());
+                        }
+                    }
+                }
+            }
+        }
+
+        BlockState selected = easyVillagers.getCrop(registries);
+        if (selected != null) {
+            ItemStack planting = plantingStackForTooltip(selected);
+            if (!planting.isEmpty()) {
+                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(planting.getItem());
+                if (itemId != null && seenItems.add(itemId)) {
+                    names.add(planting.getHoverName());
+                }
+            } else {
+                ResourceLocation cropId = BuiltInRegistries.BLOCK.getKey(selected.getBlock());
+                if (cropId != null && seenBlocks.add(cropId)) {
+                    names.add(selected.getBlock().getName());
+                }
+            }
+        }
+
+        return List.copyOf(names);
+    }
+
+    private ItemStack plantingStackForTooltip(BlockState selected) {
+        if (regrowingPlantingItemId != null) {
+            Item planting = BuiltInRegistries.ITEM.get(regrowingPlantingItemId);
+            if (planting != null && planting != Items.AIR) {
+                return new ItemStack(planting);
+            }
+        }
+
+        ResourceLocation cropId = BuiltInRegistries.BLOCK.getKey(selected.getBlock());
+        if (RICE_CROP_ID.equals(cropId)) {
+            return new ItemStack(BuiltInRegistries.ITEM.get(RICE_ITEM_ID));
+        }
+        if (isTomatoState(selected)) {
+            return new ItemStack(BuiltInRegistries.ITEM.get(TOMATO_SEEDS_ID));
+        }
+
+        ResourceLocation mushroomId = mushroomItemForColony(selected);
+        if (mushroomId != null) {
+            return new ItemStack(BuiltInRegistries.ITEM.get(mushroomId));
+        }
+
+        Item stemSeed = seedItemForStem(selected);
+        if (stemSeed != null) {
+            return new ItemStack(stemSeed);
+        }
+
+        Item blockItem = selected.getBlock().asItem();
+        return blockItem == Items.AIR ? ItemStack.EMPTY : new ItemStack(blockItem);
+    }
+
+    private static void addPlantingItemName(
+            List<Component> names,
+            Set<ResourceLocation> seenItems,
+            ResourceLocation itemId
+    ) {
+        if (itemId == null || !seenItems.add(itemId)) {
+            return;
+        }
+        Item item = BuiltInRegistries.ITEM.get(itemId);
+        if (item != null && item != Items.AIR) {
+            names.add(new ItemStack(item).getHoverName());
+        }
+    }
+
     public void setBaseProgress(int value) {
         baseProgress = Math.max(0, value);
         setChanged();
@@ -1077,20 +1178,28 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
                     sugarCaneHeight = 1;
                     sugarCaneAge = 0;
                     setChanged();
-                    level.playSound(null, worldPosition, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    level.playSound(
+                            null, worldPosition, SoundEvents.VILLAGER_WORK_FARMER,
+                            SoundSource.BLOCKS, 1.0F, 1.0F
+                    );
                 }
                 return;
             }
 
             if (variant().isAquatic()) {
-                if (paddyGrowth < MAX_PADDY_GROWTH || !easyVillagers.hasRiceCrop(registries) || !hasAdultFarmerVillager(registries)) {
+                if (paddyGrowth < MAX_PADDY_GROWTH
+                        || !easyVillagers.hasRiceCrop(registries)
+                        || !hasAdultFarmerVillager(registries)) {
                     return;
                 }
                 if (harvestMatureRice(level, registries)) {
                     paddyGrowth = 3;
                     syncRiceCropState(registries);
                     setChanged();
-                    level.playSound(null, worldPosition, SoundEvents.VILLAGER_WORK_FARMER, SoundSource.BLOCKS, 1.0F, 1.0F);
+                    level.playSound(
+                            null, worldPosition, SoundEvents.VILLAGER_WORK_FARMER,
+                            SoundSource.BLOCKS, 1.0F, 1.0F
+                    );
                 }
                 return;
             }
@@ -1994,7 +2103,7 @@ public final class CompatFarmerBlockEntity extends BlockEntity {
                 .filter(candidate -> candidate.getName().equals(name))
                 .findFirst();
         if (property.isPresent()
-                && property.get() instanceof net.minecraft.world.level.block.state.properties.DirectionProperty directionProperty) {
+                && property.get() instanceof DirectionProperty directionProperty) {
             return state.setValue(directionProperty, value);
         }
         return state;

@@ -114,7 +114,7 @@ public final class FarmCommand {
 
         if (cropNode == null) {
             System.err.println(
-                    "[Easy Farmer's Delight Compat] Failed to register the /farm command branch."
+                    "[Easy Farmer's Delight] Failed to register the /farm command branch."
             );
         }
     }
@@ -164,7 +164,10 @@ public final class FarmCommand {
 
         for (BlockPos pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ)) {
             if (!level.hasChunkAt(pos)) {
-                source.sendFailure(Component.translatable("command.easyfarmersdelightcompat.farm.unloaded", pos.toShortString()));
+                source.sendFailure(Component.translatable(
+                        "command.easyfarmersdelightcompat.farm.unloaded",
+                        pos.toShortString()
+                ));
                 return 0;
             }
         }

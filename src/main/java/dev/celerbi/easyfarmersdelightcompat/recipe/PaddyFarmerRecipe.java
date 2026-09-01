@@ -12,7 +12,13 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 public final class PaddyFarmerRecipe extends ShapedRecipe {
 
     public PaddyFarmerRecipe(CraftingBookCategory category) {
-        super("", category, FarmerUpgradeRecipeDefinitions.paddy().pattern(), new ItemStack(ModBlocks.PADDY_FARMER_ITEM.get()), false);
+        super(
+                "",
+                category,
+                FarmerUpgradeRecipeDefinitions.paddy().pattern(),
+                new ItemStack(ModBlocks.PADDY_FARMER_ITEM.get()),
+                false
+        );
     }
 
     @Override

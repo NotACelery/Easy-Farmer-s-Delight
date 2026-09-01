@@ -20,7 +20,7 @@ public final class ModCreativeTabs {
             "main",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.easyfarmersdelightcompat"))
-                    .icon(() -> new ItemStack(ModBlocks.PADDY_FARMER_ITEM.get()))
+                    .icon(() -> new ItemStack(ModBlocks.RICH_FARMER_ITEM.get()))
                     .displayItems((parameters, output) -> {
                         output.accept(ModBlocks.PADDY_FARMER_ITEM.get());
                         output.accept(ModBlocks.RICH_FARMER_ITEM.get());

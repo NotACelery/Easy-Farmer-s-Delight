@@ -23,6 +23,6 @@ if [ ! -x "$DIST_DIR/bin/gradle" ]; then
     unzip -q -o "$DIST_ZIP" -d "$DIST_ROOT"
 fi
 
-echo "Compilando Easy Farmer's Delight Compat (dev build)..."
+echo "Compilando Easy Farmer's Delight 1.4.0..."
 "$DIST_DIR/bin/gradle" --no-daemon clean build --stacktrace
 echo "LISTO: revisa build/libs/"

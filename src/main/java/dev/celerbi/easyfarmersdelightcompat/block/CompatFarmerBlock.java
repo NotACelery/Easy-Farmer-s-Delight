@@ -1,14 +1,14 @@
 package dev.celerbi.easyfarmersdelightcompat.block;
 
 import dev.celerbi.easyfarmersdelightcompat.blockentity.CompatFarmerBlockEntity;
-import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import dev.celerbi.easyfarmersdelightcompat.integration.FarmerToolSupport;
 import dev.celerbi.easyfarmersdelightcompat.menu.PaddyFarmerMenu;
 import dev.celerbi.easyfarmersdelightcompat.menu.RichFarmerMenu;
+import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

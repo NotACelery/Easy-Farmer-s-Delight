@@ -12,7 +12,13 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 public final class RichFarmerRecipe extends ShapedRecipe {
 
     public RichFarmerRecipe(CraftingBookCategory category) {
-        super("", category, FarmerUpgradeRecipeDefinitions.rich().pattern(), new ItemStack(ModBlocks.RICH_FARMER_ITEM.get()), false);
+        super(
+                "",
+                category,
+                FarmerUpgradeRecipeDefinitions.rich().pattern(),
+                new ItemStack(ModBlocks.RICH_FARMER_ITEM.get()),
+                false
+        );
     }
 
     @Override

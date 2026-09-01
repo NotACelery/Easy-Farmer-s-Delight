@@ -56,7 +56,9 @@ public final class NoiseSwitchVillagerAdapter {
 
             owner.updateVillagerFromAdapter(source);
             if (!(created instanceof Villager villager)) {
-                throw new IllegalStateException("Easy Villagers VillagerData#createEasyVillager did not return a Villager");
+                throw new IllegalStateException(
+                        "Easy Villagers VillagerData#createEasyVillager did not return a Villager"
+                );
             }
             cachedVillager = villager;
             return cachedVillager;
@@ -99,7 +101,9 @@ public final class NoiseSwitchVillagerAdapter {
 
     private void fail(Throwable error) {
         if (!failed) {
-            System.err.println("[Easy Farmer's Delight Compat] Easy Villagers VillagerData adapter failed for a Villager Noise Switch.");
+            System.err.println(
+                    "[Easy Farmer's Delight] Easy Villagers VillagerData adapter failed for a Villager Noise Switch."
+            );
             error.printStackTrace();
         }
         failed = true;
