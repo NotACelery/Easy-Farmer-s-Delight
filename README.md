@@ -3,7 +3,7 @@
 Current release: **1.4.0** (Minecraft 1.21.1 / NeoForge 21.1.x / Java 21)
 
 <p align="center">
-  <img src="easy-farmers-delight-cover.webp" alt="Easy Farmer's Delight" width="320">
+  <img src="easy-farmers-delight-cover.png" alt="Easy Farmer's Delight" width="320">
 </p>
 
 **Easy Farmer's Delight** is an independent, unofficial expansion for **Easy Villagers** and **Farmer's Delight**.
