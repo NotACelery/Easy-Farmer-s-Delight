@@ -16,12 +16,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public final class CutterLogVariant {
     public static final String NBT_KEY = "CutterLog";
+
     private static final TagKey<Item> LEGACY_ALLOWED_LOGS = TagKey.create(
             Registries.ITEM,
-            ResourceLocation.fromNamespaceAndPath("easyfarmersdelightcompat", "cutter_logs"));
+            ResourceLocation.fromNamespaceAndPath("easyfarmersdelightcompat", "cutter_logs")
+    );
 
     private CutterLogVariant() {
     }
@@ -30,11 +33,9 @@ public final class CutterLogVariant {
         if (stack == null || stack.isEmpty() || !(stack.getItem() instanceof BlockItem blockItem)) {
             return false;
         }
+
         Block block = blockItem.getBlock();
-        return (stack.is(ItemTags.LOGS)
-                        || stack.is(LEGACY_ALLOWED_LOGS)
-                        || block.defaultBlockState().is(BlockTags.LOGS))
-                && isBaseLog(block);
+        return isBaseLog(block) && (isTaggedLog(stack, block) || isFallbackLog(block));
     }
 
     public static Block fromIngredient(ItemStack stack) {
@@ -47,6 +48,7 @@ public final class CutterLogVariant {
         if (stack == null || stack.isEmpty()) {
             return Blocks.OAK_LOG;
         }
+
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         return data == null ? Blocks.OAK_LOG : read(data.copyTag());
     }
@@ -55,10 +57,12 @@ public final class CutterLogVariant {
         if (tag == null || !tag.contains(NBT_KEY)) {
             return Blocks.OAK_LOG;
         }
+
         ResourceLocation id = ResourceLocation.tryParse(tag.getString(NBT_KEY));
         if (id == null || !BuiltInRegistries.BLOCK.containsKey(id)) {
             return Blocks.OAK_LOG;
         }
+
         Block block = BuiltInRegistries.BLOCK.get(id);
         return isAllowed(new ItemStack(block.asItem())) ? block : Blocks.OAK_LOG;
     }
@@ -67,6 +71,7 @@ public final class CutterLogVariant {
         if (tag == null || log == null || log == Blocks.OAK_LOG || !isAllowed(new ItemStack(log.asItem()))) {
             return;
         }
+
         tag.putString(NBT_KEY, BuiltInRegistries.BLOCK.getKey(log).toString());
     }
 
@@ -75,6 +80,7 @@ public final class CutterLogVariant {
         if (log == null || log == Blocks.OAK_LOG) {
             return result;
         }
+
         CompoundTag tag = new CompoundTag();
         write(tag, log);
         if (!tag.isEmpty()) {
@@ -83,11 +89,26 @@ public final class CutterLogVariant {
         return result;
     }
 
+    private static boolean isTaggedLog(ItemStack stack, Block block) {
+        return stack.is(ItemTags.LOGS)
+                || stack.is(LEGACY_ALLOWED_LOGS)
+                || block.defaultBlockState().is(BlockTags.LOGS);
+    }
+
     private static boolean isBaseLog(Block block) {
-        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(block);
-        String path = id.getPath();
+        String path = BuiltInRegistries.BLOCK.getKey(block).getPath();
         return !path.startsWith("stripped_")
                 && !path.endsWith("_wood")
                 && !path.endsWith("_hyphae");
+    }
+
+    private static boolean isFallbackLog(Block block) {
+        String path = BuiltInRegistries.BLOCK.getKey(block).getPath();
+        boolean logLikeName = path.equals("log")
+                || path.equals("stem")
+                || path.endsWith("_log")
+                || path.endsWith("_stem");
+
+        return logLikeName && block.defaultBlockState().hasProperty(BlockStateProperties.AXIS);
     }
 }
