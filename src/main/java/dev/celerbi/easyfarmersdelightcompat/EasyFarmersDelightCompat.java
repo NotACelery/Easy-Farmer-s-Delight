@@ -1,9 +1,11 @@
 package dev.celerbi.easyfarmersdelightcompat;
 
 import dev.celerbi.easyfarmersdelightcompat.command.FarmCommand;
+import dev.celerbi.easyfarmersdelightcompat.event.GraftingSupportEvents;
 import dev.celerbi.easyfarmersdelightcompat.event.LegacyFarmerMigrationEvents;
 import dev.celerbi.easyfarmersdelightcompat.integration.attached.AttachedCropReloadListener;
 import dev.celerbi.easyfarmersdelightcompat.integration.regrowing.RegrowingCropReloadListener;
+import dev.celerbi.easyfarmersdelightcompat.integration.orchard.OrchardCropReloadListener;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlockEntities;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModBlocks;
 import dev.celerbi.easyfarmersdelightcompat.registry.ModRecipeSerializers;
@@ -24,11 +26,14 @@ public final class EasyFarmersDelightCompat {
         modEventBus.addListener(ModBlockEntities::onRegisterCapabilities);
         ModRecipeSerializers.register(modEventBus);
         NeoForge.EVENT_BUS.addListener(LegacyFarmerMigrationEvents::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(GraftingSupportEvents::onLeftClickBlock);
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
                 FarmCommand.register(event.getDispatcher()));
         NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) ->
                 event.addListener(AttachedCropReloadListener.INSTANCE));
         NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) ->
                 event.addListener(RegrowingCropReloadListener.INSTANCE));
+        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) ->
+                event.addListener(OrchardCropReloadListener.INSTANCE));
     }
 }

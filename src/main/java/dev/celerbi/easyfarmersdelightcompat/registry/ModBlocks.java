@@ -6,6 +6,8 @@ import dev.celerbi.easyfarmersdelightcompat.block.CutterBlock;
 import dev.celerbi.easyfarmersdelightcompat.block.EasyMobFarmNoiseSwitchBlock;
 import dev.celerbi.easyfarmersdelightcompat.block.FarmerVariant;
 import dev.celerbi.easyfarmersdelightcompat.block.IronFarmNoiseSwitchBlock;
+import dev.celerbi.easyfarmersdelightcompat.block.GraftingCanopyBlock;
+import dev.celerbi.easyfarmersdelightcompat.block.GraftingSupportBlock;
 import dev.celerbi.easyfarmersdelightcompat.block.VillagerNoiseSwitchBlock;
 import dev.celerbi.easyfarmersdelightcompat.compat.easymobfarm.EasyMobFarmCompat;
 import dev.celerbi.easyfarmersdelightcompat.item.CompatFarmerItem;
@@ -13,6 +15,7 @@ import dev.celerbi.easyfarmersdelightcompat.item.CutterItem;
 import dev.celerbi.easyfarmersdelightcompat.item.EasyMobFarmNoiseSwitchItem;
 import dev.celerbi.easyfarmersdelightcompat.item.IronFarmNoiseSwitchItem;
 import dev.celerbi.easyfarmersdelightcompat.item.VillagerNoiseSwitchItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -41,6 +44,19 @@ public final class ModBlocks {
             "rich_paddy_farmer",
             properties -> new CompatFarmerBlock(properties, FarmerVariant.RICH_PADDY),
             farmerProperties()
+    );
+
+
+    public static final DeferredBlock<GraftingSupportBlock> GRAFTING_SUPPORT = BLOCKS.registerBlock(
+            "grafting_support",
+            GraftingSupportBlock::new,
+            graftingSupportProperties()
+    );
+
+    public static final DeferredBlock<GraftingCanopyBlock> GRAFTING_CANOPY = BLOCKS.registerBlock(
+            "grafting_canopy",
+            GraftingCanopyBlock::new,
+            graftingCanopyProperties()
     );
 
     public static final DeferredBlock<CutterBlock> CUTTER = BLOCKS.registerBlock(
@@ -90,6 +106,11 @@ public final class ModBlocks {
                             EASY_MOB_FARM_NOISE_SWITCH.get(), new Item.Properties().stacksTo(1))
             ) : null;
 
+    public static final DeferredItem<BlockItem> GRAFTING_SUPPORT_ITEM = ITEMS.register(
+            "grafting_support",
+            () -> new BlockItem(GRAFTING_SUPPORT.get(), new Item.Properties().stacksTo(64))
+    );
+
     public static final DeferredItem<CompatFarmerItem> PADDY_FARMER_ITEM = ITEMS.register(
             "paddy_farmer",
             () -> new CompatFarmerItem(PADDY_FARMER.get(), new Item.Properties())
@@ -108,6 +129,23 @@ public final class ModBlocks {
                 .strength(2.5F)
                 .sound(SoundType.METAL)
                 .noOcclusion();
+    }
+
+    private static BlockBehaviour.Properties graftingSupportProperties() {
+        return BlockBehaviour.Properties.of()
+                .strength(1.5F)
+                .sound(SoundType.WOOD)
+                .noOcclusion()
+                .randomTicks();
+    }
+
+    private static BlockBehaviour.Properties graftingCanopyProperties() {
+        return BlockBehaviour.Properties.of()
+                .strength(1.5F)
+                .sound(SoundType.GRASS)
+                .noOcclusion()
+                .noTerrainParticles()
+                .noLootTable();
     }
 
     private ModBlocks() {

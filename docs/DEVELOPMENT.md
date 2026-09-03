@@ -339,3 +339,35 @@ A release source tree must pass:
 - ZIP CRC verification.
 
 The internal `DEV_1.4.0_ROADMAP.md` is not a public release artifact and must be excluded from final source packages.
+
+
+## 15. Orchard definitions (1.4.2-dev.8)
+
+Orchard definitions live under `data/easyfarmersdelightcompat/efdc_orchard_crops/*.json`. The runtime loader resolves
+optional registry IDs without classloading the source mod. A definition supplies a planting item or tag, a render
+block, age bounds/property, harvest item/count semantics, Rich Soil eligibility and render style.
+
+`CompatFarmerBlockEntity` persists the definition ID plus planting item and a small render snapshot (render block,
+age property/style, harvest item and mature age). The standalone `GraftingSupportBlockEntity` persists the exact
+inserted canopy plus the same render snapshot. Both paths therefore synchronize enough information for dedicated
+clients to render the Orchard without relying on the server datapack reload listener populating a client-side static
+map.
+
+A standalone Grafting Support accepts any `minecraft:leaves` BlockItem. If no Orchard definition matches, the canopy
+is decorative. A matching canopy advances only while Farmer's Delight Rich Soil is directly beneath the support;
+removing Rich Soil stalls the current age without resetting it. Mature standalone fruit is harvested manually with
+Shears, while Rich Farmer Orchards use the Harvest Tool slot and automatic output insertion.
+
+Vanilla Oak/Dark Oak use `render_style: apple`: their age is virtual and is represented by the Rich Farmer and
+standalone Grafting Support renderers. Croptopia uses `render_style: block_age`, allowing both renderers to draw
+Croptopia's real `*_crop` AGE 0..3 models. The source models/textures are never copied into Easy Farmer's Delight.
+
+Mature Rich Farmer Orchard output is rolled once and retained while output is blocked. The pending roll is persisted
+so clearing output space cannot reroll a better/worse Apple result. Shears are damaged only after the pending output
+is inserted. Standalone harvesting has no machine output buffer, so the successful roll is handed directly to the
+player and then resets the fruit age.
+
+Croptopia Cinnamon is intentionally handled as a narrow `AxeActionResolver` compatibility case because Croptopia
+implements the bark drop through its tool-modification event rather than Minecraft's normal Axe stripping map. The
+Cutter therefore resolves Cinnamon Log/Wood to the corresponding stripped block plus one Cinnamon as one atomic
+operation.

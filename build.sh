@@ -23,6 +23,7 @@ if [ ! -x "$DIST_DIR/bin/gradle" ]; then
     unzip -q -o "$DIST_ZIP" -d "$DIST_ROOT"
 fi
 
-echo "Compilando Easy Farmer's Delight 1.4.0..."
+MOD_VERSION="$(sed -n 's/^mod_version=//p' gradle.properties | head -n1)"
+echo "Compilando Easy Farmer's Delight ${MOD_VERSION:-dev}..."
 "$DIST_DIR/bin/gradle" --no-daemon clean build --stacktrace
 echo "LISTO: revisa build/libs/"

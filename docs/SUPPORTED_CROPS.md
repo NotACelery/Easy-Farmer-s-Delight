@@ -1,6 +1,6 @@
-# Supported Crops and Farming Rules — Easy Farmer's Delight 1.4.0
+# Supported Crops and Farming Rules — Easy Farmer's Delight 1.4.2-dev.8
 
-This document is the user-facing source of truth for crop support in **Easy Farmer's Delight 1.4.0**.
+This document is the user-facing source of truth for crop support in **Easy Farmer's Delight 1.4.2-dev.8**.
 The public project name changed in 1.4.0, but the technical registry namespace remains
 `easyfarmersdelightcompat` so existing worlds and saved machine items keep their identity.
 
@@ -17,7 +17,8 @@ The public project name changed in 1.4.0, but the technical registry namespace r
 | Melon / Pumpkin stems | No | Yes | No |
 | Regrowing bushes | No | Yes | No |
 | Attached log crops | No | Yes | No |
-| Harvest Tool slot | No | Yes | Yes |
+| Grafting Support / Orchard | No | Yes | No |
+| Harvest Tool slot | No | Yes — Knife/Hoe/Axe/Shears | Yes — Knife/Hoe/Axe/Shears |
 
 The base Easy Villagers Farmer remains owned by Easy Villagers. Easy Farmer's Delight does not add the new
 special-crop mechanics to that upstream block.
@@ -107,6 +108,62 @@ They are deliberately opt-in. Easy Farmer's Delight does **not** assume every `B
 - Mature harvest yields **2–3 Sourceberries** using the configured full-age semantics.
 - The bush resets to age 1 after harvest.
 - Rich Soil can accelerate growth but does not directly increase the harvest count.
+
+
+## Grafting Support and Orchards
+
+**Available as:** a standalone placed block, or an automated Rich Farmer mode.
+
+The Grafting Support represents a rooted stock/trunk held by four stakes and Farmer's Delight Rope. It is crafted
+from 3 Rope, 4 Sticks, any `#minecraft:logs` item and 1 Hanging Roots. Any accepted log creates the same fixed
+Grafting Support block/item; the ingredient does not create variants or NBT and the item stacks to 64.
+
+### Standalone support
+
+1. Place the **Grafting Support** with one free/replaceable block directly above it. Placement reserves that upper block for the canopy.
+2. Right-click the lower support with any block in `minecraft:leaves` to install a canopy. The canopy has a real upper-block hitbox, so fruit can be harvested by clicking either the leaves or the lower trunk/support.
+3. Unsupported leaves are purely decorative and never gain fruit.
+4. Compatible productive leaves only advance through their four fruit ages (`0..3`) while **Farmer's Delight Rich Soil** is directly below the support.
+5. Mature fruit is harvested manually by right-clicking with **Shears**. A successful harvest resets the fruit to its post-harvest age and applies normal Shears durability, including **Unbreaking**.
+6. Left-click either the canopy hitbox or the lower support to return the inserted leaves first. A later left-click can then mine the empty support normally.
+
+Removing Rich Soil does not erase existing progress; growth simply stalls until Rich Soil is restored. Breaking a
+support through another destruction path preserves both the support and its installed canopy as drops.
+
+### Rich Farmer automation
+
+1. Right-click an empty Rich Farmer with the **Grafting Support**.
+2. Right-click with compatible productive leaves.
+3. The installed leaves become that Farmer's Orchard and progress through the same four fruit ages (`0..3`).
+4. At maturity the Orchard waits until **Shears** are present in the Harvest Tool slot and output capacity exists.
+5. A successful harvest resets the fruit age and applies normal Shears durability; **Unbreaking applies normally**.
+6. Sneak-use returns the leaves first; sneak-use again returns the Grafting Support.
+
+A full output does not reset the fruit, reroll the harvest or damage the Shears. Rich Soil accelerates configured
+Orchard growth but does not alter the harvest roll.
+
+### Vanilla Apple Orchard
+
+- `minecraft:oak_leaves` → Apples
+- `minecraft:dark_oak_leaves` → Apples
+
+The normal vanilla leaf blocks are not modified globally. Their Orchard age exists only while grafted into a
+productive Grafting Support / Rich Farmer setup. The visual lifecycle mirrors Croptopia's four-stage fruit language:
+bud, flower, young fruit and mature fruit. A vanilla Apple Orchard yields 1–2 Apples, with a small chance for a third
+Apple. Without Rich Soil, a newly placed standalone Oak/Dark Oak canopy remains visually ordinary and does not begin
+the fruit lifecycle.
+
+### Optional Croptopia Orchards
+
+Croptopia is optional and is never imported as a hard Java dependency. When its registry entries exist, the Rich
+Farmer accepts these 26 productive crop-leaf blocks:
+
+Almond, Apple, Apricot, Avocado, Banana, Cashew, Cherry, Coconut, Date, Dragonfruit, Fig, Grapefruit, Kumquat, Lemon,
+Lime, Mango, Nectarine, Nutmeg, Orange, Peach, Pear, Pecan, Persimmon, Plum, Starfruit and Walnut.
+
+Each integration uses Croptopia's real `*_crop` block with its native age property `0..3`. Harvest output matches the
+ripe fruit item from Croptopia's own 4.2.4 crop-leaf loot tables; Croptopia Apple correctly produces the vanilla
+`minecraft:apple`.
 
 ## Attached log crops — Rich Farmer Log Mode
 
@@ -219,7 +276,7 @@ for every occupied face.
 
 ## Deliberate exclusions
 
-**Bamboo is not treated as a Farmer crop in 1.4.0.** Its vertical structural growth is outside the crop families
+**Bamboo is not treated as a Farmer crop in 1.4.2-dev.8.** Its vertical structural growth is outside the crop families
 implemented by Easy Farmer's Delight.
 
 This does not prevent Bamboo Block from participating in unrelated Cutter Axe/log behavior when Minecraft exposes

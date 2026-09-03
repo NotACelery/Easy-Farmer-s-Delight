@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "R": { "item": "farmersdelight:rope" },
+    "S": { "item": "minecraft:stick" },
+    "L": { "tag": "minecraft:logs" },
+    "H": { "item": "minecraft:hanging_roots" }
+  },
+  "pattern": [
+    "RRR",
+    "SLS",
+    "SHS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "easyfarmersdelightcompat:grafting_support"
+  }
+}

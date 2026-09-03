@@ -1,7 +1,14 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0"
-title Easy Farmer's Delight - Build 1.4.0
+
+set "MOD_VERSION="
+for /f "tokens=2 delims==" %%V in ('findstr /b /c:"mod_version=" "gradle.properties" 2^>nul') do (
+    set "MOD_VERSION=%%V"
+)
+if not defined MOD_VERSION goto :version_missing
+
+title Easy Farmer's Delight - Build %MOD_VERSION%
 
 set "GRADLE_VERSION=9.2.1"
 set "DIST_ROOT=%CD%\.gradle-dist"
@@ -9,11 +16,11 @@ set "DIST_DIR=%DIST_ROOT%\gradle-%GRADLE_VERSION%"
 set "DIST_ZIP=%DIST_ROOT%\gradle-%GRADLE_VERSION%-bin.zip"
 set "JAVA_EXE="
 
- echo ============================================================
- echo     EASY FARMER'S DELIGHT - BUILD 1.4.0
- echo ============================================================
- echo Directorio: %CD%
- echo.
+echo ============================================================
+echo     EASY FARMER'S DELIGHT - BUILD %MOD_VERSION%
+echo ============================================================
+echo Directorio: %CD%
+echo.
 
 if exist "cleanup-1.4.0-migration.bat" (
     call "cleanup-1.4.0-migration.bat"
@@ -87,7 +94,7 @@ if not exist "%DIST_DIR%\bin\gradle.bat" (
 if not exist "%DIST_DIR%\bin\gradle.bat" goto :gradle_missing
 
 echo.
-echo Compilando Easy Farmer's Delight...
+echo Compilando Easy Farmer's Delight %MOD_VERSION%...
 echo La primera compilacion puede descargar dependencias de NeoForge.
 echo.
 call "%DIST_DIR%\bin\gradle.bat" --no-daemon clean build --stacktrace
@@ -105,6 +112,11 @@ echo JAR generado:
 echo   %CD%\%JAR_FILE%
 echo ============================================================
 goto :success
+
+:version_missing
+echo.
+echo ERROR: No pude leer mod_version desde gradle.properties.
+goto :failure
 
 :java_missing
 echo.
