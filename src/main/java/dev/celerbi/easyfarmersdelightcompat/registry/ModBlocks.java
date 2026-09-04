@@ -141,9 +141,10 @@ public final class ModBlocks {
 
     private static BlockBehaviour.Properties graftingCanopyProperties() {
         return BlockBehaviour.Properties.of()
-                .strength(1.5F)
+                .strength(0.2F)
                 .sound(SoundType.GRASS)
                 .noOcclusion()
+                .dynamicShape()
                 .noTerrainParticles()
                 .noLootTable();
     }

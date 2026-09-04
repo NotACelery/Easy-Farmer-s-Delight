@@ -38,8 +38,7 @@ public final class ModBlockEntities {
                     "grafting_support",
                     () -> BlockEntityType.Builder.of(
                             GraftingSupportBlockEntity::new,
-                            ModBlocks.GRAFTING_SUPPORT.get(),
-                            ModBlocks.GRAFTING_CANOPY.get()
+                            ModBlocks.GRAFTING_SUPPORT.get()
                     ).build(null)
             );
 

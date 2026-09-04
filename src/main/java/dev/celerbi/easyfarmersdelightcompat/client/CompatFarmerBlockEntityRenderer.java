@@ -78,8 +78,9 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
     private static final float ORCHARD_SUPPORT_SCALE = 0.46F;
     private static final float ORCHARD_CANOPY_SCALE = 0.34F;
     private static final float ORCHARD_SUPPORT_BOTTOM_Y = 1.0F / 16.0F;
-    private static final float ORCHARD_CANOPY_BOTTOM_Y = 0.335F;
+    private static final float ORCHARD_CANOPY_BOTTOM_Y = 0.395F;
     private static final float ORCHARD_LOCAL_Z = 2.5F / 16.0F;
+    private static final float ORCHARD_ITEM_Y_OFFSET = 0.055F;
 
     private final Minecraft minecraft;
     private final BlockRenderDispatcher blockRenderer;
@@ -248,12 +249,12 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
                 direction,
                 0.0F,
                 ORCHARD_LOCAL_Z,
-                0.285F,
-                0.075F,
-                0.24F,
-                0.075F
+                0.345F,
+                0.080F,
+                0.28F,
+                0.080F
         );
-        renderBlockState(Blocks.OAK_LOG.defaultBlockState(), poseStack, buffer, combinedLight, combinedOverlay);
+        renderBlockState(Blocks.STRIPPED_OAK_LOG.defaultBlockState(), poseStack, buffer, combinedLight, combinedOverlay);
         poseStack.popPose();
     }
 
@@ -331,7 +332,7 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
             return;
         }
         poseStack.pushPose();
-        poseStack.translate(0.5D, y, 0.5D);
+        poseStack.translate(0.5D, y + ORCHARD_ITEM_Y_OFFSET, 0.5D);
         poseStack.mulPose(Axis.YP.rotationDegrees(-direction.toYRot()));
         poseStack.translate(localX, 0.0D, localZ);
         poseStack.mulPose(Axis.YP.rotationDegrees(yawDegrees));

@@ -1,77 +1,34 @@
 # Changelog
 
-## 1.4.2-dev.8 — 2026-09-03
-
-- Fixed the Grafting Support render inside Rich Farmers by rendering its actual block model instead of the inventory/display `FIXED` item transform.
-- Anchored the internal support to the Rich Farmer soil surface (`1/16` block Y), preventing the rootstock from protruding below the machine.
-- Reduced the Rich Farmer orchard canopy scale from `0.46` to `0.40` and repositioned its Apple growth markers to match the smaller canopy.
-- Standalone Grafting Support dimensions and orchard mechanics are unchanged.
-
-
-
-## 1.4.2-dev.5 — 2026-09-03
-
-- Converted the standalone Grafting Support into a true two-block structure: the lower support reserves an invisible upper canopy block.
-- Added a real selectable canopy hitbox so players can harvest mature fruit with Shears by right-clicking either the leaves or the lower support.
-- Left-clicking either half removes and returns the installed canopy before the support can be mined.
-- Placement now requires a replaceable block directly above the support; removing the lower support also removes its reserved upper half.
-- Jade resolves the upper canopy half back to the lower Grafting Support so both targets show the same Orchard status.
-- Raised the standalone canopy into its reserved upper block and expanded the block-entity render bounds to the full two-block structure.
-- Lowered the central rootstock trunk to model Y=0 so the trunk, roots and stakes share the same ground line.
-
-
-
-## 1.4.2-dev.4 — 2026-09-03
-
-- Visual orchard pass: Apple/Dark Oak fruit stages now render on the exterior faces of the canopy, following Croptopia's readable bud/flower/young-fruit/mature progression language.
-- Mature apples are larger and distributed around the canopy so growth is readable from multiple viewing angles, both standalone and inside Rich Farmers.
-- Grounded the Grafting Support model by lowering the trunk, roots, posts and rope rails.
-- Replaced the transparent Farmer's Delight Rope sprite on solid support rails with a dedicated opaque braided-rope texture to remove missing-looking segments.
-- Root struts now use an opaque rooted-soil texture and begin at model Y=0 for stronger ground contact.
-
-## 1.4.2-dev.3 — 2026-09-03
-
-- Fixed the `CompatFarmerBlockEntity` compile failure caused by Orchard tooltip bookkeeping being inserted into `removeSelectedCrop()` outside the scope of `names` / `seenItems`.
-- Moved Orchard planting-item name collection into `plantedCropNames()`, preserving Farmer item crop display without affecting Orchard dismantling.
-- Converted the Grafting Support from an inventory-only helper into a placeable block while preserving the same item ID and recipe.
-- Added a standalone grafting canopy: any block in `minecraft:leaves` can be inserted for decoration.
-- Productive Orchard leaves only grow when the placed support sits directly above Farmer's Delight Rich Soil.
-- Oak and Dark Oak Leaves use the same four-stage Orchard lifecycle as the Rich Farmer and produce Apples when mature.
-- Croptopia fruit crop leaves reuse their age-aware render states on placed supports.
-- Added manual harvesting: right-click mature fruit with Shears; Unbreaking applies through normal durability damage.
-- Added canopy removal before support removal: left-click returns the inserted leaves first.
-- Added a dedicated placed-support block entity renderer and Jade status provider.
-- Added explicit left-hand item display transforms and shared the same Grafting Support geometry between block, inventory, hand, and Rich Farmer rendering.
-- Polished the support model with proper Oak Log end grain, narrower rootstock roots and cutout rendering for Rope/Hanging Roots textures.
-- Hardened canopy removal so the server consumes the first left-click as a canopy removal action before normal block mining can begin.
-- Updated JEI/EMI guide text to document decorative supports, Rich Soil growth, manual harvesting, and Rich Farmer automation.
-
-## 1.4.2-dev.1 — 2026-09-03
+## 1.4.2 — 2026-09-03
 
 ### Grafting Support and Orchard farming
 
-- Added the stackable **Grafting Support** for Rich Farmer, crafted from 3 Farmer's Delight Rope, 4 Sticks, any log and Hanging Roots.
-- Added vanilla Apple Orchards using Oak or Dark Oak Leaves with a four-stage bud/flower/young/mature fruit lifecycle.
-- Rich Soil accelerates Orchard fruit growth without directly multiplying harvest output.
-- Mature Orchards require **Shears**; successful harvests use normal durability and therefore respect **Unbreaking**.
-- Full outputs preserve mature fruit and Shears durability.
-- Sneak-use dismantles Orchards safely: grafted leaves first, Grafting Support second.
-- Orchard display metadata is synchronized with the BlockEntity so dedicated clients can render data-driven canopies without requiring server reload listeners locally.
+- Added the stackable **Grafting Support**, crafted from Farmer's Delight Rope, Sticks, any standard log and Hanging Roots.
+- The support is a real placeable two-block structure with a rooted stock, stakes/Rope frame, slim stripped-log graft branch and a canopy slot.
+- Any `minecraft:leaves` block can be installed for decoration; productive leaves require Farmer's Delight **Rich Soil** directly beneath the standalone support.
+- The upper canopy uses a dynamic selection/collision shape fitted to the visible leaf mass, can be stood on, and remains physically reserved only by the support structure.
+- Breaking the canopy with **Shears** or **Silk Touch** recovers the exact inserted leaves; ordinary breaking destroys the leaves while keeping the Grafting Support.
+- Mature standalone fruit is harvested by right-clicking with Shears and drops into the world. Shears durability uses normal item damage and therefore respects **Unbreaking**.
+- Added vanilla **Apple Orchards** from Oak Leaves and Dark Oak Leaves with four visual fruit stages. Mature harvest yields **2 Apples + 30% chance of a third**.
+- Added full **Rich Farmer Orchard automation**: install Grafting Support + compatible productive leaves, grow through the same four-stage lifecycle, then harvest automatically when Shears and output capacity are available.
+- Rich Farmer blocked output preserves mature fruit, the pending harvest roll and Shears durability until capacity returns.
+- Jade reports empty supports, Orchard identity, growth/readiness, Rich Soil state and missing Shears; JEI/EMI document the Grafting Support/Orchard workflow.
 
-### Optional Croptopia 4.2.4 integration
+### Croptopia 4.2.4 compatibility
 
-- Added optional Orchard definitions for all 26 Croptopia fruit-tree crop leaves without a hard Java dependency.
-- Croptopia Orchards reuse the source crop leaf's real age-0-to-3 models while Rich Soil drives the machine-side growth cadence.
-- Harvest outputs were checked against Croptopia 4.2.4 loot tables; Croptopia Apple correctly returns `minecraft:apple`.
-- Added Cutter compatibility for Cinnamon Log and Cinnamon Wood: Axe processing returns the stripped block **and one Cinnamon**, matching Croptopia's tool-modification behavior.
-- Cinnamon processing is atomic: both outputs must fit before input or Axe durability is consumed.
+- Added optional Orchard support for all **26 Croptopia fruit-tree crop leaves** without a hard Java dependency.
+- Croptopia Orchards reuse the source mod's real AGE 0–3 crop-leaf models and matching fruit outputs; Croptopia Apple correctly yields `minecraft:apple`.
+- Confirmed the **58 Croptopia ground crops** work through the normal Rich Farmer crop lifecycle and harvest path.
+- Added Cutter compatibility for Croptopia **Cinnamon Log/Wood**: Axe processing returns the corresponding stripped block plus one Cinnamon, with atomic output-space handling.
 
-### Jade / JEI / EMI
+### Rendering, interaction and polish
 
-- Jade identifies Apple, Banana, Cherry and other configured Orchards by their fruit, reports growth/readiness, warns when a Grafting Support is empty, and shows **Waiting for Shears** on mature fruit.
-- Added Grafting Support / Apple Orchard and optional Croptopia Orchard guidance to the shared JEI/EMI Block Guide.
-- Added an optional Croptopia Cinnamon Cutter guide with both outputs.
-- Added Shears to Rich Farmer Harvest Tool discovery/documentation.
+- Added a dedicated Grafting Support block/item model with grounded roots, fixed Oak-style stock, Rope frame and consistent inventory/hand/world presentation.
+- Refined the Orchard canopy and graft-branch proportions in both standalone and Rich Farmer rendering.
+- Apple growth visuals follow the same readable bud/flower/young-fruit/mature progression language as Croptopia fruit leaves.
+- Added the real canopy hitbox so fruit can be targeted directly instead of clicking only the support stakes/Rope.
+- Added Shears to Rich Farmer Harvest Tool discovery/transfer guidance and retained normal Unbreaking behavior.
 
 ## 1.4.0 — 2026-08-31
 

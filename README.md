@@ -1,6 +1,6 @@
 # Easy Farmer's Delight
 
-Current development build: **1.4.2-dev.8** (Minecraft 1.21.1 / NeoForge 21.1.x / Java 21)
+Current release: **1.4.2** (Minecraft 1.21.1 / NeoForge 21.1.x / Java 21)
 
 <p align="center">
   <img src="easy-farmers-delight-cover.png" alt="Easy Farmer's Delight" width="320">
@@ -62,7 +62,8 @@ The Rich Farmer keeps the normal Easy Villagers crop route and adds specialized 
 - Cocoa on Jungle Logs.
 - Ars Nouveau Bombegranate, Mendosteen, Frostaya and Bastion fruit on their matching Archwood host families.
 - Two independently selectable attached host logs, allowing mixed crops in one Farmer.
-- **Grafting Support / Orchard mode:** Oak or Dark Oak Leaves grow apples through four fruit stages; Croptopia adds 26 fruit-tree crop leaves when installed.
+- **Grafting Support / Orchard mode:** Oak or Dark Oak Leaves grow apples through four fruit stages; Croptopia adds all 26 productive fruit-tree crop leaves when installed.
+- **Croptopia ground-crop compatibility:** its 58 normal farmland crops use the standard Rich Farmer crop lifecycle and harvest correctly without bespoke per-crop handlers.
 
 The base Easy Villagers Farmer itself is not modified to gain these special mechanics.
 
@@ -94,8 +95,9 @@ installed into an empty Rich Farmer.
 
 - A placed support accepts **any block in `minecraft:leaves`**. Unsupported leaves remain a decorative canopy forever.
 - A productive canopy grows only while the support is directly above **Farmer's Delight Rich Soil**.
-- **Oak Leaves** and **Dark Oak Leaves** become an Apple Orchard on Rich Soil and follow four internal fruit stages: bud → flower → young fruit → mature fruit.
-- A mature placed Orchard is harvested manually by right-clicking with **Shears**; left-click removes the canopy first and leaves the support in place.
+- **Oak Leaves** and **Dark Oak Leaves** become an Apple Orchard on Rich Soil and follow four internal fruit stages: bud → flower → young fruit → mature fruit. Mature harvest yields 2 Apples with a 30% chance for a third.
+- A mature placed Orchard is harvested manually by right-clicking with **Shears**; fruit drops into the world beside the support.
+- The canopy is a real breakable upper block: Shears or Silk Touch recover the inserted leaves, while other tools/hand destroy the leaves. The lower Grafting Support remains in place.
 - In a **Rich Farmer**, the same Orchard lifecycle is automated. Mature fruit waits for Shears in the Harvest Tool slot and output capacity.
 - Shears lose durability only after a successful harvest and normal **Unbreaking** behavior applies.
 - Rich Soil accelerates Orchard fruit growth without multiplying the configured harvest roll.
@@ -258,7 +260,7 @@ those assets.
 
 ## Bamboo scope
 
-Bamboo is **not a supported Farmer crop** in 1.4.2-dev.8. Its vertical structural growth is outside the crop families
+Bamboo is **not a supported Farmer crop** in 1.4.2. Its vertical structural growth is outside the crop families
 implemented by this release. Bamboo Block can still participate in Cutter Axe/log behavior if exposed through the
 standard game transformation/tag systems.
 

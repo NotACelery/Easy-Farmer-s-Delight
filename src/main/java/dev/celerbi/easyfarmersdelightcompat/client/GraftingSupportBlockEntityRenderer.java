@@ -23,8 +23,8 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 
 public final class GraftingSupportBlockEntityRenderer implements BlockEntityRenderer<GraftingSupportBlockEntity> {
     private static final float CANOPY_SCALE = 0.68F;
-    private static final float CANOPY_BOTTOM_Y = 0.60F;
-    private static final float APPLE_Y_OFFSET = 0.24F;
+    private static final float CANOPY_BOTTOM_Y = 0.74F;
+    private static final float APPLE_Y_OFFSET = 0.34F;
 
     private final Minecraft minecraft;
     private final BlockRenderDispatcher blockRenderer;
@@ -75,10 +75,10 @@ public final class GraftingSupportBlockEntityRenderer implements BlockEntityRend
             int overlay
     ) {
         poseStack.pushPose();
-        poseStack.translate(0.5D, 0.92D, 0.5D);
-        poseStack.scale(0.16F, 0.34F, 0.16F);
+        poseStack.translate(0.5D, 0.98D, 0.5D);
+        poseStack.scale(0.085F, 0.30F, 0.085F);
         poseStack.translate(-0.5D, 0.0D, -0.5D);
-        renderBlockState(support, net.minecraft.world.level.block.Blocks.OAK_LOG.defaultBlockState(), poseStack, buffer, light, overlay);
+        renderBlockState(support, net.minecraft.world.level.block.Blocks.STRIPPED_OAK_LOG.defaultBlockState(), poseStack, buffer, light, overlay);
         poseStack.popPose();
     }
 
