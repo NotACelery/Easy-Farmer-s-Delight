@@ -45,7 +45,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 public final class CompatFarmerBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -146,19 +145,12 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
 
         var registries = level.registryAccess();
 
-        if (player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic() && farmer.hasGraftingSupport()) {
-            if (!level.isClientSide) {
-                for (ItemStack returned : farmer.dismantleOrchardStep()) {
-                    if (!returned.isEmpty()) {
-                        ItemHandlerHelper.giveItemToPlayer(player, returned);
-                    }
-                }
-                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
-            }
+        if (player.isShiftKeyDown()) {
+            handleShiftDismantle(level, pos, player, farmer);
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+        if (variant.isRich() && !variant.isAquatic()
                 && farmer.canInstallGraftingSupport(heldItem)) {
             if (!level.isClientSide && farmer.installGraftingSupport(heldItem)) {
                 consumeOne(heldItem, player);
@@ -167,7 +159,7 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+        if (variant.isRich() && !variant.isAquatic()
                 && farmer.canPlantOrchardCrop(heldItem)) {
             if (!level.isClientSide && farmer.plantOrchardCrop(heldItem)) {
                 consumeOne(heldItem, player);
@@ -176,19 +168,7 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        if (player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic() && farmer.hasAttachedSetup()) {
-            if (!level.isClientSide) {
-                for (ItemStack returned : farmer.dismantleAttachedStep()) {
-                    if (!returned.isEmpty()) {
-                        ItemHandlerHelper.giveItemToPlayer(player, returned);
-                    }
-                }
-                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
-        }
-
-        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+        if (variant.isRich() && !variant.isAquatic()
                 && farmer.canInstallAttachedHost(heldItem)) {
             if (!level.isClientSide && farmer.installAttachedHost(heldItem)) {
                 consumeOne(heldItem, player);
@@ -197,7 +177,7 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+        if (variant.isRich() && !variant.isAquatic()
                 && farmer.canPlantAttachedCrop(heldItem)) {
             if (!level.isClientSide && farmer.plantAttachedCrop(heldItem)) {
                 consumeOne(heldItem, player);
@@ -206,7 +186,7 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+        if (variant.isRich() && !variant.isAquatic()
                 && farmer.shouldWarnIncompatibleAttachedCrop(heldItem)) {
             if (!level.isClientSide) {
                 player.displayClientMessage(Component.translatable(
@@ -215,41 +195,7 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        if (player.isShiftKeyDown() && variant.isAquatic()) {
-            if (level.isClientSide) {
-                return ItemInteractionResult.sidedSuccess(true);
-            }
-            if (farmer.hasPaddySand()) {
-                for (ItemStack returned : farmer.dismantleSugarCaneMode()) {
-                    if (!returned.isEmpty()) {
-                        ItemHandlerHelper.giveItemToPlayer(player, returned);
-                    }
-                }
-                level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
-                return ItemInteractionResult.sidedSuccess(false);
-            }
-
-            if (farmer.easyVillagers().getCrop(registries) != null) {
-                ItemStack removed = farmer.removeSelectedCrop(registries);
-                if (!removed.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, removed);
-                }
-                level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
-                return ItemInteractionResult.sidedSuccess(false);
-            }
-
-            if (farmer.easyVillagers().hasVillager(registries)) {
-                ItemStack villager = farmer.easyVillagers().removeVillager(registries);
-                if (!villager.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, villager);
-                }
-                farmer.setChanged();
-                level.playSound(null, pos, SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1.0F, 1.0F);
-                return ItemInteractionResult.sidedSuccess(false);
-            }
-        }
-
-        if (!player.isShiftKeyDown() && variant.isRich() && FarmerToolSupport.isHarvestTool(heldItem)
+        if (variant.isRich() && FarmerToolSupport.isHarvestTool(heldItem)
                  && farmer.getHarvestTool().isEmpty()) {
             if (!level.isClientSide) {
                 farmer.setHarvestTool(heldItem.copyWithCount(1));
@@ -259,7 +205,7 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        if (!player.isShiftKeyDown() && variant.isAquatic()
+        if (variant.isAquatic()
                  && !farmer.hasPaddySand()
                  && farmer.easyVillagers().getCrop(registries) == null
                  && isSand(heldItem)) {
@@ -270,7 +216,7 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
 
-        if (!player.isShiftKeyDown() && variant.isAquatic()
+        if (variant.isAquatic()
                  && farmer.hasPaddySand()
                  && farmer.sugarCaneHeight() == 0
                  && isSugarCane(heldItem)) {
@@ -292,16 +238,6 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
         }
 
         if (!variant.isAquatic() && variant.isRich() && farmer.hasTomatoCrop(registries)) {
-            if (player.isShiftKeyDown() && farmer.ropeCount() > 0) {
-                if (!level.isClientSide) {
-                    ItemStack removedRope = farmer.removeTopRope();
-                    if (!removedRope.isEmpty()) {
-                        ItemHandlerHelper.giveItemToPlayer(player, removedRope);
-                    }
-                    level.playSound(null, pos, SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
-                }
-                return ItemInteractionResult.sidedSuccess(level.isClientSide);
-            }
 
             if (isRope(heldItem) && farmer.ropeCount() < 2) {
                 if (!level.isClientSide && farmer.addRope()) {
@@ -312,7 +248,7 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             }
         }
 
-        if (!player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic()
+        if (variant.isRich() && !variant.isAquatic()
                 && !farmer.hasGraftingSupport()
                 && farmer.canSelectRegrowingCrop(heldItem)) {
             if (!level.isClientSide && farmer.selectRegrowingCrop(heldItem, registries)) {
@@ -357,29 +293,6 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             }
         }
 
-        if (player.isShiftKeyDown() && farmer.easyVillagers().getCrop(registries) != null) {
-            if (!level.isClientSide) {
-                ItemStack removed = farmer.removeSelectedCrop(registries);
-                if (!removed.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, removed);
-                }
-                level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
-        }
-
-        if (player.isShiftKeyDown() && farmer.easyVillagers().hasVillager(registries)) {
-            if (!level.isClientSide) {
-                ItemStack villager = farmer.easyVillagers().removeVillager(registries);
-                if (!villager.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, villager);
-                }
-                farmer.setChanged();
-                level.playSound(null, pos, SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1.0F, 1.0F);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
-        }
-
         openOutput(level, pos, player, farmer, state);
         return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
@@ -392,97 +305,104 @@ public final class CompatFarmerBlock extends Block implements EntityBlock {
             return InteractionResult.PASS;
         }
 
-        var registries = level.registryAccess();
-        if (player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic() && farmer.hasGraftingSupport()) {
-            if (!level.isClientSide) {
-                for (ItemStack returned : farmer.dismantleOrchardStep()) {
-                    if (!returned.isEmpty()) {
-                        ItemHandlerHelper.giveItemToPlayer(player, returned);
-                    }
-                }
-                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
-            }
-            return InteractionResult.sidedSuccess(level.isClientSide);
-        }
-
-        if (player.isShiftKeyDown() && variant.isRich() && !variant.isAquatic() && farmer.hasAttachedSetup()) {
-            if (!level.isClientSide) {
-                for (ItemStack returned : farmer.dismantleAttachedStep()) {
-                    if (!returned.isEmpty()) {
-                        ItemHandlerHelper.giveItemToPlayer(player, returned);
-                    }
-                }
-                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
-            }
-            return InteractionResult.sidedSuccess(level.isClientSide);
-        }
-
-        if (player.isShiftKeyDown() && variant.isAquatic()) {
-            if (level.isClientSide) {
-                return InteractionResult.sidedSuccess(true);
-            }
-            if (farmer.hasPaddySand()) {
-                for (ItemStack returned : farmer.dismantleSugarCaneMode()) {
-                    if (!returned.isEmpty())
-                        ItemHandlerHelper.giveItemToPlayer(player, returned);
-                }
-                level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
-                return InteractionResult.sidedSuccess(false);
-            }
-            if (farmer.easyVillagers().getCrop(registries) != null) {
-                ItemStack removed = farmer.removeSelectedCrop(registries);
-                if (!removed.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, removed);
-                }
-                level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
-                return InteractionResult.sidedSuccess(false);
-            }
-            if (farmer.easyVillagers().hasVillager(registries)) {
-                ItemStack villager = farmer.easyVillagers().removeVillager(registries);
-                if (!villager.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, villager);
-                }
-                farmer.setChanged();
-                level.playSound(null, pos, SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1.0F, 1.0F);
-                return InteractionResult.sidedSuccess(false);
-            }
-        }
-
-        if (player.isShiftKeyDown() && !variant.isAquatic() && variant.isRich()
-                 && farmer.hasTomatoCrop(registries) && farmer.ropeCount() > 0) {
-            if (!level.isClientSide) {
-                ItemStack removedRope = farmer.removeTopRope();
-                if (!removedRope.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, removedRope);
-                }
-                level.playSound(null, pos, SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
-            }
-            return InteractionResult.sidedSuccess(level.isClientSide);
-        }
-
-        if (player.isShiftKeyDown() && farmer.easyVillagers().getCrop(registries) != null) {
-            if (!level.isClientSide) {
-                ItemStack removed = farmer.removeSelectedCrop(registries);
-                if (!removed.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, removed);
-                }
-            }
-            return InteractionResult.sidedSuccess(level.isClientSide);
-        }
-
-        if (player.isShiftKeyDown() && farmer.easyVillagers().hasVillager(registries)) {
-            if (!level.isClientSide) {
-                ItemStack villager = farmer.easyVillagers().removeVillager(registries);
-                if (!villager.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, villager);
-                }
-                farmer.setChanged();
-            }
+        if (player.isShiftKeyDown()) {
+            handleShiftDismantle(level, pos, player, farmer);
             return InteractionResult.sidedSuccess(level.isClientSide);
         }
 
         openOutput(level, pos, player, farmer, state);
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    private void handleShiftDismantle(
+            Level level,
+            BlockPos pos,
+            Player player,
+            CompatFarmerBlockEntity farmer
+    ) {
+        var registries = level.registryAccess();
+
+        if (variant.isRich() && !variant.isAquatic() && farmer.hasGraftingSupport()) {
+            if (!level.isClientSide) {
+                for (ItemStack returned : farmer.dismantleOrchardStep()) {
+                    giveOrDrop(player, returned);
+                }
+                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+            }
+            return;
+        }
+
+        if (variant.isRich() && !variant.isAquatic() && farmer.hasAttachedSetup()) {
+            if (!level.isClientSide) {
+                for (ItemStack returned : farmer.dismantleAttachedStep()) {
+                    giveOrDrop(player, returned);
+                }
+                level.playSound(null, pos, SoundEvents.WOOD_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+            }
+            return;
+        }
+
+        if (variant.isAquatic()) {
+            if (farmer.hasPaddySand()) {
+                if (!level.isClientSide) {
+                    for (ItemStack returned : farmer.dismantleSugarCaneMode()) {
+                        giveOrDrop(player, returned);
+                    }
+                    level.playSound(null, pos, SoundEvents.SAND_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+                }
+                return;
+            }
+            if (farmer.easyVillagers().getCrop(registries) != null) {
+                if (!level.isClientSide) {
+                    giveOrDrop(player, farmer.removeSelectedCrop(registries));
+                    level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
+                return;
+            }
+            if (farmer.easyVillagers().hasVillager(registries)) {
+                if (!level.isClientSide) {
+                    giveOrDrop(player, farmer.easyVillagers().removeVillager(registries));
+                    farmer.setChanged();
+                    level.playSound(null, pos, SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1.0F, 1.0F);
+                }
+                return;
+            }
+            return;
+        }
+
+        if (variant.isRich() && farmer.hasTomatoCrop(registries) && farmer.ropeCount() > 0) {
+            if (!level.isClientSide) {
+                giveOrDrop(player, farmer.removeTopRope());
+                level.playSound(null, pos, SoundEvents.WOOL_BREAK, SoundSource.BLOCKS, 0.8F, 1.0F);
+            }
+            return;
+        }
+
+        if (farmer.easyVillagers().getCrop(registries) != null) {
+            if (!level.isClientSide) {
+                giveOrDrop(player, farmer.removeSelectedCrop(registries));
+                level.playSound(null, pos, SoundEvents.VILLAGER_NO, SoundSource.BLOCKS, 1.0F, 1.0F);
+            }
+            return;
+        }
+
+        if (farmer.easyVillagers().hasVillager(registries) && !level.isClientSide) {
+            giveOrDrop(player, farmer.easyVillagers().removeVillager(registries));
+            farmer.setChanged();
+            level.playSound(null, pos, SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1.0F, 1.0F);
+        }
+    }
+
+    private static void giveOrDrop(Player player, ItemStack stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
+
+        ItemStack remainder = stack.copy();
+        player.getInventory().add(remainder);
+        if (!remainder.isEmpty()) {
+            player.drop(remainder, false);
+        }
     }
 
     private void openOutput(Level level, BlockPos pos, Player player, CompatFarmerBlockEntity farmer,

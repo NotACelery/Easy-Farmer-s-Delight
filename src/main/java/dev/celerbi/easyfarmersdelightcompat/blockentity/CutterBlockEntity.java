@@ -433,27 +433,40 @@ public final class CutterBlockEntity extends BlockEntity {
     }
 
     public ToolRequirement blockingToolRequirement(Level level, ItemStack equipped) {
-        if (level == null)
+        if (level == null) {
             return ToolRequirement.NONE;
-        List<ItemStack> knives = FarmerToolSupport.representativeKnives();
-        List<ItemStack> axes = FarmerToolSupport.representativeAxes();
-        boolean knife = false;
-        boolean axe = false;
+        }
+
+        CutterOperationProbe.ToolSamples toolSamples = CutterOperationProbe.representativeTools();
+        java.util.EnumSet<ToolRequirement> missing = java.util.EnumSet.noneOf(ToolRequirement.class);
         for (int slot = 0; slot < input.getSlots(); slot++) {
             ItemStack source = input.getStackInSlot(slot);
-            if (source.isEmpty())
+            if (source.isEmpty()) {
                 continue;
-            ToolRequirement requirement = CutterOperationProbe.probe(level, source, knives, axes).requirement();
-            if (!requirement.isRequired())
+            }
+
+            CutterOperationProbe.Result probe = CutterOperationProbe.probe(level, source, toolSamples);
+            if (!probe.processable()) {
                 continue;
-            if (requirement.isSatisfiedBy(equipped))
+            }
+            if (probe.supports(equipped)) {
                 return ToolRequirement.NONE;
-            if (requirement == ToolRequirement.KNIFE || requirement == ToolRequirement.KNIFE_OR_AXE)
-                knife = true;
-            if (requirement == ToolRequirement.AXE || requirement == ToolRequirement.KNIFE_OR_AXE)
-                axe = true;
+            }
+            missing.addAll(probe.supportedRequirements());
         }
-        return ToolRequirement.from(knife, axe);
+
+        if (missing.isEmpty()) {
+            return ToolRequirement.NONE;
+        }
+        if (missing.size() == 1) {
+            return missing.iterator().next();
+        }
+        if (missing.size() == 2
+                && missing.contains(ToolRequirement.KNIFE)
+                && missing.contains(ToolRequirement.AXE)) {
+            return ToolRequirement.KNIFE_OR_AXE;
+        }
+        return ToolRequirement.CUTTING_TOOL;
     }
 
     public int progress() {

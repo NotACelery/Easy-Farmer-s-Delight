@@ -13,6 +13,8 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.common.Tags;
 
 public final class FarmerToolSupport {
     public static final TagKey<Item> KNIVES = TagKey.create(
@@ -27,7 +29,11 @@ public final class FarmerToolSupport {
     );
     public static final List<TagKey<Item>> CUTTING_TOOL_CATEGORIES = List.of(
             KNIVES,
-            ItemTags.AXES
+            ItemTags.PICKAXES,
+            ItemTags.AXES,
+            ItemTags.SHOVELS,
+            ItemTags.HOES,
+            Tags.Items.TOOLS_SHEAR
     );
 
     public static final ResourceLocation EMPTY_HARVEST_TOOL_SLOT = ResourceLocation.fromNamespaceAndPath(
@@ -42,16 +48,31 @@ public final class FarmerToolSupport {
         return stack != null && !stack.isEmpty() && stack.is(KNIVES);
     }
 
+    public static boolean isPickaxe(ItemStack stack) {
+        return stack != null && !stack.isEmpty()
+                && (stack.is(ItemTags.PICKAXES) || stack.canPerformAction(ItemAbilities.PICKAXE_DIG));
+    }
+
     public static boolean isHoe(ItemStack stack) {
-        return stack != null && !stack.isEmpty() && stack.is(ItemTags.HOES);
+        return stack != null && !stack.isEmpty()
+                && (stack.is(ItemTags.HOES) || stack.canPerformAction(ItemAbilities.HOE_DIG));
     }
 
     public static boolean isAxe(ItemStack stack) {
-        return stack != null && !stack.isEmpty() && stack.is(ItemTags.AXES);
+        return stack != null && !stack.isEmpty()
+                && (stack.is(ItemTags.AXES) || stack.canPerformAction(ItemAbilities.AXE_DIG));
+    }
+
+    public static boolean isShovel(ItemStack stack) {
+        return stack != null && !stack.isEmpty()
+                && (stack.is(ItemTags.SHOVELS) || stack.canPerformAction(ItemAbilities.SHOVEL_DIG));
     }
 
     public static boolean isShears(ItemStack stack) {
-        return stack != null && !stack.isEmpty() && stack.is(Items.SHEARS);
+        return stack != null && !stack.isEmpty()
+                && (stack.is(Tags.Items.TOOLS_SHEAR)
+                || stack.is(Items.SHEARS)
+                || stack.canPerformAction(ItemAbilities.SHEARS_DIG));
     }
 
     public static boolean isHarvestTool(ItemStack stack) {
@@ -59,7 +80,12 @@ public final class FarmerToolSupport {
     }
 
     public static boolean isCuttingTool(ItemStack stack) {
-        return isKnife(stack) || isAxe(stack);
+        return isKnife(stack)
+                || isPickaxe(stack)
+                || isAxe(stack)
+                || isShovel(stack)
+                || isHoe(stack)
+                || isShears(stack);
     }
 
     public static ItemStack normalizeHarvestTool(ItemStack stack) {
@@ -94,6 +120,26 @@ public final class FarmerToolSupport {
             return id == null ? "" : id.toString();
         }));
         return List.copyOf(result);
+    }
+
+    public static List<ItemStack> representativePickaxes() {
+        List<ItemStack> pickaxes = taggedToolStacks(ItemTags.PICKAXES);
+        return pickaxes.isEmpty() ? List.of(new ItemStack(Items.IRON_PICKAXE)) : pickaxes;
+    }
+
+    public static List<ItemStack> representativeShovels() {
+        List<ItemStack> shovels = taggedToolStacks(ItemTags.SHOVELS);
+        return shovels.isEmpty() ? List.of(new ItemStack(Items.IRON_SHOVEL)) : shovels;
+    }
+
+    public static List<ItemStack> representativeHoes() {
+        List<ItemStack> hoes = taggedToolStacks(ItemTags.HOES);
+        return hoes.isEmpty() ? List.of(new ItemStack(Items.IRON_HOE)) : hoes;
+    }
+
+    public static List<ItemStack> representativeShears() {
+        List<ItemStack> shears = taggedToolStacks(Tags.Items.TOOLS_SHEAR);
+        return shears.isEmpty() ? List.of(new ItemStack(Items.SHEARS)) : shears;
     }
 
     public static List<ItemStack> representativeAxes() {

@@ -140,20 +140,24 @@ public enum CutterJadeProvider implements IBlockComponentProvider, IServerDataPr
     }
 
     private static void appendWaitingTool(ITooltip tooltip, String waiting, boolean wrongTool) {
-        String key = switch (waiting) {
-            case "KNIFE" -> wrongTool
-                    ? "jade.easyfarmersdelightcompat.wrong_tool.knife"
-                    : "jade.easyfarmersdelightcompat.waiting.knife";
-            case "AXE" -> wrongTool
-                    ? "jade.easyfarmersdelightcompat.wrong_tool.axe"
-                    : "jade.easyfarmersdelightcompat.waiting.axe";
-            case "KNIFE_OR_AXE" -> wrongTool
-                    ? "jade.easyfarmersdelightcompat.wrong_tool.knife_or_axe"
-                    : "jade.easyfarmersdelightcompat.waiting.knife_or_axe";
+        String suffix = switch (waiting) {
+            case "KNIFE" -> "knife";
+            case "PICKAXE" -> "pickaxe";
+            case "AXE" -> "axe";
+            case "SHOVEL" -> "shovel";
+            case "HOE" -> "hoe";
+            case "SHEARS" -> "shears";
+            case "KNIFE_OR_AXE" -> "knife_or_axe";
+            case "CUTTING_TOOL" -> "cutting_tool";
             default -> null;
         };
-        if (key != null)
-            tooltip.add(Component.translatable(key).withStyle(ChatFormatting.RED));
+        if (suffix == null) {
+            return;
+        }
+        String key = "jade.easyfarmersdelightcompat."
+                + (wrongTool ? "wrong_tool." : "waiting.")
+                + suffix;
+        tooltip.add(Component.translatable(key).withStyle(ChatFormatting.RED));
     }
 
     private static List<OutputEntry> aggregate(CutterBlockEntity cutter) {

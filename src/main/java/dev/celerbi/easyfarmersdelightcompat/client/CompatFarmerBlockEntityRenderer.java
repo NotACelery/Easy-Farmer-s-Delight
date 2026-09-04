@@ -49,6 +49,8 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
             "tomatoes");
     private static final ResourceLocation TOMATO_ON_ROPE_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
             "tomatoes_on_rope");
+    private static final ResourceLocation ROPE_BLOCK_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
+            "rope");
     private static final ResourceLocation LEGACY_HANGING_TOMATO_ID = ResourceLocation
             .fromNamespaceAndPath("farmersdelight", "hanging_tomatoes");
     private static final ResourceLocation RICH_SOIL_ID = ResourceLocation.fromNamespaceAndPath("farmersdelight",
@@ -91,6 +93,7 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
     private final Block buddingTomatoBlock;
     private final Block tomatoBlock;
     private final Block tomatoOnRopeBlock;
+    private final Block ropeBlock;
     private final Block richSoilBlock;
 
     public CompatFarmerBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
@@ -116,6 +119,7 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
             ropeBlock = BuiltInRegistries.BLOCK.get(LEGACY_HANGING_TOMATO_ID);
         }
         this.tomatoOnRopeBlock = ropeBlock;
+        this.ropeBlock = BuiltInRegistries.BLOCK.get(ROPE_BLOCK_ID);
         Block configuredRichSoil = BuiltInRegistries.BLOCK.get(RICH_SOIL_ID);
         this.richSoilBlock = configuredRichSoil == Blocks.AIR ? Blocks.DIRT : configuredRichSoil;
     }
@@ -427,13 +431,13 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
 
         if (farmer.ropeCount() >= 1) {
             renderTomatoSection(
-                    1, farmer.ropeOneProgress(), tomatoOnRopeBlock, tomatoBlock,
+                    1, farmer.ropeOneProgress(), farmer.ropeOnePlanted(), tomatoOnRopeBlock, tomatoBlock,
                     poseStack, buffer, combinedLight, combinedOverlay
             );
         }
         if (farmer.ropeCount() >= 2) {
             renderTomatoSection(
-                    2, farmer.ropeTwoProgress(), tomatoOnRopeBlock, tomatoBlock,
+                    2, farmer.ropeTwoProgress(), farmer.ropeTwoPlanted(), tomatoOnRopeBlock, tomatoBlock,
                     poseStack, buffer, combinedLight, combinedOverlay
             );
         }
@@ -443,6 +447,7 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
     private void renderTomatoSection(
             int section,
             int progress,
+            boolean planted,
             Block tomatoOnRope,
             Block tomato,
             PoseStack poseStack,
@@ -452,6 +457,13 @@ public final class CompatFarmerBlockEntityRenderer implements BlockEntityRendere
     ) {
         poseStack.pushPose();
         poseStack.translate(0D, section, 0D);
+        if (!planted) {
+            if (ropeBlock != Blocks.AIR) {
+                renderBlockState(ropeBlock.defaultBlockState(), poseStack, buffer, combinedLight, combinedOverlay);
+            }
+            poseStack.popPose();
+            return;
+        }
         if (tomatoOnRope != Blocks.AIR) {
 
             renderBlockState(withAge(tomatoOnRope.defaultBlockState(), progress), poseStack, buffer, combinedLight,
